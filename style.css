@@ -1,70 +1,74 @@
-a {
-    text-decoration: none;
-    color: #222222;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
-a:hover {
-    text-decoration: underline;
-    color: #FF1111;
-}
-nav {
-    background-color: #4488BB;
-    width: 620px;
-    height: 30px;
-}
-nav ul {
-    list-style-type: none;
-    text-transform: uppercase;
-}
-nav ul li {
-    float: left;
-}
-nav ul li a {
-    font-size: 20px;
-    background-color: #CCC;
-    width: 100px;
 
-    display: block;
-    text-align: center;
-    padding: 4px;
-    color: #FFF;
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
 }
-nav ul li a:hover {
-    background-color: #FFF;
-    color: #FF1111;
-    text-shadow: 1px 1px 2px #CCC;
-}
-a {
-    text-decoration: none;
-    color: #222222;
-}
-a:hover {
-    text-decoration: underline;
-    color: #FF1111;
-}
-nav {
-    background-color: #4488BB;
-    width: 620px;
-    height: 30px;
-}
-nav ul {
-    list-style-type: none;
-    text-transform: uppercase;
-}
-nav ul li {
-    float: left;
-}
-nav ul li a {
-    font-size: 20px;
-    background-color: #CCC;
-    width: 100px;
 
-    display: block;
-    text-align: center;
-    padding: 4px;
-    color: #FFF;
+/* Navbar */
+.navbar {
+    background-color: #8b0000;
+    padding: 20px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: left;
 }
-nav ul li a:hover {
-    background-color: #FFF;
-    color: #FF1111;
-    text-shadow: 1px 1px 2px #CCC;
+
+.logo img {
+    height: 40px;
+    justify-content: left;
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    transition: opacity 0.3s;
+}
+
+.nav-links a:hover {
+    opacity: 0.7;
+}
+
+/* Botões */
+.button {
+    background-color: #008cba;
+    padding: 8px 12px;
+    border-radius: 5px;
+    color: white;
+    text-decoration: none;
+}
+
+.button.secondary {
+    background-color: #005f73;
+}
+
+/* Conteúdo Central */
+.container {
+    text-align: center;
+    margin-top: 100px;
+}
+
+.container h1 {
+    color: #333;
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.container p {
+    color: #555;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
 }
