@@ -13,21 +13,14 @@ body {
 .navbar {
     background-color: #8b0000;
     padding: 20px 30px;
-    display: flex;
-    align-items: center;
-    justify-content: left;
-}
-
-.logo img {
-    height: 40px;
-    justify-content: left;
+    max-height: 100px;
 }
 
 .nav-links {
     display: flex;
-    gap: 20px;
-    align-items: center;
-    justify-content: center;
+    gap: 40px;
+    justify-content: right;
+    font-size: 150%;
 }
 
 .nav-links a {
