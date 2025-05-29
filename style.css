@@ -51,7 +51,7 @@ body {
 }
 
 .menu a {
-  border-left: 3px solid white;
+  /* border-left: 3px solid white; */
   padding-left: 60px; /* Espaço entre a borda e o texto */
   color: white;
   text-decoration: none;
@@ -112,6 +112,7 @@ section {
     padding: auto;
     display: flex;
     justify-content: flex-start;
+    /* border-left: 3px solid white; */
 }
 
 /* FOOTER */
