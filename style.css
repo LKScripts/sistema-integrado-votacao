@@ -69,18 +69,22 @@ body {
 
 .login {
     background-color: #005f73;
-    padding: 8px 12px;
-    border-radius: 3px;
+    padding: 10px 14px;
+    border-radius: 5px;
     color: white;
     text-decoration: none;
+    text-align: justify;
+    margin-top: -5px;
 }
 
 .cadastrar {
     background-color: #005f73;
-    padding: 8px 12px;
-    border-radius: 3px;
+    padding: 10px 14px;
+    border-radius: 5px;
     color: white;
     text-decoration: none;
+    text-align: justify;
+    margin-top: -5px;
 }
 
 /* CONTEÚDO CENTRAL */
@@ -155,10 +159,13 @@ section {
 }
 
 .sobre {
-    padding: 30px;
-    margin: auto;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 100px;
+    padding-right: 100px;
     justify-content: center;
     background-color: #005f73;
     border-radius: 70px;
-    color: white
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
