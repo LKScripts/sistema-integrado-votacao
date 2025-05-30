@@ -40,10 +40,6 @@ body {
     transition: opacity 0.3s;
 }
 
-.nav-links a:hover {
-    opacity: 0.7;
-    background-color: aqua;
-}
 
 .menu {
     justify-content: center;
@@ -53,7 +49,10 @@ body {
 
 .menu a {
   /* border-left: 3px solid white; */
-  padding-left: 60px; /* Espaço entre a borda e o texto */
+  padding-left: 30px; /* Espaço entre a borda e o texto */
+  padding-right: 30px;
+  padding-top: 23px ;
+  padding-bottom: 23px;
   color: white;
   text-decoration: none;
   font-weight: bold;
@@ -170,4 +169,9 @@ section {
     border-radius: 70px;
     color: white;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.but:hover{
+    transition: 1,5s;
+    background-color:#6a0101;
+  
 }
