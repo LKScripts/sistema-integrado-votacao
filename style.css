@@ -1,4 +1,5 @@
 /* RESET & VARIÁVEIS */
+
 :root {
     --primary: #8b0000;
     --secondary: #005f73;
@@ -19,6 +20,7 @@ body {
 }
 
 /* NAVBAR */
+
 .navbar {
     background-color: var(--primary);
     display: flex;
@@ -33,7 +35,14 @@ body {
     margin-left: 80px;
 }
 
+.user-icon {
+    height: 50px;
+    width: 50px;
+    margin-right: -250px;
+}
+
 /* MENU */
+
 .menu {
     list-style: none;
     display: flex;
@@ -55,6 +64,7 @@ body {
 }
 
 /* AÇÕES */
+
 .actions {
     display: flex;
     gap: 15px;
@@ -75,6 +85,7 @@ body {
 }
 
 /* CONTEÚDO */
+
 .container {
     text-align: center;
     padding: 80px 20px 40px;
@@ -94,6 +105,7 @@ body {
 }
 
 /* LOGO FATEC */
+
 .logo-fatec {
     display: flex;
     justify-content: center;
@@ -273,18 +285,19 @@ footer {
     font-size: 16px;
     margin-bottom: 15px;
     line-height: 1.6;
-    align-items: center;
-    justify-items: center;
+    text-align: justify;
 }
 
 .home-ul {
     margin-left: 20px;
     margin-bottom: 20px;
+    text-align: justify;
 }
 
 .home-li {
     margin-bottom: 10px;
     line-height: 1.6;
+    text-align: justify;
 }
 
 strong {
@@ -300,4 +313,25 @@ strong {
     font-weight: bold;
     margin-top: 25px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* HOME */
+
+.container-editais {
+    max-width: 900px;
+    padding: 20px;
+    align-items: center;
+    justify-items: center;
+    margin: auto;
+    margin-top: -20px;
+}
+
+.card-editais {
+    background-color: #028c9f;
+    border-radius: 20px;
+    padding: 40px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    align-items: center;
+    justify-items: center;
 }
