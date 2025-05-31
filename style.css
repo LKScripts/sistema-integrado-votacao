@@ -1,3 +1,12 @@
+/* RESET & VARIÁVEIS */
+:root {
+    --primary: #8b0000;
+    --secondary: #005f73;
+    --background: #f8f8f8;
+    --dark: #0A142F;
+    --light: #ffffff;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -5,98 +14,75 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f8f8;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--background);
 }
 
 /* NAVBAR */
-
 .navbar {
-    background-color: #8b0000;
-    max-height: 100px;
-    height: 67px;
-}
-
-.logo {
-    margin-right: 10px;
-    margin-top: 5px;
-}
-
-.nav-links {
+    background-color: var(--primary);
     display: flex;
-    font-size: 18px;
-    gap: 100px;
-    justify-content: center;
-    max-height: 100px;
-    justify-content: right;
-    margin-right: 30px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 40px;
 }
 
-.nav-links a {
-    color: white;
-    text-decoration: none;
-    gap: 100px;
-    font-weight: bold;
-    transition: opacity 0.3s;
+.logo img {
+    height: 60px;
+    width: 110px;
+    margin-left: 80px;
 }
 
-
+/* MENU */
 .menu {
-    justify-content: center;
-    gap: 60px;
-    margin-right: 500px;
+    list-style: none;
+    display: flex;
+    gap: 50px;
 }
 
-.menu a {
-  /* border-left: 3px solid white; */
-  padding-left: 30px; /* Espaço entre a borda e o texto */
-  padding-right: 30px;
-  padding-top: 23px ;
-  padding-bottom: 23px;
-  color: white;
-  text-decoration: none;
-  font-weight: bold;
+.menu li a {
+    color: white;
+    text-decoration: none;
+    padding: 12px 20px;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+    margin-right: -10px;
 }
 
-/* BOTÕES */
+.menu li a:hover {
+    background-color: #6a0101;
+}
 
+/* AÇÕES */
 .actions {
-    justify-content: right;
-    gap: 30px;
-    margin-top: -45px;
-    margin-right: 30px;
+    display: flex;
+    gap: 15px;
 }
 
-.login {
-    background-color: #005f73;
-    padding: 10px 14px;
-    border-radius: 5px;
+.btn {
+    background-color: var(--secondary);
     color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
     text-decoration: none;
-    text-align: justify;
-    margin-top: -5px;
+    font-weight: 600;
+    transition: background-color 0.3s;
 }
 
-.cadastrar {
-    background-color: #005f73;
-    padding: 10px 14px;
-    border-radius: 5px;
-    color: white;
-    text-decoration: none;
-    text-align: justify;
-    margin-top: -5px;
+.btn:hover {
+    background-color: #004654;
 }
 
-/* CONTEÚDO CENTRAL */
-
+/* CONTEÚDO */
 .container {
     text-align: center;
-    margin-top: 100px;
+    padding: 80px 20px 40px;
 }
 
 .container h1 {
     color: #333;
-    font-size: 2rem;
+    font-size: 2.2rem;
     margin-bottom: 20px;
 }
 
@@ -104,74 +90,144 @@ body {
     color: #555;
     max-width: 600px;
     margin: 0 auto;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
-section {
-    margin: auto;
-    padding: auto;
+/* LOGO FATEC */
+.logo-fatec {
     display: flex;
-    justify-content: flex-start;
-    /* border-left: 3px solid white; */
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.logo-fatec img {
+    width: 400px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+/* FORMULÁRIO */
+
+.form-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-container {
+    background-color: #d9d9d9;
+    padding: 10px 20px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+input[type="email"] {
+    border: none;
+    padding: 10px 15px;
+    border-radius: 20px;
+    outline: none;
+    font-size: 16px;
+    width: 220px;
+    background-color: white;
+}
+
+input::placeholder {
+    color: #a9a9a9;
+}
+
+.send-button {
+    background-color: #0084ff;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.send-button:hover {
+    background-color: #006fd4;
+}
+
+.send-button img {
+    width: 18px;
+    height: 18px;
+    filter: invert(1);
+}
+
+.description {
+    font-size: 14px;
+    text-align: center;
+    color: #000;
+    max-width: 400px;
+    margin-top: 10px;
+    margin-bottom: 20px;
 }
 
 /* FOOTER */
 
-.footer1 {
-    background-color: #0A142F;
+footer {
+    background-color: var(--dark);
     color: white;
     text-align: center;
-    padding: 1rem 0;
-    /* margin-top: 3rem; */
-    /* border-top: 80px solid #0A142F; */
+    padding: 50px 20px;
 }
 
-.sp {
-    margin-right: 5px;
-    margin-top: 5px;
+.footer-content {
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    gap: 20px;
 }
 
-.footer2 {
-    background-color: #ffffff;
-    color: white;
-    text-align: center;
-    padding: 1rem 0;
-    /* margin-top: 3rem; */
-    /* border-top: 80px solid #0A142F; */
-}
-
-.fatec {
-    margin-right: 5px;
-    margin-top: 5px;
-    align-items: left;
-    justify-content: left;
-}
-
-.footer3 {
-    background-color: #0A142F;
-    color: white;
-    text-align: center;
-    padding-top: 100px;
-    margin: auto;
-    /* margin-top: 3rem; */
-    /* border-top: 80px solid #0A142F; */
+.logo-footer {
+    width: 200px;
+    height: auto;
+    margin-left: 25px;
 }
 
 .sobre {
-    padding-top: 20px;
-    padding-bottom: 20px;
-    padding-left: 100px;
-    padding-right: 100px;
-    justify-content: center;
-    background-color: #005f73;
-    border-radius: 70px;
+    background-color: var(--secondary);
+    padding: 10px 30px;
+    border-radius: 50px;
     color: white;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s;
+    margin-top: 20px;
 }
-.but:hover{
-    transition: 1,5s;
-    background-color:#6a0101;
-  
+
+.sobre:hover {
+    background-color: #004654;
+}
+
+/* RESPONSIVO */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 20px;
+    }
+
+    .menu {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .actions {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .logo-fatec img {
+        width: 300px;
+    }
 }

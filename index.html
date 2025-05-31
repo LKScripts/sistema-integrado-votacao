@@ -5,83 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIV - Sistema Integrado de Votações</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+
+    <!-- NAVBAR -->
     <header>
-        <div class="navbar">
-            <div class="nav-links">
-            <section class="logo">
-                <img src="images/logo.png" height="60px" width="110px">
-            </section>
-
-            <section class="menu">
-                
-                <section class="but">
-                <a href="#">Home</a>
-                </section>
-
-                <section class="but">
-                <a href="#">Editais</a>
-                </section class="but">
-
-                <section class="but">
-                <a href="#">Votação</a>
-                </section>
-
-                <section class="but">
-                <a href="#">Inscrição</a>
-                </section>
-
-            </section>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="images/logo.png" alt="Logo SIV">
             </div>
+            
+            <ul class="menu">
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Editais</a></li>
+                <li><a href="#">Votação</a></li>
+                <li><a href="#">Inscrição</a></li>
+            </ul>
 
-            <section class="actions">
-                <a href="#" class="login">Login</a>
-                <a href="#" class="cadastrar">Cadastre-se</a>
-            </section>
-
-        </div>
+            <div class="actions">
+                <a href="#" class="btn login">Login</a>
+                <a href="#" class="btn cadastrar">Cadastre-se</a>
+            </div>
+        </nav>
     </header>
-    <div class="container">
-        <h1>Sistema Integrado de Votações da<br>FATEC - Centro Paula Souza</h1>
-        <p>
-            Uma plataforma digital completa para eleições virtuais ágil e seguro,<br>
-            desenvolvido para simplificar o processo eleitoral acadêmico.
-            <br>
-            <br>
-            <br>
-        </p>
-    </div>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main>
+        <section class="container">
+            <h1>Sistema Integrado de Votações da<br>FATEC - Centro Paula Souza</h1>
+            <p>
+                Uma plataforma digital completa para eleições virtuais, ágil e segura.<br>
+                Desenvolvido para simplificar o processo eleitoral acadêmico.
+            </p>
+        </section>
+
+        <section class="logo-fatec">
+            <img src="images/logo-fatec_itapira.png" alt="Logo FATEC Itapira">
+        </section>
+
+        <section class="form-wrapper">
+            <form action="email.php" method="get" class="form-container">
+                <input type="email" name="email" id="email" placeholder="Seu e-mail" required>
+                <button class="send-button" type="submit">
+                    <img src="images/enviar.png" alt="Enviar">
+                </button>
+            </form>
+            <p class="description">
+                Insira seu e-mail para receber informações sobre novas eleições da sua FATEC!
+            </p>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            <img src="images/logo-governo-do-estado-sp.png" alt="Logo Governo SP" class="logo-footer">
+            
+            <a href="#" class="sobre">SOBRE O SISTEMA</a>
+
+            <p>Sistema Integrado de Votação - FATEC/CPS</p>
+            <p>Versão 0.1 (11/06/2025)</p>
+        </div>
+    </footer>
+
 </body>
-<footer> 
-    <div class="footer1">
-        <section class="sp">
-            <img src="images/logo-governo-do-estado-sp.png" height="25px" width="100px">
-        </section>
-    </div>
-</footer>
-<footer> 
-    <div class="footer2">
-        <section class="fatec">
-            <img src="images/logo-fatec_itapira.png" height="100px" width="400px">
-        </section>
-    </div>
-</footer>
-<footer> 
-    <div class="footer3">
-        <br>
-        <a class="sobre">SOBRE O SISTEMA</a>
-        <br>
-        <br>
-        <br>
-        <br>
-        <p>Sistema Integrado de Votação - FATEC/CPS</p>
-        <br>
-        <p>Versão 0.1 (11/06/2025)</p>
-        <br>
-        <br>
-        <br>
-        <br>
-    </div>
-</footer>
 </html>
