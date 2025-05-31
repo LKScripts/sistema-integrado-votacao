@@ -208,6 +208,7 @@ footer {
 }
 
 /* RESPONSIVO */
+
 @media (max-width: 768px) {
     .navbar {
         flex-direction: column;
@@ -230,4 +231,73 @@ footer {
     .logo-fatec img {
         width: 300px;
     }
+}
+
+/* HOME */
+
+.home-container {
+    max-width: 900px;
+    padding: 20px;
+    align-items: center;
+    justify-items: center;
+    display: flex;
+    margin: auto;
+}
+
+.card {
+    background-color: #028c9f;
+    border-radius: 20px;
+    padding: 40px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    align-items: center;
+    justify-items: center;
+}
+
+.card h1 {
+    font-size: 32px;
+    margin-bottom: 15px;
+    align-items: center;
+    justify-items: center;
+}
+
+.card h2 {
+    font-size: 26px;
+    margin-top: 30px;
+    margin-bottom: 10px;
+    align-items: center;
+    justify-items: center;
+}
+
+.card p {
+    font-size: 16px;
+    margin-bottom: 15px;
+    line-height: 1.6;
+    align-items: center;
+    justify-items: center;
+}
+
+.home-ul {
+    margin-left: 20px;
+    margin-bottom: 20px;
+}
+
+.home-li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+strong {
+    color: #fff;
+    font-weight: bold;
+}
+
+.alert {
+    background-color: #fceaea;
+    color: #a80000;
+    padding: 12px 18px;
+    border-radius: 15px;
+    font-weight: bold;
+    margin-top: 25px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }

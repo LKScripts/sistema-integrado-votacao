@@ -17,12 +17,12 @@
                 <img src="images/logo.png" alt="Logo SIV">
             </div>
             
-            <!-- <ul class="menu">
+            <ul class="menu">
                 <li><a href="home.html">Home</a></li>
                 <li><a href="#">Editais</a></li>
                 <li><a href="#">Votação</a></li>
                 <li><a href="#">Inscrição</a></li>
-            </ul> -->
+            </ul>
 
             <div class="actions">
                 <a href="#" class="btn login">Login</a>
@@ -33,29 +33,34 @@
 
     <!-- CONTEÚDO PRINCIPAL -->
     <main>
-        <section class="container">
-            <h1>Sistema Integrado de Votações da<br>FATEC - Centro Paula Souza</h1>
+        <div class="home-container">
+        <div class="card">
+            <h1>AMBIENTE DE VOTAÇÃO</h1>
             <p>
-                Uma plataforma digital completa para eleições virtuais, ágil e segura.<br>
-                Desenvolvido para simplificar o processo eleitoral acadêmico.
+                Esta interface exibe todos os processos eleitorais em andamento nos quais você está cadastrado como eleitor. Observe que:
             </p>
-        </section>
+            <ul class="home-ul">
+                <li class="home-li">
+                    É possível estar vinculado ao mesmo processo em mais de uma categoria como <strong>ALUNO</strong> e <strong>SERVIDOR ADMINISTRATIVO</strong> simultaneamente.
+                </li>
+                <li class="home-li">
+                    Cada processo exibirá o botão <strong>VOTAR</strong> para acessar a cédula eleitoral.
+                </li>
+                <li class="home-li">
+                    Os prazos são rigorosos: o sistema <strong>bloqueará</strong> o acesso no horário de encerramento.
+                </li>
+            </ul>
 
-        <section class="logo-fatec">
-            <img src="images/logo-fatec_itapira.png" alt="Logo FATEC Itapira">
-        </section>
-
-        <section class="form-wrapper">
-            <form action="email.php" method="get" class="form-container">
-                <input type="email" name="email" id="email" placeholder="Seu e-mail" required>
-                <button class="send-button" type="submit">
-                    <img src="images/enviar.png" alt="Enviar">
-                </button>
-            </form>
-            <p class="description">
-                Insira seu e-mail para receber informações sobre novas eleições da sua FATEC!
+            <h2>SEGURANÇA DO SEU VOTO</h2>
+            <p>
+                Sua identidade é verificada apenas no acesso e o registro de voto não contém informações que possam vinculá-lo às suas escolhas, garantindo seu sigilo absoluto para exercício livre do seu direito.
             </p>
-        </section>
+
+            <div class="alert">
+                ⚠️ ATENÇÃO: Verifique os prazos de cada edital para não perder seu direito de voto!
+            </div>
+        </div>
+    </div>
     </main>
 
     <!-- FOOTER -->
