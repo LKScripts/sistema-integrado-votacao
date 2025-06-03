@@ -301,7 +301,7 @@ footer {
 }
 
 strong {
-    color: #fff;
+    color: #000000;
     font-weight: bold;
 }
 
@@ -338,9 +338,11 @@ strong {
 
 .container-button-editais {
     display: flex;
-    flex-direction: column;
     gap: 20px;
     align-items: center;
+    justify-items: center;
+    margin-bottom: 100px;
+    margin-left: 350px;
 }
 
 /* Estilo dos botões */
@@ -355,6 +357,8 @@ strong {
     cursor: pointer;
     box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s, box-shadow 0.2s;
+    align-items: center;
+    justify-items: center;
 }
 
 .botao:hover {
@@ -370,4 +374,305 @@ strong {
 .botao-grande {
     width: 320px;
     text-align: center;
+}
+
+@font-face {
+    font-family: "Poppins";
+    src: url("fontes/Poppins-Regular.ttf");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: rgb(70, 4, 4);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    font-family: poppins;
+} */
+
+.container-vot {
+    text-align: center;
+    position: center;
+    margin-top: 20px;
+}
+
+.header-vot {
+    color: rgb(0, 0, 0);
+    margin-bottom: 30px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 
+.header h1 {
+    font-size: 2.8rem;
+    margin-bottom: 10px;
+}
+
+.header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+} */
+
+.cardsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+}
+
+.votingCard {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    width: 300px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+.votingCard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.photoContainer {
+    height: 200px;
+    background: #005c6d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.photoPlaceholder {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 3rem;
+    border: 4px solid white;
+}
+
+.candidateInfo {
+    padding: 25px 20px;
+}
+
+.candidateInfo h2 {
+    color: #005c6d;
+    margin-bottom: 15px;
+    font-size: 1.8rem;
+}
+
+.infoRow {
+    display: flex;
+    align-items: center;
+    margin: 12px 0;
+    text-align: left;
+}
+
+.infoRow i {
+    width: 30px;
+    color: #3498db;
+    font-size: 1.2rem;
+}
+
+.infoRow span {
+    font-size: 1.1rem;
+    color: #34495e;
+}
+
+.voteButton {
+    background: linear-gradient(to right, #005c6d, #061e2e);
+    color: white;
+    border: none;
+    padding: 15px 0;
+    width: 100%;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-top: 1px solid #eee;
+    display: block;
+    text-decoration: none;
+}
+
+.voteButton:hover {
+    background: linear-gradient(to right, #061e2e, #005c6d);
+    letter-spacing: 1px;
+}
+
+.voteButton:active {
+    transform: scale(0.98);
+}
+
+.voteButton i {
+    margin-left: 8px;
+}
+
+.badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #e74c3c;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.instructions {
+    background: rgba(255, 255, 255, 0.9);
+    margin: 30px auto;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    align-items: left;
+    max-width: 900px;
+}
+
+.instructions h2 {
+    color: #005c6d;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.instructions ol {
+    padding-left: 25px;
+    color: #000;
+    align-items: left;
+}
+
+.instructions li {
+    margin: 5px 0;
+    line-height: 1.6;
+    color: #34495e;
+    align-items: left;
+}
+
+@media (max-width: 768px) {
+    .cardsContainer {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* .header h1 {
+        font-size: 2.2rem;
+    } */
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal:target {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modalContent {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    text-align: center;
+    position: relative;
+}
+
+.modalTitle {
+    color: #005c6d;
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+}
+
+.modalText {
+    color: #34495e;
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.modalButtons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.modalButton {
+    padding: 15px 30px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    min-width: 140px;
+}
+
+.modalButton.cancel {
+    background: #e74c3c;
+    color: white;
+}
+
+.modalButton.cancel:hover {
+    background: #c0392b;
+}
+
+.modalButton.confirm {
+    background: linear-gradient(to right, #005c6d, #061e2e);
+    color: white;
+}
+
+.modalButton.confirm:hover {
+    background: linear-gradient(to right, #061e2e, #005c6d);
+}
+
+.modalClose {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 1.5rem;
+    color: #34495e;
+    text-decoration: none;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+.modalClose:hover {
+    background-color: #f1f1f1;
 }
