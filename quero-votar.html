@@ -5,32 +5,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Election Voting Card</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
- <!-- NAVBAR -->
+
+<body>
+    <!-- NAVBAR -->
     <header>
         <nav class="navbar">
             <div class="logo">
                 <img src="images/fatec-ogari.png" alt="Logo Fatec Itapira">
                 <img src="images/logo-cps.png" alt="Logo CPS">
-            </div>       
+            </div>
             <ul class="menu">
                 <li><a href="home.html">Home</a></li>
                 <li><a href="editais.html">Editais</a></li>
                 <li><a href="quero-votar.html">Votação</a></li>
-                <li><a href="#">Inscrição</a></li>
+                <li><a href="inscricao.html">Inscrição</a></li>
             </ul>
-            <img src="images/user-icon.png" alt="Usuario" class="user-icon">
-            <div class="actions">
-                <a href="index.html" class="btn cadastrar">Sair da Conta</a>
+
+            <div class="navbarRight">
+                <img src="images/user-icon.png" alt="Usuario" class="user-icon">
+                <div class="actions">
+                    <a href="index.html" class="btn cadastrar">Sair da Conta</a>
+                </div>
             </div>
         </nav>
     </header>
-<body>
+
     <div class="container-vot">
         <div class="header-vot">
-            <h1>Candidatos DSM 2025-2</h1>
+            <h1>Candidatos DSM 2025-1</h1>
             <p>Vote para o candidato que você quer que represente você durante esse semestre na sua sala.</p>
         </div>
 
@@ -43,7 +48,7 @@
                     </div>
                 </div>
                 <div class="candidateInfo">
-                    <h2>Fulano</h2>
+                    <h2>Lucas Simões</h2>
                     <div class="infoRow">
                         <i class="fas fa-graduation-cap"></i>
                         <span>1º Semestre</span>
@@ -64,7 +69,7 @@
                     </div>
                 </div>
                 <div class="candidateInfo">
-                    <h2>Ciclano</h2>
+                    <h2>Julia Rodrigues</h2>
                     <div class="infoRow">
                         <i class="fas fa-graduation-cap"></i>
                         <span>1º Semestre</span>
@@ -85,7 +90,7 @@
                     </div>
                 </div>
                 <div class="candidateInfo">
-                    <h2>Beutrano</h2>
+                    <h2>Rafael Moraes</h2>
                     <div class="infoRow">
                         <i class="fas fa-graduation-cap"></i>
                         <span>1º Semestre</span>
@@ -106,7 +111,7 @@
                     </div>
                 </div>
                 <div class="candidateInfo">
-                    <h2>Fulano</h2>
+                    <h2>Gabriel Bueno</h2>
                     <div class="infoRow">
                         <i class="fas fa-graduation-cap"></i>
                         <span>1º Semestre</span>
@@ -127,7 +132,7 @@
                     </div>
                 </div>
                 <div class="candidateInfo">
-                    <h2>Ciclano</h2>
+                    <h2>Gabriel Borges</h2>
                     <div class="infoRow">
                         <i class="fas fa-graduation-cap"></i>
                         <span>1º Semestre</span>
@@ -140,32 +145,12 @@
                 <a href="#modalCiclano2" class="voteButton">VOTAR <i class="fas fa-vote-yea"></i></a>
             </div>
 
-            <!-- Candidato 6 -->
-            <div class="votingCard">
-                <div class="photoContainer">
-                    <div class="photoPlaceholder">
-                        <i class="fas fa-user"></i>
-                    </div>
-                </div>
-                <div class="candidateInfo">
-                    <h2>Beutrano</h2>
-                    <div class="infoRow">
-                        <i class="fas fa-graduation-cap"></i>
-                        <span>1º Semestre</span>
-                    </div>
-                    <div class="infoRow">
-                        <i class="fas fa-users"></i>
-                        <span>DSM</span>
-                    </div>
-                </div>
-                <a href="#modalBeutrano2" class="voteButton">VOTAR <i class="fas fa-vote-yea"></i></a>
-            </div>
         </div>
 
         <div class="instructions">
             <h2>Como Votar</h2>
             <ol>
-                <li><strong>Escolhe seu candidato:</strong> Clique no botão "VOTAR" em baixo do seu candidato preferido.
+                <li><strong>Escolha seu candidato:</strong> Clique no botão "VOTAR" em baixo do seu candidato preferido.
                 </li>
                 <li><strong>Confirme sua escolha:</strong> Você verá uma janela de confirmação para verificar seu voto.
                 </li>
@@ -183,9 +168,9 @@
             <h3 class="modalTitle">Confirmar Voto</h3>
             <p class="modalText">Você está prestes a votar em <strong>Fulano</strong>. Tem certeza que deseja confirmar
                 este voto?</p>
-            <div class="modalButton">
+            <div class="modalButtons">
                 <a href="#" class="modalButton cancel">Cancelar</a>
-                <a href="#" class="modalButton confirm">Confirmar Voto</a>
+                <a href="#successPopup" class="modalButton confirm">Confirmar Voto</a>
             </div>
         </div>
     </div>
@@ -194,11 +179,11 @@
         <div class="modalContent">
             <a href="#" class="modalClose">&times;</a>
             <h3 class="modalTitle">Confirmar Voto</h3>
-            <p class="modalText">Você está prestes a votar em <strong>Ciclano</strong>. Tem certeza que deseja
-                confirmar este voto?</p>
-            <div class="modalButton">
+            <p class="modalText">Você está prestes a votar em <strong>Ciclano</strong>. Tem certeza que deseja confirmar
+                este voto?</p>
+            <div class="modalButtons">
                 <a href="#" class="modalButton cancel">Cancelar</a>
-                <a href="#" class="modalButton confirm">Confirmar Voto</a>
+                <a href="#successPopup" class="modalButton confirm">Confirmar Voto</a>
             </div>
         </div>
     </div>
@@ -209,9 +194,9 @@
             <h3 class="modalTitle">Confirmar Voto</h3>
             <p class="modalText">Você está prestes a votar em <strong>Beutrano</strong>. Tem certeza que deseja
                 confirmar este voto?</p>
-            <div class="modalButton">
+            <div class="modalButtons">
                 <a href="#" class="modalButton cancel">Cancelar</a>
-                <a href="#" class="modalButton confirm">Confirmar Voto</a>
+                <a href="#successPopup" class="modalButton confirm">Confirmar Voto</a>
             </div>
         </div>
     </div>
@@ -222,9 +207,9 @@
             <h3 class="modalTitle">Confirmar Voto</h3>
             <p class="modalText">Você está prestes a votar em <strong>Fulano</strong>. Tem certeza que deseja confirmar
                 este voto?</p>
-            <div class="modalButton">
+            <div class="modalButtons">
                 <a href="#" class="modalButton cancel">Cancelar</a>
-                <a href="#" class="modalButton confirm">Confirmar Voto</a>
+                <a href="#successPopup" class="modalButton confirm">Confirmar Voto</a>
             </div>
         </div>
     </div>
@@ -233,11 +218,11 @@
         <div class="modalContent">
             <a href="#" class="modalClose">&times;</a>
             <h3 class="modalTitle">Confirmar Voto</h3>
-            <p class="modalText">Você está prestes a votar em <strong>Ciclano</strong>. Tem certeza que deseja
-                confirmar este voto?</p>
-            <div class="modalButton">
+            <p class="modalText">Você está prestes a votar em <strong>Ciclano</strong>. Tem certeza que deseja confirmar
+                este voto?</p>
+            <div class="modalButtons">
                 <a href="#" class="modalButton cancel">Cancelar</a>
-                <a href="#" class="modalButton confirm">Confirmar Voto</a>
+                <a href="#successPopup" class="modalButton confirm">Confirmar Voto</a>
             </div>
         </div>
     </div>
@@ -248,14 +233,27 @@
             <h3 class="modalTitle">Confirmar Voto</h3>
             <p class="modalText">Você está prestes a votar em <strong>Beutrano</strong>. Tem certeza que deseja
                 confirmar este voto?</p>
-            <div class="modalButton">
+            <div class="modalButtons">
                 <a href="#" class="modalButton cancel">Cancelar</a>
-                <a href="#" class="modalButton confirm">Confirmar Voto</a>
+                <a href="#successPopup" class="modalButton confirm">Confirmar Voto</a>
             </div>
         </div>
     </div>
-</body>
-<!-- FOOTER -->
+
+    <!-- Confirmado com Sucesso -->
+    <div id="successPopup" class="success-popup">
+        <div class="successContent">
+            <a href="#" class="modalClose">&times;</a>
+            <div class="successIcon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2 class="successTitle">Sucesso!</h2>
+            <p class="successText">Seu voto foi registrado com segurança no nosso sistema.</p>
+            <a href="#" class="successButton">OK</a>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
     <footer>
         <div class="footer-content">
             <img src="images/logo-governo-do-estado-sp.png" alt="Logo Governo SP" class="logo-footer">
@@ -265,4 +263,5 @@
         </div>
     </footer>
 </body>
+
 </html>
