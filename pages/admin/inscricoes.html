@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIV - Sistema Integrado de Votações</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="/assets/styles/admin.css">
+</head>
+
+<body>
+    <header class="site">
+        <nav class="navbar">
+            <div class="logo">
+                <img src="/assets/images/fatec-ogari.png" alt="Logo Fatec Itapira">
+                <img src="/assets/images/logo-cps.png" alt="Logo CPS">
+            </div>
+            
+            <ul class="links">
+                <li><a href="/pages/admin/index.html">Home</a></li>
+                <li><a href="/pages/admin/inscricoes.html" class="active">Inscrições</a></li>
+                <li><a href="/pages/admin/prazos.html">Prazos</a></li>
+                <li><a href="/pages/admin/relatorios.html">Relatórios</a></li>
+            </ul>
+
+            <div class="actions">
+                <img src="/assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
+                <a href="/pages/guest/index.html">Sair da Conta</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="manage-applicants">
+        <div class="container">
+            <h1>Gerenciar Inscrições</h1>
+            <form class="form-filters">
+                <div class="column">
+                    <label for="name">Nome do aluno</label>
+                    <input id="applicant-name" type="text"/>
+                </div>
+
+                <div class="column half">
+                    <div class="input-group">
+                        <label for="course">Curso</label>
+                        <div class="wrapper-select">
+                            <select id="course">
+                                <option value="" selected>Selecione uma opção</option>
+                                <option value="1">Desenvolvimento de Software Multiplataforma</option>
+                                <option value="2">Gestão Empresarial</option>
+                                <option value="3">Gestão da Produção Industrial</option>
+                                <option value="4">Todos os Cursos</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column half">
+                    <div class="input-group">
+                        <label for="semester">Semestre</label>
+                        <div class="wrapper-select">
+                            <select id="semester">
+                                <option value="" selected>Selecione uma opção</option>
+                                <option value="1">1º Semestre</option>
+                                <option value="2">2º Semestre</option>
+                                <option value="3">3º Semestre</option>
+                                <option value="4">4º Semestre</option>
+                                <option value="5">5º Semestre</option>
+                                <option value="6">6º Semestre</option>
+                                <option value="7">Todos Semestres</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <section class="list-applicants">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Data inscrição</th>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Curso</th>
+                            <th scope="col">Semestre</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Ações</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>01/06/2025 17:00</td>
+                            <th scope="row">Lucas Simões</th>
+                            <td>Desenvolvimento de Software Multiplataforma</td>
+                            <td>1º Semestre</td>
+                            <td class="text-warning">Aguardando análise</td>
+                            <td>
+                                <a href="#">Editar</a>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>01/06/2025 17:00</td>
+                            <th scope="row">Lucas Simões</th>
+                            <td>Desenvolvimento de Software Multiplataforma</td>
+                            <td>1º Semestre</td>
+                            <td class="text-danger">Indeferido</td>
+                            <td>
+                                <a href="#">Editar</a>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>01/06/2025 17:00</td>
+                            <th scope="row">Lucas Simões</th>
+                            <td>Desenvolvimento de Software Multiplataforma</td>
+                            <td>1º Semestre</td>
+                            <td class="text-success">Deferido</td>
+                            <td>
+                                <a href="#">Editar</a>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td>01/06/2025 17:00</td>
+                            <th scope="row">Lucas Simões</th>
+                            <td>Desenvolvimento de Software Multiplataforma</td>
+                            <td>1º Semestre</td>
+                            <td class="text-success">Deferido</td>
+                            <td>
+                                <a href="#">Editar</a>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td>01/06/2025 17:00</td>
+                            <th scope="row">Lucas Simões</th>
+                            <td>Desenvolvimento de Software Multiplataforma</td>
+                            <td>1º Semestre</td>
+                            <td class="text-success">Deferido</td>
+                            <td>
+                                <a href="#">Editar</a>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td>01/06/2025 17:00</td>
+                            <th scope="row">Lucas Simões</th>
+                            <td>Desenvolvimento de Software Multiplataforma</td>
+                            <td>1º Semestre</td>
+                            <td class="text-success">Deferido</td>
+                            <td>
+                                <a href="#">Editar</a>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td>01/06/2025 17:00</td>
+                            <th scope="row">Lucas Simões</th>
+                            <td>Desenvolvimento de Software Multiplataforma</td>
+                            <td>1º Semestre</td>
+                            <td class="text-success">Deferido</td>
+                            <td>
+                                <a href="#">Editar</a>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>01/06/2025 17:00</td>
+                            <th scope="row">Lucas Simões</th>
+                            <td>Desenvolvimento de Software Multiplataforma</td>
+                            <td>1º Semestre</td>
+                            <td class="text-success">Deferido</td>
+                            <td>
+                                <a href="#">Editar</a>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td>01/06/2025 17:00</td>
+                            <th scope="row">Lucas Simões</th>
+                            <td>Desenvolvimento de Software Multiplataforma</td>
+                            <td>1º Semestre</td>
+                            <td class="text-success">Deferido</td>
+                            <td>
+                                <a href="#">Editar</a>
+                            </td>
+                        </tr>
+                        
+                        
+                        <tr>
+                            <td>01/06/2025 17:00</td>
+                            <th scope="row">Lucas Simões</th>
+                            <td>Desenvolvimento de Software Multiplataforma</td>
+                            <td>1º Semestre</td>
+                            <td class="text-success">Deferido</td>
+                            <td>
+                                <a href="#">Editar</a>
+                            </td>
+                        </tr>
+
+                        <tfoot>
+                            <tr>
+                                <td colspan="6">
+                                    <div class="pagination">
+                                        <div class="results">Mostrando 10 de 100 resultados</div>
+                                        <ul>
+                                            <li>
+                                                <i class="fa-solid fa-chevron-left"></i>
+                                            </li>
+                                            <li>
+                                                <a href="#">1</a>
+                                            </li>
+                                            <li>
+                                                <a href="#">2</a>
+                                            </li>
+                                            <li>
+                                                <a href="#">3</a>
+                                            </li>
+                                            <li>
+                                                <a href="#">4</a>
+                                            </li>
+                                            <li>
+                                                <a href="#">5</a>
+                                            </li>
+                                            <li>
+                                                <i class="fa-solid fa-chevron-right"></i>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tfoot>
+                        
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </main>
+    
+    <footer class="site">
+        <div class="content">
+            <img src="/assets/images/logo-governo-do-estado-sp.png" alt="Logo Governo SP" class="logo-governo">
+
+            <a href="/pages/guest/sobre.html" class="btn-about">SOBRE O SISTEMA</a>
+
+            <p>Sistema Integrado de Votação - FATEC/CPS</p>
+            <p>Versão 0.1 (11/06/2025)</p>
+        </div>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,89 @@
+/* Layout do cabeçalho de navegação */
+
+header.site .navbar {
+    background-color: var(--secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* position: relative; */
+    padding: 16px 40px;
+}
+
+header.site .navbar .logo {
+    display: flex;
+    gap: 20px;
+    z-index: 2;
+}
+
+header.site .navbar .logo > img {
+    height: 55px;
+}
+
+header.site .navbar .user-icon {
+    height: 50px;
+    width: 50px;
+}
+
+/* Menu de navegação (links) */
+header.site .navbar .links {
+    z-index: 1;
+    position: absolute;
+    width: calc(100vw - 80px); /* calcula a largura total do viewport e ajusta baseado na quantidade de padding, para centralizar os links. */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    list-style: none;
+    gap: 25px;
+}
+
+header.site .navbar .links li a {
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+header.site .navbar .links li a.active,
+header.site .navbar .links li a:hover {
+    background-color: #6a0101;
+}
+
+/* Ações (login, logout) */
+header.site .navbar .actions {
+    z-index: 2;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+}
+
+header.site .navbar .actions a {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background-color: var(--primary);
+    font-weight: 600;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+header.site .navbar .actions a:hover {
+    background-color: #004654;
+}
+
+@media (max-width: 1024px) {
+    header.site .navbar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 20px;
+    }
+
+    header.site .navbar .links {
+        position: relative;
+        padding: 16px 0;
+    }
+}

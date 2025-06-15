@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIV - Sistema Integrado de Votações</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="/assets/styles/admin.css">
+</head>
+
+<body>
+    <header class="site">
+        <nav class="navbar">
+            <div class="logo">
+                <img src="/assets/images/fatec-ogari.png" alt="Logo Fatec Itapira">
+                <img src="/assets/images/logo-cps.png" alt="Logo CPS">
+            </div>
+
+            <ul class="links">
+                <li><a href="/pages/admin/index.html">Home</a></li>
+                <li><a href="/pages/admin/inscricoes.html">Inscrições</a></li>
+                <li><a href="/pages/admin/prazos.html" class="active">Prazos</a></li>
+                <li><a href="/pages/admin/relatorios.html">Relatórios</a></li>
+            </ul>
+
+            <div class="actions">
+                <img src="/assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
+                <a href="/pages/guest/index.html">Sair da Conta</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="manage-deadlines">
+        <div class="card-wrapper">
+            <div class="card">
+                <h1 class="title">Gerenciar Prazos</h1>
+
+                <form class="form-deadline">
+                    <div class="input-group">
+                        <label for="semester">Semestre</label>
+                        <div class="wrapper-select">
+                            <select id="semester">
+                                <option value="" selected>Selecione uma opção</option>
+                                <option value="1">1º Semestre</option>
+                                <option value="2">2º Semestre</option>
+                                <option value="3">3º Semestre</option>
+                                <option value="4">4º Semestre</option>
+                                <option value="5">5º Semestre</option>
+                                <option value="6">6º Semestre</option>
+                                <option value="7">Todos Semestres</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="course">Curso</label>
+                        <div class="wrapper-select">
+                            <select id="course">
+                                <option value="" selected>Selecione uma opção</option>
+                                <option value="1">Desenvolvimento de Software Multiplataforma</option>
+                                <option value="2">Gestão Empresarial</option>
+                                <option value="3">Gestão da Produção Industrial</option>
+                                <option value="4">Todos os Cursos</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="date-interval-group">
+                        <h3 class="title">Periodo de Inscrição</h3>
+                        <div class="row">
+                            <div class="input-group">
+                                <label for="name">Data inicial</label>
+                                <input id="applicant-name" type="date" />
+                            </div>
+
+                            <div class="input-group">
+                                <label for="name">Data inicial</label>
+                                <input id="applicant-name" type="date" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="date-interval-group">
+                        <h3 class="title">Periodo de Votação</h3>
+                        <div class="row">
+                            <div class="input-group">
+                                <label for="name">Data inicial</label>
+                                <input id="applicant-name" type="date" />
+                            </div>
+
+                            <div class="input-group">
+                                <label for="name">Data inicial</label>
+                                <input id="applicant-name" type="date" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <a href="index.html" type="button" class="button secondary">Voltar</a>
+                        <button type="button" class="button primary">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site">
+        <div class="content">
+            <img src="/assets/images/logo-governo-do-estado-sp.png" alt="Logo Governo SP" class="logo-governo">
+
+            <a href="/pages/guest/sobre.html" class="btn-about">SOBRE O SISTEMA</a>
+
+            <p>Sistema Integrado de Votação - FATEC/CPS</p>
+            <p>Versão 0.1 (11/06/2025)</p>
+        </div>
+    </footer>
+</body>
+
+</html>

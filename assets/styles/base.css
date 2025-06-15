@@ -1,0 +1,336 @@
+/* Importa recursos, reseta CSS, define variáveis e classes genéricas */
+
+@import url("/assets/styles/fonts.local.css");
+/* @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"); */
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css");
+
+:root {
+    --primary: #005f73;
+    --secondary: #8b0000;
+    --background: #f8f8f8;
+    --dark: #0a142f;
+    --light: #ffffff;
+
+    /* Bootstrap colors */
+    --bootstrap-primary: #007bff;
+    --bootstrap-secondary: #6c757d;
+    --bootstrap-success: #28a745;
+    --bootstrap-warning: #ffc107;
+    --bootstrap-danger: #dc3545;
+    --bootstrap-info: #17a2b8;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100vh;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background);
+    font-family: "Poppins", sans-serif;
+}
+
+input,
+select,
+textarea,
+button {
+    font-family: "Poppins", sans-serif;
+}
+
+.button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    padding: 15px 40px;
+    box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: all ease-in-out 0.2s;
+}
+
+.button.primary {
+    background-color: #006172;
+}
+.button.primary:hover {
+    background-color: #004955;
+}
+.button.secondary {
+    background-color: #5c0d0d;
+}
+.button.secondary:hover {
+    background-color: #4a0a0a;
+}
+
+.button.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.text-success {
+    color: var(--bootstrap-success);
+}
+
+.text-danger {
+    color: var(--bootstrap-danger);
+}
+
+.text-warning {
+    color: var(--bootstrap-warning);
+}
+
+.callout {
+    position: relative;
+    background-color: rgba(92, 13, 13, 0.05);
+    border: 1px solid rgba(92, 13, 13, 0.15);
+    border-radius: 12px;
+    padding: 1.5em;
+    overflow: hidden;
+}
+
+.callout > div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1em;
+    color: #444;
+    font-size: 0.9em;
+    line-height: 1.7;
+}
+
+.callout > .content > i {
+    font-size: 2em;
+}
+
+.callout::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 100%;
+}
+
+.callout.info > div i {
+    color: var(--primary);
+}
+.callout.info::before {
+    background: var(--primary);
+}
+
+.callout.success > div i {
+    color: var(--bootstrap-success);
+}
+.callout.success::before {
+    background: var(--bootstrap-success);
+}
+
+.callout.danger > div i {
+    color: var(--bootstrap-danger);
+}
+.callout.danger::before {
+    background: var(--bootstrap-danger);
+}
+
+.callout.warning > div i {
+    color: var(--bootstrap-warning);
+}
+.callout.warning::before {
+    background: var(--bootstrap-warning);
+}
+
+.card-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1 1 auto;
+    width: 100%;
+    margin: 30px auto;
+    padding: 0 16px;
+}
+
+.card-wrapper .card {
+    width: 100%;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+form[class^="form-"] {
+    display: flex;
+    flex-direction: column;
+}
+
+form[class^="form-"] .input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1em;
+}
+
+form[class^="form-"] .wrapper-select {
+    position: relative;
+    border: 2px solid #e0e0e0;
+}
+
+form[class^="form-"] .wrapper-select::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid #999;
+}
+
+form[class^="form-"] input {
+    width: 100%;
+    background-color: #f8f8f8;
+    border: 2px solid #e0e0e0;
+    padding: 8px 16px;
+    font-size: 1em;
+    outline: none;
+}
+
+form[class^="form-"] label {
+    font-size: 1em;
+    margin-bottom: 0.75em;
+}
+
+form[class^="form-"] select {
+    padding: 8px 26px 8px 16px;
+    width: 100%;
+    background-color: #f8f8f8;
+    border: none;
+    appearance: none;
+    font-size: 1em;
+}
+
+form[class^="form-"] .form-buttons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.5em;
+}
+
+form[class^="form-"] .form-buttons .button {
+    margin-top: 12px;
+}
+
+.container {
+    margin: 0 auto;
+    width: 100%;
+}
+
+@media (min-width: 576px) {
+    .container {
+        max-width: 540px;
+    }
+}
+
+@media (min-width: 768px) {
+    .container {
+        max-width: 720px;
+    }
+}
+
+@media (min-width: 992px) {
+    .container {
+        max-width: 960px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+/* https://developer.mozilla.org/en-US/docs/Web/CSS/Subsequent-sibling_combinator */
+.modal-opener:target ~ .modal {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal .content {
+    position: relative;
+    padding: 30px;
+    width: 90%;
+    max-width: 500px;
+    background: white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    text-align: center;
+}
+
+.modal .content .title {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    color: #005c6d;
+}
+
+.modal .content .text {
+    margin-bottom: 30px;
+    font-size: 1.2rem;
+    color: #34495e;
+    line-height: 1.6;
+}
+
+.modal .content a.close {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 15px;
+    right: 15px;
+    font-size: 1.5rem;
+    color: #34495e;
+    text-decoration: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #e7e5e5;
+    cursor: pointer;
+}
+
+.modal .modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}

@@ -1,0 +1,256 @@
+@import url("/assets/styles/base.css");
+@import url("/assets/styles/header-site.css");
+@import url("/assets/styles/footer-site.css");
+
+/* Início estilização página inicial (/pages/admin/index.html) */
+main.dashboard {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+/* Fim estilização página inicial (/pages/admin/index.html) */
+
+/* Início estilização página para gerenciar inscrições (/pages/admin/inscricoes.html) */
+main.manage-applicants {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    padding: 2em;
+}
+
+main.manage-applicants h1,
+main.manage-applicants h2,
+main.manage-applicants h3 {
+    color: rgb(0, 0, 0);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+main.manage-applicants .form-filters {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+    margin: 1em 0;
+}
+
+main.manage-applicants .form-filters input {
+    background-color: #fff;
+}
+
+main.manage-applicants .form-filters select {
+    background-color: #fff;
+}
+
+main.manage-applicants .column {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+main.manage-applicants .column.half {
+    flex: 1 1 auto;
+    max-width: calc(50% - 20px);
+}
+
+@media (max-width: 768px) {
+    main.manage-applicants .column.half {
+        max-width: unset;
+    }
+}
+
+main.manage-applicants .list-applicants {
+    display: flex;
+    flex-direction: column;
+    overflow-x: scroll;
+    box-shadow: 15px 15px 30px rgba(0, 0, 0, 0.2);
+    margin: 2em 0;
+    border-radius: 15px;
+}
+
+main.manage-applicants .list-applicants table {
+    width: 100%;
+    table-layout: auto;
+    border-spacing: 0;
+    border-collapse: separate;
+}
+
+main.manage-applicants .list-applicants thead th {
+    background: #005c6d;
+    padding: 1em 1.5em;
+    color: #fff;
+}
+
+main.manage-applicants .list-applicants thead th:nth-child(1) {
+    width: 15%;
+    min-width: 160px;
+}
+
+main.manage-applicants .list-applicants thead th:nth-child(2) {
+    width: 20%;
+    min-width: 200px;
+}
+
+main.manage-applicants .list-applicants thead th:nth-child(3) {
+    width: 25%;
+    min-width: 250px;
+}
+
+main.manage-applicants .list-applicants thead th:nth-child(4) {
+    width: 10%;
+    min-width: 90px;
+}
+
+main.manage-applicants .list-applicants thead th:nth-child(5) {
+    width: 10%;
+    min-width: 90px;
+}
+
+main.manage-applicants .list-applicants thead th:nth-child(6) {
+    width: 10%;
+    min-width: 90px;
+}
+main.manage-applicants .list-applicants tbody {
+    background-color: #e9e9e9;
+}
+
+main.manage-applicants .list-applicants tbody td {
+    text-align: center;
+}
+
+main.manage-applicants .list-applicants tbody td {
+    padding: 1em 0;
+    font-size: 0.9em;
+    overflow: hidden;
+}
+
+main.manage-applicants .list-applicants tbody td a {
+    display: inline-block;
+    text-decoration: none;
+    background-color: #005c6d;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    color: #fff;
+}
+
+main.manage-applicants .list-applicants .pagination {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background: #005c6d;
+    padding: 1em 1.5em;
+    font-size: 0.95em;
+    color: #fff;
+}
+
+main.manage-applicants .list-applicants .pagination {
+    font-size: 0.8em;
+}
+
+main.manage-applicants .list-applicants .pagination ul {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    list-style: none;
+    gap: 0.85em;
+    text-align: center;
+}
+
+main.manage-applicants .list-applicants .pagination li:first-child {
+    opacity: 0.5;
+    cursor: none;
+}
+
+main.manage-applicants .list-applicants .pagination li:last-child {
+    cursor: pointer;
+}
+
+main.manage-applicants .list-applicants .pagination a {
+    display: inline-block;
+    text-decoration: none;
+    background-color: #fff;
+    width: 25px;
+    height: 25px;
+    padding: 4px;
+    border-radius: 6px;
+    font-weight: bold;
+    color: #005c6d;
+}
+/* Fim estilização página para gerenciar inscrições (/pages/admin/inscricoes.html) */
+
+/* Início estilização página de prazos (/pages/admin/prazos.html) */
+main.manage-deadlines {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+main.manage-deadlines .card-wrapper .card {
+    display: flex;
+    flex-direction: column;
+    max-width: 800px;
+    background-color: #fff;
+}
+
+main.manage-deadlines .card-wrapper .card h1.title {
+    color: #005f73;
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+main.manage-deadlines .date-interval-group {
+    display: flex;
+    flex-direction: column;
+    background-color: #f0fafc;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-top: 20px;
+}
+
+main.manage-deadlines .date-interval-group h3 {
+    margin-bottom: 20px;
+    font-size: 20px;
+    color: #005f73;
+    text-align: center;
+}
+
+main.manage-deadlines .date-interval-group .row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+main.manage-deadlines .date-interval-group .row .input-group {
+    font-weight: 600;
+    font-size: 16px;
+    flex: 1;
+}
+/* Fim estilização página de prazos (/pages/admin/prazos.html) */
+
+/* Início estilização página de relatórios (/pages/admin/relatorios.html) */
+main.manage-reports {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+main.manage-reports .card-wrapper .card {
+    display: flex;
+    flex-direction: column;
+    max-width: 800px;
+    background-color: #fff;
+}
+
+main.manage-reports .card-wrapper .card h1.title {
+    color: #005f73;
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+/* Fim estilização página de relatórios (/pages/admin/relatorios.html) */
