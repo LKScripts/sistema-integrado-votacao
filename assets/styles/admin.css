@@ -1,12 +1,108 @@
 @import url("/assets/styles/base.css");
 @import url("/assets/styles/header-site.css");
 @import url("/assets/styles/footer-site.css");
-
 /* Início estilização página inicial (/pages/admin/index.html) */
 main.dashboard {
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
+}
+
+main.dashboard .container .title {
+    background-color: #005f73;
+    color: white;
+    margin: 20px 150px;
+    text-align: center;
+    font-size: 20px;
+    border-radius: 20px;
+}
+
+main.dashboard .graphs {
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+    margin: auto;
+    max-width: 850px;
+    justify-content: space-between;
+}
+
+main.dashboard .graphs .graph-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    max-width: 400px;
+    margin: 30px 0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    background-color: #d9d9d9;
+}
+
+main.dashboard .graphs .graph-container h1 {
+    margin-top: 15px;
+    color: var(--dark);
+}
+
+main.dashboard .graphs .graph-container .card-wrapper {
+    margin: 15px auto;
+}
+
+main.dashboard .graphs .graph-container .card-wrapper .card {
+    background-color: #ffffff;
+    color: var(--primary);
+    padding: 15px;
+}
+
+main.dashboard .graphs .graph-container .card-wrapper .card h4 {
+    color: var(--primary);
+    font-size: 16px;
+    margin-top: 15px;
+}
+
+main.dashboard .graphs .graph-container .graph-footer h4 {
+    color: var(--primary);
+    font-size: 18px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+main.dashboard .graphs .graph-card {
+    height: 500px;
+    gap: 25px;
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    align-items: flex-end;
+}
+
+main.dashboard .graphs .graph-card-title {
+    text-align: center;
+    color: var(--primary);
+}
+
+main.dashboard .graphs .graph-card .bar-container-100 {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+main.dashboard .graphs .graph-card .bar-container-75 {
+    display: flex;
+    flex-direction: column;
+    height: 75%;
+}
+
+main.dashboard .graphs .graph-card .bar-container-50 {
+    display: flex;
+    flex-direction: column;
+    height: 50%;
+}
+
+main.dashboard .graphs .graph-card [class^="bar-container"] .bar {
+    background-color: var(--primary);
+    flex: 1;
+    margin: 0 auto;
+    width: 100px;
 }
 /* Fim estilização página inicial (/pages/admin/index.html) */
 
