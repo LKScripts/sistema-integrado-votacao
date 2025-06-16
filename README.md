@@ -7,7 +7,7 @@ Breve descrição do projeto.
 -   Lucas Simões
 -   Rafael Moraes
 -   Júlia Rodrigues
--   Gabriel Burno
+-   Gabriel Bueno
 -   Gabriel Borges
 
 ### Linguagem e tecnologias
