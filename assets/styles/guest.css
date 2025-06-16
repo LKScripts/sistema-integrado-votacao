@@ -100,6 +100,46 @@ main.guest-home .form-wrapper p.description {
     margin-bottom: 20px;
 }
 
+main.guest-home .guest-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+main.guest-home .guest-container .button.primary {
+    margin-top: 30px;
+}
+
+main.guest-home .guest-container .guest-text-container,
+main.guest-home .guest-container .guest-image-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 50%;
+    justify-content: center;
+}
+
+main.guest-home .guest-container .guest-text-container {
+    padding: 20px;
+}
+
+main.guest-home .guest-container .guest-text-container ul {
+    list-style: inside;
+    margin-bottom: 30px;
+}
+
+main.guest-home .guest-container .guest-text-container h2 {
+    margin-bottom: 20px;
+    font-size: 48px;
+}
+
+main.guest-home .guest-container .guest-text-container p {
+    font-size: 18px;
+}
+
+main.guest-home .guest-container .guest-image-container img {
+    width: 100%;
+}
+
 @media (max-width: 768px) {
     main.guest-home .logo-fatec img {
         width: 300px;
@@ -156,14 +196,14 @@ main.login .wrapper-form header h1 {
 }
 
 main.login .wrapper-form header h1::after {
-  content: "";
-  position: absolute;
-  bottom: -10px;
-  left: 0;
-  width: 80px;
-  height: 4px;
-  background: #5c0d0d;
-  border-radius: 2px;
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 80px;
+    height: 4px;
+    background: #5c0d0d;
+    border-radius: 2px;
 }
 
 main.login .wrapper-form form {
@@ -205,7 +245,7 @@ main.login .wrapper-form .input-field input:focus {
     box-shadow: 0 0 0 3px rgba(0, 92, 109, 0.2);
 }
 
-main.login .wrapper-form .input-field i[class^='fa'] {
+main.login .wrapper-form .input-field i[class^="fa"] {
     position: absolute;
     left: 16px;
     top: 50%;
@@ -213,7 +253,7 @@ main.login .wrapper-form .input-field i[class^='fa'] {
     color: #005c6d;
 }
 
-main.login .wrapper-form [class^='button'] {
+main.login .wrapper-form [class^="button"] {
     width: 100%;
     margin-bottom: 1em;
 }
