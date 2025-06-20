@@ -10,6 +10,24 @@
 </head>
 
 <body>
+    <div class="modal-wrapper">
+        <modal-opener id="feedback" class="modal-feedback-opener"></modal-opener>
+        <div class="modal feedback">
+            <div class="content">
+                <a href="#" class="close">&times;</a>
+
+                <h3 class="title">Inscrição Confirmada!</h3>
+
+                <div class="text">
+                    <p>✅ Sua inscrição foi registrada com sucesso!</p>
+                </div>
+
+                <div class="modal-buttons">
+                    <a href="/pages/user/index.html" class="button primary">Voltar</a>
+                </div>
+            </div>
+        </div>
+    </div>
     <header class="site">
         <nav class="navbar">
             <div class="logo">
@@ -86,7 +104,7 @@
 
                     <div class="form-buttons">
                         <a href="/pages/user/index.html" type="button" class="button secondary">Cancelar</a>
-                        <a href="/pages/user/index.html" type="button" class="button primary">Concluir</a>
+                        <a href="#feedback" type="button" class="button primary">Concluir</a>
                     </div>
                 </form>
             </div>
