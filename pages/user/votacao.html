@@ -15,8 +15,9 @@
         <modal-opener id="votar-rafael" class="modal-opener"></modal-opener>
         <modal-opener id="votar-gabriel-bueno" class="modal-opener"></modal-opener>
         <modal-opener id="votar-gabriel-borges" class="modal-opener"></modal-opener>
+        <modal-opener id="feedback" class="modal-feedback-opener"></modal-opener>
 
-        <div class="modal">
+        <div class="modal confirm">
             <div class="content">
                 <a href="#" class="close">&times;</a>
 
@@ -29,10 +30,28 @@
 
                 <div class="modal-buttons">
                     <a href="#" class="button secondary">Cancelar</a>
-                    <a href="#" class="button primary">Confirmar Voto</a>
+                    <a href="#feedback" class="button primary">Confirmar Voto</a>
                 </div>
             </div>
         </div>
+
+        <div class="modal feedback">
+            <div class="content">
+                <a href="#" class="close">&times;</a>
+
+                <h3 class="title">Voto Confirmado!</h3>
+
+                <div class="text">
+                    <p>✅ Seu voto foi registrado com sucesso!</p>
+                    <p>Obrigado por participar das votações!</p>
+                </div>
+
+                <div class="modal-buttons">
+                    <a href="#" class="button primary">Ok</a>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <header class="site">

@@ -283,7 +283,12 @@ form[class^="form-"] .form-buttons .button {
 }
 
 /* https://developer.mozilla.org/en-US/docs/Web/CSS/Subsequent-sibling_combinator */
-.modal-opener:target ~ .modal {
+.modal-opener:target ~ .modal.confirm {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-feedback-opener:target ~ .modal.feedback {
     opacity: 1;
     pointer-events: auto;
 }
