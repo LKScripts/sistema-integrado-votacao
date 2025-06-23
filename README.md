@@ -1,6 +1,18 @@
 # sistema-integrado-votacao
 
-Breve descrição do projeto.
+Breve descrição do projeto:
+
+Este projeto para a FATEC Itapira consiste em um protótipo frontend de um sistema de votação online desenvolvido com HTML e CSS. O SIV permite que alunos se inscrevam como representantes de turma e votem nos candidatos durante períodos eleitorais. Os administradores podem gerenciar inscrições, definir prazos para diferentes cursos e semestres, deferir candidaturas e gerar relatórios completos das eleições.
+
+Apesar de ser um protótipo não funcional (sem backend e mínimo JavaScript), o sistema demonstra uma interface completa com:
+
+1. Área do administrador para gerenciar todo o processo eleitoral
+
+2. Sistema de inscrição para candidatos a representante de turma
+
+3. Controle de prazos para períodos de inscrição e votação
+
+4. Geração de relatórios (Atas de votação) com resultados das eleições
 
 ### Participantes
 
