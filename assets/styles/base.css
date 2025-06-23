@@ -293,6 +293,11 @@ form[class^="form-"] .form-buttons .button {
     pointer-events: auto;
 }
 
+#edit-user-modal:target {
+    opacity: 1;
+    pointer-events: auto;
+}
+
 .modal .content {
     position: relative;
     padding: 30px;
@@ -332,6 +337,42 @@ form[class^="form-"] .form-buttons .button {
     border-radius: 50%;
     background-color: #e7e5e5;
     cursor: pointer;
+}
+
+#edit-user-modal:target {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.modal .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #005c6d;
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.modal .form-group input,
+.modal .form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+    background: white;
+}
+
+.modal .form-group input:focus,
+.modal .form-group select:focus {
+    border-color: #005c6d;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 92, 109, 0.2);
 }
 
 .modal .modal-buttons {

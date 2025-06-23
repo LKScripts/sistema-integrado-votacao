@@ -21,7 +21,6 @@
                 <li><a href="/pages/admin/index.html">Home</a></li>
                 <li><a href="/pages/admin/inscricoes.html" class="active">Inscrições</a></li>
                 <li><a href="/pages/admin/prazos.html">Prazos</a></li>
-                <li><a href="/pages/admin/deferir.html">Deferimentos</a></li>
                 <li><a href="/pages/admin/relatorios.html">Relatórios</a></li>
             </ul>
 
@@ -31,6 +30,55 @@
             </div>
         </nav>
     </header>
+
+    <div class="modal" id="edit-user-modal">
+        <div class="content">
+            <a href="#" class="close">&times;</a>
+
+            <h3 class="title">Perfil do Usuário</h3>
+
+            <div class="form-group">
+                <label for="userName">Nome Completo</label>
+                <input type="text" id="userName" value="Lucas Simões">
+            </div>
+
+            <div class="form-group">
+                <label for="">Curso</label>
+                <select id="">
+                    <option>Gestão Empresarial</option>
+                    <option selected>Desenvolvimento de Software</option>
+                    <option>Gestão da Produção Industrial</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="u">Semestre</label>
+                <select id="">
+                    <option selected>1º Semestre</option>
+                    <option>2º Semestre</option>
+                    <option>3º Semestre</option>
+                    <option>4º Semestre</option>
+                    <option>5º Semestre</option>
+                    <option>6º Semestre</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="">Deferimento</label>
+                <select id="">
+                    <option>Deferido</option>
+                    <option selected>Indeferido</option>
+                    <option>Em análise</option>
+                </select>
+            </div>
+
+
+            <div class="modal-buttons">
+                <a href="#" class="button secondary">Cancelar</a>
+                <a href="#" class="button primary">Salvar Alterações</a>
+            </div>
+        </div>
+    </div>
 
     <main class="manage-applicants">
         <div class="container">
@@ -96,7 +144,7 @@
                             <td>1º Semestre</td>
                             <td class="text-danger">Indeferido</td>
                             <td>
-                                <a href="deferir.html">Editar</a>
+                                <a href="#edit-user-modal">Editar</a>
                             </td>
                         </tr>
 

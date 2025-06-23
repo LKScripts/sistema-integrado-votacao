@@ -228,6 +228,13 @@ main.manage-applicants .list-applicants tbody td a {
     border-radius: 8px;
     font-weight: bold;
     color: #fff;
+    transition: all 0.2s ease;
+}
+
+main.manage-applicants .list-applicants tbody td a:hover {
+    background-color: #004955;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 main.manage-applicants .list-applicants .pagination {
