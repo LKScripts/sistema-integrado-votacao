@@ -21,6 +21,7 @@ Apesar de ser um protótipo não funcional (sem backend e mínimo JavaScript), o
 -   Júlia Rodrigues
 -   Gabriel Bueno
 -   Gabriel Borges
+-   Gian Miguel Oliveira
 
 ### Linguagem e tecnologias
 
