@@ -17,7 +17,6 @@ Apesar de ser um protótipo não funcional (sem backend e mínimo JavaScript), o
 ### Participantes
 
 -   Lucas Simões
--   Gian Miguel
 -   Gabriel Bueno
 -   Gabriel Borges
 -   Gian Miguel Oliveira
