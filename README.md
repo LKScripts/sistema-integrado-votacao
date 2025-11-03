@@ -17,10 +17,10 @@ Apesar de ser um protótipo não funcional (sem backend e mínimo JavaScript), o
 ### Participantes
 
 -   Lucas Simões
--   Rafael Moraes
--   Júlia Rodrigues
+-   Gian Miguel
 -   Gabriel Bueno
 -   Gabriel Borges
+-   Gian Miguel Oliveira
 
 ### Linguagem e tecnologias
 
