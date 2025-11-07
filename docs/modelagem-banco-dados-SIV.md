@@ -862,15 +862,15 @@ DELIMITER ;
 INSERT INTO ADMINISTRADOR (nome_completo, email_corporativo, senha_hash)
 VALUES (
     'Administrador Sistema',
-    'admin@fatecitapira.edu.br',
+    'admin@fatec.sp.gov.br',
     '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'
 );
 
 -- Inserir alunos de teste (senha: teste123)
 INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre) VALUES
-('20240001', 'João da Silva', 'joao.silva@fatecitapira.edu.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2),
-('20240002', 'Maria Santos', 'maria.santos@fatecitapira.edu.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2),
-('20240003', 'Pedro Oliveira', 'pedro.oliveira@fatecitapira.edu.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2);
+('20240001', 'João da Silva', 'joao.silva@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2),
+('20240002', 'Maria Santos', 'maria.santos@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2),
+('20240003', 'Pedro Oliveira', 'pedro.oliveira@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2);
 
 -- ===============================================
 -- FIM DO SCRIPT
