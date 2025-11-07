@@ -162,6 +162,7 @@ VOTO (
     id_candidatura INT NOT NULL COMMENT 'Candidato votado',
     data_hora_voto TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ip_votante VARCHAR(45) NULL COMMENT 'IP do votante (segurança)',
+    INDEX idx_aluno_voto (id_aluno),
     FOREIGN KEY (id_eleicao) REFERENCES ELEICAO(id_eleicao) ON DELETE CASCADE,
     FOREIGN KEY (id_aluno) REFERENCES ALUNO(id_aluno) ON DELETE CASCADE,
     FOREIGN KEY (id_candidatura) REFERENCES CANDIDATURA(id_candidatura) ON DELETE CASCADE,
@@ -372,6 +373,7 @@ CREATE TABLE VOTO (
 
     INDEX idx_eleicao_voto (id_eleicao),
     INDEX idx_candidatura (id_candidatura),
+    INDEX idx_aluno_voto (id_aluno),
     INDEX idx_data_voto (data_hora_voto),
 
     UNIQUE KEY uk_voto_unico (id_eleicao, id_aluno),
@@ -785,8 +787,10 @@ BEGIN
     
     SELECT COUNT(*) INTO v_total_votantes
     FROM VOTO WHERE id_eleicao = p_id_eleicao;
-    
-    SET v_percentual = (v_total_votantes / v_total_aptos) * 100;
+
+    SET v_percentual = IF(v_total_aptos > 0,
+                          (v_total_votantes / v_total_aptos) * 100,
+                          0);
     
     SELECT c.id_candidatura, COUNT(v.id_voto)
     INTO v_id_representante, v_votos_representante
@@ -1052,6 +1056,7 @@ CANDIDATURA:
 VOTO:
 - idx_eleicao_voto (id_eleicao)
 - idx_candidatura (id_candidatura)
+- idx_aluno_voto (id_aluno)
 - idx_data_voto (data_hora_voto)
 
 RESULTADO:
@@ -1113,6 +1118,6 @@ AUDITORIA:
 
 ---
 
-_Modelagem criada em: 30/10/2025_ 
-_Modelagem atualizada pela última vez em: 11/03/2025_
+_Modelagem criada em: 30/10/2025_
+_Modelagem atualizada pela última vez em: 07/11/2025_
 _SGBD Target: MySQL 8.0+ / MariaDB 10.5+_
