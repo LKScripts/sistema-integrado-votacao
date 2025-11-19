@@ -1,3 +1,6 @@
+<?php
+// Nenhum processamento necessário aqui, apenas renderização da página.
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -5,13 +8,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIV - Sistema Integrado de Votações</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="/assets/styles/guest.css">
+
+    <link rel="stylesheet" href="../../assets/styles/guest.css">
+    <link rel="stylesheet" href="../../assets/styles/admin.css">
+    <link rel="stylesheet" href="../../assets/styles/base.css">
+    <link rel="stylesheet" href="../../assets/styles/fonts.css">
+    <link rel="stylesheet" href="../../assets/styles/footer-site.css">
+    <link rel="stylesheet" href="../../assets/styles/header-site.css">
 </head>
 
 <body>
     <main class="login-support">
         <div class="container">
+
             <header>
                 <h1>
                     <i class="fas fa-user-lock"></i>
@@ -33,9 +42,10 @@
                 </div>
 
                 <h2>Como recuperar suas credenciais?</h2>
+
                 <p style="margin-top: 15px; color: #555; line-height: 1.6;">
-                    Se você esqueceu seu login ou senha de acesso ao sistema acadêmico, é necessário realizar o
-                    processo de recuperação presencialmente na secretaria de sua instituição.
+                    Se você esqueceu seu login ou senha de acesso ao sistema acadêmico, é necessário realizar o processo
+                    de recuperação presencialmente na secretaria de sua instituição.
                 </p>
 
                 <div class="steps">
@@ -69,13 +79,12 @@
                             O processo de recuperação é realizado exclusivamente de forma presencial para garantir a
                             segurança dos seus dados acadêmicos.
                             Recomendamos entrar em contato com sua instituição para confirmar horários de atendimento e
-                            documentação necessária antes de se
-                            dirigir à secretaria.
+                            documentação necessária antes de se dirigir à secretaria.
                         </p>
                     </div>
                 </div>
 
-                <a href="/pages/guest/index.html" class="button primary">
+                <a href="../../pages/guest/index.php" class="button primary">
                     <i class="fas fa-arrow-left"></i>
                     Voltar
                 </a>
@@ -84,6 +93,7 @@
             <footer>
                 <p>2025 Sistema Integrado de Votação FATEC CPS</p>
             </footer>
+
         </div>
     </main>
 </body>

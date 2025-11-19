@@ -1,3 +1,6 @@
+<?php
+// pages/user/index.php
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -6,27 +9,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIV - Sistema Integrado de Votações</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="/assets/styles/user.css">
+    <link rel="stylesheet" href="/assets/styles/guest.css">
+    <link rel="stylesheet" href="../../assets/styles/guest.css">
+    <link rel="stylesheet" href="../../assets/styles/admin.css">
+    <link rel="stylesheet" href="../../assets/styles/base.css">
+    <link rel="stylesheet" href="../../assets/styles/user.css">
+    <link rel="stylesheet" href="../../assets/styles/fonts.css">
+    <link rel="stylesheet" href="../../assets/styles/footer-site.css">
+    <link rel="stylesheet" href="../../assets/styles/header-site.css">
 </head>
 
 <body>
     <header class="site">
         <nav class="navbar">
             <div class="logo">
-                <img src="/assets/images/fatec-ogari.png" alt="Logo Fatec Itapira">
-                <img src="/assets/images/logo-cps.png" alt="Logo CPS">
+                <img src="../../assets/images/fatec-ogari.png" alt="Logo Fatec Itapira">
+                <img src="../../assets/images/logo-cps.png" alt="Logo CPS">
             </div>
 
             <ul class="links">
-                <li><a href="/pages/user/index.html" class="active">Home</a></li>
-                <li><a href="/pages/user/inscricao.html">Inscrição</a></li>
-                <li><a href="/pages/user/votacao.html">Votação</a></li>
-                <li><a href="/pages/user/sobre.html">Sobre</a></li>
+                <li><a href="../../pages/user/index.php" class="active">Home</a></li>
+                <li><a href="../../pages/user/inscricao.php">Inscrição</a></li>
+                <li><a href="../../pages/user/votacao.php">Votação</a></li>
+                <li><a href="../../pages/user/sobre.php">Sobre</a></li>
             </ul>
 
             <div class="actions">
-                <img src="/assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
-                <a href="/pages/guest/index.html">Sair da Conta</a>
+                <img src="../../assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
+                <a href="../../pages/guest/index.php">Sair da Conta</a>
             </div>
         </nav>
     </header>
@@ -53,7 +63,7 @@
                     </div>
 
                     <div class="voting-illustration">
-                        <img src="/assets/images/voting-amico.svg" alt="Ilustração da votação">
+                        <img src="../../assets/images/voting-amico.svg" alt="Ilustração da votação">
                     </div>
                 </section>
 
@@ -80,8 +90,8 @@
             </div>
 
             <div class="button-group">
-                <a href="/pages/user/inscricao.html" class="button primary">QUERO ME INSCREVER</a>
-                <a href="/pages/user/votacao.html" class="button primary disabled">QUERO VOTAR</a>
+                <a href="../../pages/user/inscricao.php" class="button primary">QUERO ME INSCREVER</a>
+                <a href="../../assets/user/votacao.php" class="button primary disabled">QUERO VOTAR</a>
                 <a href="#" class="button primary disabled">ACOMPANHAR INSCRIÇÃO</a>
             </div>
         </div>
@@ -89,9 +99,9 @@
 
     <footer class="site">
         <div class="content">
-            <img src="/assets/images/logo-governo-do-estado-sp.png" alt="Logo Governo SP" class="logo-governo">
+            <img src="../../assets/images/logo-governo-do-estado-sp.png" alt="Logo Governo SP" class="logo-governo">
 
-            <a href="/pages/guest/sobre.html" class="btn-about">SOBRE O SISTEMA</a>
+            <a href="../../assets/guest/sobre.php" class="btn-about">SOBRE O SISTEMA</a>
 
             <p>Sistema Integrado de Votação - FATEC/CPS</p>
             <p>Versão 0.1 (11/06/2025)</p>

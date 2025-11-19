@@ -6,26 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIV - Sistema Integrado de Votações</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="/assets/styles/guest.css">
+    <link rel="stylesheet" href="./assets/styles/guest.css">
+    <link rel="stylesheet" href="./assets/styles/base.css">
+    <link rel="stylesheet" href="./assets/styles/fonts.css">
+    <link rel="stylesheet" href="./assets/styles/footer-site.css">
+    <link rel="stylesheet" href="./assets/styles/header-site.css">
+    
+
+
+
 </head>
 
 <body>
     <header class="site">
         <nav class="navbar">
             <div class="logo">
-                <img src="/assets/images/fatec-ogari.png" alt="Logo Fatec Itapira">
-                <img src="/assets/images/logo-cps.png" alt="Logo CPS">
+                <img src="./assets/images/fatec-ogari.png" alt="Logo Fatec Itapira">
+                <img src="./assets/images/logo-cps.png" alt="Logo CPS">
             </div>
 
             <ul class="links">
-                <li><a href="/pages/guest/index.html" class="active">Home</a></li>
-                <li><a href="/pages/guest/sobre.html">Sobre</a></li>
-                <li><a href="/pages/guest/login.html">Votação</a></li>
-                <li><a href="/pages/guest/login.html">Inscrição</a></li>
+                <li><a href="./pages/guest/index.html" class="active">Home</a></li>
+                <li><a href="./pages/guest/sobre.html">Sobre</a></li>
+                <li><a href="./pages/guest/login.html">Votação</a></li>
+                <li><a href="./pages/guest/login.html">Inscrição</a></li>
             </ul>
 
             <div class="actions">
-                <a href="/pages/guest/login.html">LOGIN</a>
+                <a href="./pages/guest/login.html">LOGIN</a>
             </div>
         </nav>
     </header>
@@ -62,11 +70,11 @@
                     <p>O botão estará disponível apenas durante o
                         período de inscrições.</p>
                 </div>
-                <div class="guest-image-container"><img src="/assets/images/political-candidate-bro.svg" alt=""></div>
+                <div class="guest-image-container"><img src="./assets/images/political-candidate-bro.svg" alt=""></div>
             </div>
 
             <div class="guest-container">
-                <div class="guest-image-container"><img src="/assets/images/active-support-amico.svg" alt=""></div>
+                <div class="guest-image-container"><img src="./assets/images/active-support-amico.svg" alt=""></div>
                 <div class="guest-text-container">
                     <h2>Suporte</h2>
                     <p>Encontrou dificuldades no acesso ou esqueceu

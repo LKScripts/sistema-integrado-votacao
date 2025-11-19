@@ -1,3 +1,27 @@
+<?php
+// pages/admin/inscricoes.php
+
+// Criar a pasta 'data' se não existir
+if (!file_exists('../../data')) {
+    mkdir('../../data', 0777, true);
+}
+
+// Verifica se o formulário foi enviado
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nome = $_POST['nome'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $curso = $_POST['curso'] ?? '';
+    $semestre = $_POST['semestre'] ?? '';
+
+    // Monta a linha a ser gravada no arquivo
+    $linha = "Nome: $nome | Email: $email | Curso: $curso | Semestre: $semestre" . PHP_EOL;
+
+    // Salva no arquivo inscricoes.txt
+    file_put_contents('../../data/inscricoes.txt', $linha, FILE_APPEND | LOCK_EX);  
+
+    $mensagem = "Inscrição enviada com sucesso!";
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -6,27 +30,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIV - Sistema Integrado de Votações</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="/assets/styles/admin.css">
+    <link rel="stylesheet" href="../../assets/styles/admin.css">
+
+    <link rel="stylesheet" href="../../assets/styles/guest.css">
+    <link rel="stylesheet" href="../../assets/styles/guest.css">
+    <link rel="stylesheet" href="../../assets/styles/admin.css">
+    <link rel="stylesheet" href="../../assets/styles/base.css">
+    <link rel="stylesheet" href="../../assets/styles/fonts.css">
+    <link rel="stylesheet" href="../../assets/styles/footer-site.css">
+    <link rel="stylesheet" href="../../assets/styles/header-site.css">
 </head>
 
 <body>
     <header class="site">
         <nav class="navbar">
             <div class="logo">
-                <img src="/assets/images/fatec-ogari.png" alt="Logo Fatec Itapira">
-                <img src="/assets/images/logo-cps.png" alt="Logo CPS">
+                <img src="../../assets/images/fatec-ogari.png" alt="Logo Fatec Itapira">
+                <img src="../../assets/images/logo-cps.png" alt="Logo CPS">
             </div>
 
             <ul class="links">
-                <li><a href="/pages/admin/index.html">Home</a></li>
-                <li><a href="/pages/admin/inscricoes.html" class="active">Inscrições</a></li>
-                <li><a href="/pages/admin/prazos.html">Prazos</a></li>
-                <li><a href="/pages/admin/relatorios.html">Relatórios</a></li>
+            <li><a href="../../pages/admin/index.php">Home</a></li>
+            <li><a href="../../pages/admin/inscricoes.php"class="active">Inscrições</a></li>
+            <li><a href="../../pages/admin/prazos.php" >Prazos</a></li>
+            <li><a href="../../pages/admin/relatorios.php">Relatórios</a></li>
             </ul>
 
             <div class="actions">
-                <img src="/assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
-                <a href="/pages/guest/index.html">Sair da Conta</a>
+                <img src="../../assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
+                <a href="../../pages/guest/index.html">Sair da Conta</a>
             </div>
         </nav>
     </header>
@@ -289,9 +321,9 @@
 
     <footer class="site">
         <div class="content">
-            <img src="/assets/images/logo-governo-do-estado-sp.png" alt="Logo Governo SP" class="logo-governo">
+            <img src="../../assets/images/logo-governo-do-estado-sp.png" alt="Logo Governo SP" class="logo-governo">
 
-            <a href="/pages/guest/sobre.html" class="btn-about">SOBRE O SISTEMA</a>
+            <a href="../../pages/guest/sobre.html" class="btn-about">SOBRE O SISTEMA</a>
 
             <p>Sistema Integrado de Votação - FATEC/CPS</p>
             <p>Versão 0.1 (11/06/2025)</p>
