@@ -1,3 +1,100 @@
+<?php
+require_once '../../../config/session.php';
+require_once '../../../config/conexao.php';
+
+// Verifica se é administrador logado
+verificarAdmin();
+
+$usuario = obterUsuarioLogado();
+$id_admin = $usuario['id'];
+
+$mensagem = "";
+$erro = "";
+
+// Processar validação de candidatura
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_candidatura'])) {
+    $id_candidatura = intval($_POST['id_candidatura']);
+    $acao = $_POST['acao'] ?? '';
+    $justificativa = trim($_POST['justificativa'] ?? '');
+
+    if ($acao === 'deferir') {
+        $stmt = $conn->prepare("
+            UPDATE CANDIDATURA
+            SET status_validacao = 'deferido',
+                validado_por = ?,
+                data_validacao = NOW()
+            WHERE id_candidatura = ?
+        ");
+        if ($stmt->execute([$id_admin, $id_candidatura])) {
+            $mensagem = "Candidatura deferida com sucesso!";
+        }
+
+    } elseif ($acao === 'indeferir' && !empty($justificativa)) {
+        $stmt = $conn->prepare("
+            UPDATE CANDIDATURA
+            SET status_validacao = 'indeferido',
+                validado_por = ?,
+                data_validacao = NOW(),
+                justificativa_indeferimento = ?
+            WHERE id_candidatura = ?
+        ");
+        if ($stmt->execute([$id_admin, $justificativa, $id_candidatura])) {
+            $mensagem = "Candidatura indeferida com sucesso!";
+        }
+    } else {
+        $erro = "Para indeferir é necessário informar a justificativa.";
+    }
+}
+
+// Buscar candidaturas com filtros
+$filtro_curso = $_GET['curso'] ?? '';
+$filtro_semestre = $_GET['semestre'] ?? '';
+$filtro_nome = $_GET['nome'] ?? '';
+
+$sql = "
+    SELECT
+        c.id_candidatura,
+        c.data_inscricao,
+        c.status_validacao,
+        c.proposta,
+        a.nome_completo,
+        a.ra,
+        e.curso,
+        e.semestre,
+        e.id_eleicao
+    FROM CANDIDATURA c
+    JOIN ALUNO a ON c.id_aluno = a.id_aluno
+    JOIN ELEICAO e ON c.id_eleicao = e.id_eleicao
+    WHERE 1=1
+";
+
+$params = [];
+$types = "";
+
+if (!empty($filtro_curso)) {
+    $sql .= " AND e.curso = ?";
+    $params[] = $filtro_curso;
+    $types .= "s";
+}
+
+if (!empty($filtro_semestre)) {
+    $sql .= " AND e.semestre = ?";
+    $params[] = intval($filtro_semestre);
+    $types .= "i";
+}
+
+if (!empty($filtro_nome)) {
+    $sql .= " AND a.nome_completo LIKE ?";
+    $params[] = "%$filtro_nome%";
+    $types .= "s";
+}
+
+$sql .= " ORDER BY c.data_inscricao DESC";
+
+$stmt = $conn->prepare($sql);
+$stmt->execute($params);
+$candidaturas = $stmt->fetchAll();
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -6,27 +103,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIV - Sistema Integrado de Votações</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="/assets/styles/admin.css">
+    <link rel="stylesheet" href="../../assets/styles/admin.css">
+
+    <link rel="stylesheet" href="../../assets/styles/guest.css">
+    <link rel="stylesheet" href="../../assets/styles/guest.css">
+    <link rel="stylesheet" href="../../assets/styles/admin.css">
+    <link rel="stylesheet" href="../../assets/styles/base.css">
+    <link rel="stylesheet" href="../../assets/styles/fonts.css">
+    <link rel="stylesheet" href="../../assets/styles/footer-site.css">
+    <link rel="stylesheet" href="../../assets/styles/header-site.css">
 </head>
 
 <body>
     <header class="site">
         <nav class="navbar">
             <div class="logo">
-                <img src="/assets/images/fatec-ogari.png" alt="Logo Fatec Itapira">
-                <img src="/assets/images/logo-cps.png" alt="Logo CPS">
+                <img src="../../assets/images/fatec-ogari.png" alt="Logo Fatec Itapira">
+                <img src="../../assets/images/logo-cps.png" alt="Logo CPS">
             </div>
 
             <ul class="links">
-                <li><a href="/pages/admin/index.html">Home</a></li>
-                <li><a href="/pages/admin/inscricoes.html" class="active">Inscrições</a></li>
-                <li><a href="/pages/admin/prazos.html">Prazos</a></li>
-                <li><a href="/pages/admin/relatorios.html">Relatórios</a></li>
+            <li><a href="../../pages/admin/index.php">Home</a></li>
+            <li><a href="../../pages/admin/inscricoes.php"class="active">Inscrições</a></li>
+            <li><a href="../../pages/admin/prazos.php" >Prazos</a></li>
+            <li><a href="../../pages/admin/relatorios.php">Relatórios</a></li>
             </ul>
 
             <div class="actions">
-                <img src="/assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
-                <a href="/pages/guest/index.html">Sair da Conta</a>
+                <img src="../../assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
+                <a href="../../pages/guest/index.html">Sair da Conta</a>
             </div>
         </nav>
     </header>
@@ -137,116 +242,38 @@
                     </thead>
 
                     <tbody>
-                        <tr>
-                            <td>01/06/2025 17:00</td>
-                            <th scope="row">Lucas Simões</th>
-                            <td>Desenvolvimento de Software Multiplataforma</td>
-                            <td>1º Semestre</td>
-                            <td class="text-danger">Indeferido</td>
-                            <td>
-                                <a href="#edit-user-modal">Editar</a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>01/06/2025 17:00</td>
-                            <th scope="row">Rafael Moraes</th>
-                            <td>Desenvolvimento de Software Multiplataforma</td>
-                            <td>1º Semestre</td>
-                            <td class="text-warning">Aguardando análise</td>
-                            <td>
-                                <a href="#">Editar</a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>01/06/2025 17:00</td>
-                            <th scope="row">Gabriel Bueno</th>
-                            <td>Desenvolvimento de Software Multiplataforma</td>
-                            <td>1º Semestre</td>
-                            <td class="text-success">Deferido</td>
-                            <td>
-                                <a href="#">Editar</a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>01/06/2025 17:00</td>
-                            <th scope="row">Gabriel Borges</th>
-                            <td>Desenvolvimento de Software Multiplataforma</td>
-                            <td>1º Semestre</td>
-                            <td class="text-success">Deferido</td>
-                            <td>
-                                <a href="#">Editar</a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>01/06/2025 17:00</td>
-                            <th scope="row">Julia Rodrigues</th>
-                            <td>Desenvolvimento de Software Multiplataforma</td>
-                            <td>1º Semestre</td>
-                            <td class="text-success">Deferido</td>
-                            <td>
-                                <a href="#">Editar</a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>01/06/2025 17:00</td>
-                            <th scope="row">Isabela Mendes</th>
-                            <td>Desenvolvimento de Software Multiplataforma</td>
-                            <td>1º Semestre</td>
-                            <td class="text-success">Deferido</td>
-                            <td>
-                                <a href="#">Editar</a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>01/06/2025 17:00</td>
-                            <th scope="row">Leonardo Oliveira</th>
-                            <td>Desenvolvimento de Software Multiplataforma</td>
-                            <td>1º Semestre</td>
-                            <td class="text-success">Deferido</td>
-                            <td>
-                                <a href="#">Editar</a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>01/06/2025 17:00</td>
-                            <th scope="row">Beatriz Santos</th>
-                            <td>Desenvolvimento de Software Multiplataforma</td>
-                            <td>1º Semestre</td>
-                            <td class="text-success">Deferido</td>
-                            <td>
-                                <a href="#">Editar</a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>01/06/2025 17:00</td>
-                            <th scope="row">Juliana Almeida</th>
-                            <td>Desenvolvimento de Software Multiplataforma</td>
-                            <td>1º Semestre</td>
-                            <td class="text-success">Deferido</td>
-                            <td>
-                                <a href="#">Editar</a>
-                            </td>
-                        </tr>
-
-
-                        <tr>
-                            <td>01/06/2025 17:00</td>
-                            <th scope="row">Rafael Costa</th>
-                            <td>Desenvolvimento de Software Multiplataforma</td>
-                            <td>1º Semestre</td>
-                            <td class="text-success">Deferido</td>
-                            <td>
-                                <a href="#">Editar</a>
-                            </td>
-                        </tr>
+                        <?php if (count($candidaturas) > 0): ?>
+                            <?php foreach ($candidaturas as $cand): ?>
+                                <?php
+                                $status_class = 'text-warning';
+                                $status_texto = 'Aguardando análise';
+                                if ($cand['status_validacao'] === 'deferido') {
+                                    $status_class = 'text-success';
+                                    $status_texto = 'Deferido';
+                                } elseif ($cand['status_validacao'] === 'indeferido') {
+                                    $status_class = 'text-danger';
+                                    $status_texto = 'Indeferido';
+                                }
+                                $data_formatada = date('d/m/Y H:i', strtotime($cand['data_inscricao']));
+                                ?>
+                                <tr>
+                                    <td><?= $data_formatada ?></td>
+                                    <th scope="row"><?= htmlspecialchars($cand['nome_completo']) ?></th>
+                                    <td><?= htmlspecialchars($cand['curso']) ?></td>
+                                    <td><?= $cand['semestre'] ?>º Semestre</td>
+                                    <td class="<?= $status_class ?>"><?= $status_texto ?></td>
+                                    <td>
+                                        <a href="#edit-user-modal-<?= $cand['id_candidatura'] ?>">Editar</a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 20px;">
+                                    Nenhuma candidatura encontrada.
+                                </td>
+                            </tr>
+                        <?php endif; ?>
 
                     <tfoot>
                         <tr>
@@ -289,9 +316,9 @@
 
     <footer class="site">
         <div class="content">
-            <img src="/assets/images/logo-governo-do-estado-sp.png" alt="Logo Governo SP" class="logo-governo">
+            <img src="../../assets/images/logo-governo-do-estado-sp.png" alt="Logo Governo SP" class="logo-governo">
 
-            <a href="/pages/guest/sobre.html" class="btn-about">SOBRE O SISTEMA</a>
+            <a href="../../pages/guest/sobre.html" class="btn-about">SOBRE O SISTEMA</a>
 
             <p>Sistema Integrado de Votação - FATEC/CPS</p>
             <p>Versão 0.1 (11/06/2025)</p>

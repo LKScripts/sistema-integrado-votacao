@@ -38,6 +38,29 @@ O projeto utiliza tecnologias full-stack para desenvolvimento web:
 
 **Arquitetura:** MVC (Model-View-Controller) com API RESTful para comunicação entre frontend e backend.
 
+### Estrutura do Projeto
+
+```
+sistema-integrado-votacao/
+├── config/              # Arquivos de configuração
+│   ├── conexao.php     # Configuração de banco de dados
+│   └── session.php     # Gerenciamento de sessões
+├── public/             # Arquivos acessíveis publicamente
+│   ├── index.php       # Página inicial
+│   ├── assets/         # CSS, JS, imagens
+│   └── pages/          # Páginas da aplicação
+│       ├── guest/      # Páginas públicas
+│       ├── user/       # Páginas de alunos
+│       └── admin/      # Páginas administrativas
+├── storage/            # Arquivos gerados
+│   ├── logs/           # Logs do sistema
+│   └── uploads/        # Uploads de usuários
+├── database/           # Scripts SQL
+│   └── siv_db.sql      # Schema do banco
+├── docs/               # Documentação
+└── src/                # Código fonte (futuro)
+```
+
 ### Documentação Técnica
 
 A documentação completa do projeto está disponível no diretório `/docs`:
@@ -46,6 +69,8 @@ A documentação completa do projeto está disponível no diretório `/docs`:
 -   **[Histórias de Usuário](./docs/historias-usuario-SIV.md)** - Backlog do produto com 21 histórias e critérios de aceitação
 -   **[Modelagem de Banco de Dados](./docs/modelagem-banco-dados-SIV.md)** - Diagrama ER, modelo relacional, scripts SQL
 -   **[Planejamento do Projeto](./docs/planejamento-projeto.md)** - EAP, cronograma e marcos do projeto
+-   **[Integração com Banco de Dados](./docs/doc-temporario/INTEGRACAO_BANCO.md)** - Documentação da integração completa com MySQL
+-   **[Guia de Estruturação](./docs/GUIA_ESTRUTURACAO.md)** - Guia de organização de pastas e melhores práticas
 
 ### Requisitos do Sistema
 
@@ -66,12 +91,12 @@ cd sistema-integrado-votacao
 
 2. Configure o banco de dados:
 ```bash
-mysql -u root -p < database/schema.sql
+mysql -u root -p < database/siv_db.sql
 ```
 
-3. Configure as credenciais do banco em `src/config/database.php`
+3. Configure as credenciais do banco em `config/conexao.php`
 
-4. Inicie o servidor PHP:
+4. Inicie o servidor PHP (apontando para a pasta public):
 ```bash
 php -S localhost:8000 -t public
 ```
@@ -82,21 +107,25 @@ php -S localhost:8000 -t public
 
 **Nomenclatura de arquivos:**
 -   Utilizar `kebab-case` para nome dos arquivos
--   Utilizar `caminho absoluto` para referenciar arquivos (href, imports)
+-   Utilizar caminhos relativos para referenciar arquivos
+    -   Exemplo: `../../assets/styles/guest.css`
 
 **HTML/CSS:**
 -   Classes: `kebab-case`
 -   Indentação: 4 espaços
+-   Caminhos de imagens e CSS: sempre relativos ao arquivo atual
 
 **JavaScript:**
 -   Variáveis e funções: `camelCase`
 -   Indentação: 4 espaços
+-   Imports: caminhos relativos
 
 **PHP:**
 -   Seguir padrão PSR-12
 -   Classes: `PascalCase`
 -   Métodos e variáveis: `camelCase`
 -   Indentação: 4 espaços
+-   Includes: usar `require_once` com caminhos relativos ou `__DIR__`
 
 ### Commits Semânticos
 
