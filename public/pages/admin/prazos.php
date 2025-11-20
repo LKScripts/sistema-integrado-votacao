@@ -1,12 +1,12 @@
 <?php
-session_start();
-include '../../conexao.php';
+require_once '../../../config/session.php';
+require_once '../../../config/conexao.php';
 
-// BLOQUEIO PARA NÃO ADMIN
-if (!isset($_SESSION['id_admin'])) {
-    echo "<script>alert('Acesso negado. Faça login como administrador.'); window.location.href='../../pages/guest/login.php';</script>";
-    exit;
-}
+// Verificar se é administrador
+verificarAdmin();
+
+$usuario = obterUsuarioLogado();
+$id_admin = $usuario['id'];
 
 $mensagem = "";
 $tipo_mensagem = ""; // success | error
@@ -14,7 +14,7 @@ $tipo_mensagem = ""; // success | error
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $curso            = $_POST['curso'] ?? '';
-    $semestre         = $_POST['semestre'] ?? '';
+    $semestre         = intval($_POST['semestre'] ?? 0);
     $inscricao_inicio = $_POST['inscricao_inicio'] ?? '';
     $inscricao_fim    = $_POST['inscricao_fim'] ?? '';
     $votacao_inicio   = $_POST['votacao_inicio'] ?? '';
@@ -26,33 +26,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // VALIDAÇÕES
     // ============================
 
-    if ($inscricao_inicio <= $hoje) {
+    if ($inscricao_inicio < $hoje) {
         $mensagem = "⚠ A data de <b>início das inscrições</b> não pode ser anterior a hoje.";
         $tipo_mensagem = "error";
-
-        if ($inscricao_fim <= $inscricao_inicio) {
-            $mensagem = "⚠ A data de <b>término das inscrições</b> deve ser maior ou igual ao início.";
-            $tipo_mensagem = "error";
-
-            if ($votacao_inicio <= $inscricao_fim) {
-                $mensagem = "⚠ A data de <b>início da votação</b> deve ser igual ou maior que o fim das inscrições.";
-                $tipo_mensagem = "error";
-
-                if ($votacao_fim <= $votacao_inicio) {
-                    $mensagem = "⚠ A data de <b>término da votação</b> deve ser igual ou maior que o início da votação.";
-                    $tipo_mensagem = "error";
-                }
-            }
-
-
-        }
+    } elseif ($inscricao_fim < $inscricao_inicio) {
+        $mensagem = "⚠ A data de <b>término das inscrições</b> deve ser maior ou igual ao início.";
+        $tipo_mensagem = "error";
+    } elseif ($votacao_inicio < $inscricao_fim) {
+        $mensagem = "⚠ A data de <b>início da votação</b> deve ser maior ou igual que o fim das inscrições.";
+        $tipo_mensagem = "error";
+    } elseif ($votacao_fim < $votacao_inicio) {
+        $mensagem = "⚠ A data de <b>término da votação</b> deve ser maior ou igual que o início da votação.";
+        $tipo_mensagem = "error";
     }
 
-    //  ERRO → só exibe modal, NÃO salva
-    if ($tipo_mensagem === "error") {
-        // não executa salvar
-    }
-    else {
+    //  SEM ERRO → salva
+    if ($tipo_mensagem !== "error") {
 
         // ============================
         // ✔ SALVAR NO BANCO
@@ -68,23 +57,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $lista_cursos = [$curso];
         }
 
-        $id_admin = $_SESSION['id_admin'];
-        $status = "Ativa";
+        $status = "candidatura_aberta";
 
         $stmt = $conn->prepare("
-            INSERT INTO eleicao 
-            (curso, semestre, dt_ini_cand, dt_fim_cand, dt_ini_vot, dt_fim_vot, status, data_criacao, criado_por)
-            VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?)
+            INSERT INTO ELEICAO
+            (curso, semestre, data_inicio_candidatura, data_fim_candidatura,
+             data_inicio_votacao, data_fim_votacao, status, criado_por)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
-        if (!$stmt) {
-            $mensagem = "Erro ao preparar SQL: " . $conn->error;
-            $tipo_mensagem = "error";
-        } else {
-
+        try {
             foreach ($lista_cursos as $c) {
-                $stmt->bind_param(
-                    "sisssssi",
+                $stmt->execute([
                     $c,
                     $semestre,
                     $inscricao_inicio,
@@ -93,12 +77,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $votacao_fim,
                     $status,
                     $id_admin
-                );
-                $stmt->execute();
+                ]);
             }
+
+            // Registrar na auditoria
+            $stmtAudit = $conn->prepare("
+                INSERT INTO AUDITORIA (id_admin, tabela, operacao, descricao)
+                VALUES (?, 'ELEICAO', 'INSERT', ?)
+            ");
+            $descricao = "Nova eleição criada para $curso - {$semestre}º semestre";
+            $stmtAudit->execute([$id_admin, $descricao]);
 
             $mensagem = "✅ Prazo cadastrado com sucesso!";
             $tipo_mensagem = "success";
+        } catch (PDOException $e) {
+            $mensagem = "Erro ao cadastrar prazo: " . $e->getMessage();
+            $tipo_mensagem = "error";
         }
     }
 }

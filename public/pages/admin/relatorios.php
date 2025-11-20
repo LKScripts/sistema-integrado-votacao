@@ -1,14 +1,35 @@
 <?php
-// pages/admin/relatorios.php
+require_once '../../../config/session.php';
+require_once '../../../config/conexao.php';
 
-// Caminho do arquivo de prazos
-$arquivo_prazos = '../../data/prazos.txt';
+// Verificar se é administrador
+verificarAdmin();
 
-// Inicializa array de linhas
-$linhas = [];
-if(file_exists($arquivo_prazos)) {
-    $linhas = file($arquivo_prazos, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+// Buscar resultados de eleições encerradas usando a view
+$filtro_curso = $_GET['curso'] ?? '';
+$filtro_semestre = $_GET['semestre'] ?? '';
+
+$sql = "SELECT * FROM v_resultados_completos WHERE 1=1";
+$params = [];
+$types = "";
+
+if (!empty($filtro_curso) && $filtro_curso !== 'Todos os Cursos') {
+    $sql .= " AND curso = ?";
+    $params[] = $filtro_curso;
+    $types .= "s";
 }
+
+if (!empty($filtro_semestre) && $filtro_semestre !== 'Todos Semestres') {
+    $sql .= " AND semestre = ?";
+    $params[] = intval($filtro_semestre);
+    $types .= "i";
+}
+
+$sql .= " ORDER BY data_apuracao DESC";
+
+$stmt = $conn->prepare($sql);
+$stmt->execute($params);
+$resultados = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -91,13 +112,45 @@ if(file_exists($arquivo_prazos)) {
                 </form>
 
                 <div class="report-list">
-                    <h3 class="title">Prazos Registrados</h3>
-                    <?php if(!empty($linhas)): ?>
-                        <ul>
-                            <?php foreach($linhas as $linha): ?>
-                                <li><?php echo htmlspecialchars($linha); ?></li>
-                            <?php endforeach; ?>
-                        </ul>
+                    <h3 class="title">Resultados de Eleições Finalizadas</h3>
+                    <?php if(count($resultados) > 0): ?>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                            <thead>
+                                <tr style="background-color: #f5f5f5;">
+                                    <th style="padding: 10px; border: 1px solid #ddd;">Curso</th>
+                                    <th style="padding: 10px; border: 1px solid #ddd;">Semestre</th>
+                                    <th style="padding: 10px; border: 1px solid #ddd;">Representante</th>
+                                    <th style="padding: 10px; border: 1px solid #ddd;">Votos</th>
+                                    <th style="padding: 10px; border: 1px solid #ddd;">Suplente</th>
+                                    <th style="padding: 10px; border: 1px solid #ddd;">Votos</th>
+                                    <th style="padding: 10px; border: 1px solid #ddd;">Participação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach($resultados as $res): ?>
+                                    <tr>
+                                        <td style="padding: 10px; border: 1px solid #ddd;"><?= htmlspecialchars($res['curso']) ?></td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;"><?= $res['semestre'] ?>º</td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <?= htmlspecialchars($res['representante']) ?>
+                                            <br><small>(RA: <?= htmlspecialchars($res['ra_representante']) ?>)</small>
+                                        </td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;"><?= $res['votos_representante'] ?></td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <?= htmlspecialchars($res['suplente'] ?? '-') ?>
+                                            <?php if($res['suplente']): ?>
+                                                <br><small>(RA: <?= htmlspecialchars($res['ra_suplente']) ?>)</small>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;"><?= $res['votos_suplente'] ?? '-' ?></td>
+                                        <td style="padding: 10px; border: 1px solid #ddd;">
+                                            <?= number_format($res['percentual_participacao'], 2) ?>%
+                                            <br><small>(<?= $res['total_votantes'] ?>/<?= $res['total_aptos'] ?>)</small>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
                     <?php else: ?>
                         <p>Nenhum prazo registrado ainda.</p>
                     <?php endif; ?>

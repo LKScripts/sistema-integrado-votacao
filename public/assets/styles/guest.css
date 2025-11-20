@@ -38,68 +38,6 @@ main.guest-home .logo-fatec img {
     margin-bottom: 20px;
 }
 
-main.guest-home .form-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-main.guest-home .form-wrapper form {
-    background-color: #d9d9d9;
-    padding: 10px 20px;
-    border-radius: 50px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-main.guest-home .form-wrapper form input::placeholder {
-    color: #a9a9a9;
-}
-
-main.guest-home .form-wrapper form input[type="email"] {
-    border: none;
-    padding: 10px 15px;
-    border-radius: 20px;
-    outline: none;
-    font-size: 16px;
-    width: 220px;
-    background-color: white;
-}
-
-main.guest-home .form-wrapper form button[type="submit"] {
-    background-color: #0084ff;
-    border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-main.guest-home .form-wrapper form button[type="submit"]:hover {
-    background-color: #006fd4;
-}
-
-main.guest-home .form-wrapper form button[type="submit"] img {
-    width: 18px;
-    height: 18px;
-    filter: invert(1);
-}
-
-main.guest-home .form-wrapper p.description {
-    font-size: 14px;
-    text-align: center;
-    color: #000;
-    max-width: 400px;
-    margin-top: 10px;
-    margin-bottom: 20px;
-}
-
 main.guest-home .guest-container {
     display: flex;
     flex-direction: row;
@@ -510,3 +448,39 @@ main.about .card-wrapper .button-group {
 }
 
 /* Fim estilização página sobre (/pages/guest/sobre.html) */
+
+/* Início estilização página cadastro (/pages/guest/cadastro.php) */
+/* Ajustes específicos para formulário de cadastro */
+main.login .wrapper-form.cadastro {
+    max-width: 500px;
+}
+
+main.login .input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+main.login .wrapper-form .input-field select {
+    width: 100%;
+    padding: 18px 20px 18px 50px;
+    border: 2px solid #e0e6ed;
+    border-radius: 12px;
+    font-size: 1em;
+    transition: all 0.3s;
+    background-color: white;
+    cursor: pointer;
+}
+
+main.login .wrapper-form .input-field select:focus {
+    outline: none;
+    border-color: #005c6d;
+    box-shadow: 0 0 0 3px rgba(0, 92, 109, 0.2);
+}
+
+@media (max-width: 768px) {
+    main.login .input-row {
+        grid-template-columns: 1fr;
+    }
+}
+/* Fim estilização página cadastro (/pages/guest/cadastro.php) */

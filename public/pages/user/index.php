@@ -9,7 +9,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIV - Sistema Integrado de Votações</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="/assets/styles/guest.css">
     <link rel="stylesheet" href="../../assets/styles/guest.css">
     <link rel="stylesheet" href="../../assets/styles/admin.css">
     <link rel="stylesheet" href="../../assets/styles/base.css">
@@ -78,7 +77,7 @@
                 </section>
 
                 <div class="alert">
-                    <span>⚠️ ATENÇÃO: Verifique os prazos de cada edital para não perder seu direito de voto!</span>
+                    <span>⚠️ATENÇÃO: Verifique os prazos de cada edital para não perder seu direito de voto!</span>
                 </div>
             </div>
         </div>

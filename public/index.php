@@ -26,14 +26,14 @@
             </div>
 
             <ul class="links">
-                <li><a href="./pages/guest/index.html" class="active">Home</a></li>
-                <li><a href="./pages/guest/sobre.html">Sobre</a></li>
-                <li><a href="./pages/guest/login.html">Votação</a></li>
-                <li><a href="./pages/guest/login.html">Inscrição</a></li>
+                <li><a href="./index.php" class="active">Home</a></li>
+                <li><a href="./pages/guest/sobre.php">Sobre</a></li>
+                <li><a href="./pages/guest/login.php">Votação</a></li>
+                <li><a href="./pages/guest/login.php">Inscrição</a></li>
             </ul>
 
             <div class="actions">
-                <a href="./pages/guest/login.html">LOGIN</a>
+                <a href="./pages/guest/login.php">LOGIN</a>
             </div>
         </nav>
     </header>
@@ -49,7 +49,7 @@
 
         <div class="container">
             <div class="guest-container">
-                <div class="guest-image-container"><img src="/assets/images/selecting-team-cuate.svg" alt=""></div>
+                <div class="guest-image-container"><img src="./assets/images/selecting-team-cuate.svg" alt=""></div>
                 <div class="guest-text-container">
                     <h2>Deseja se Candidatar?</h2>
                     <p>Você deve possuir credencial ativa no sistema SIV e estar apto ás regras específicas do edital.
@@ -80,32 +80,19 @@
                     <p>Encontrou dificuldades no acesso ou esqueceu
                         suas credenciais?
 
-                        Clique <a href="suporte.html">aqui</a> ou no botão abaixo para maiores informações.</p>
-                    <a href="suporte.html" class="button primary">Suporte</a>
+                        Clique <a href="./pages/guest/suporte.php">aqui</a> ou no botão abaixo para maiores informações.</p>
+                    <a href="./pages/guest/suporte.php" class="button primary">Suporte</a>
                 </div>
             </div>
 
         </div>
-
-        <section class="form-wrapper">
-            <form action="email.php" method="GET">
-                <input type="email" name="email" id="email" placeholder="Seu e-mail" required>
-                <button type="submit">
-                    <img src="/assets/images/enviar.png" alt="Enviar">
-                </button>
-            </form>
-
-            <p class="description">
-                Insira seu e-mail para receber informações sobre novas eleições da sua FATEC!
-            </p>
-        </section>
     </main>
 
     <footer class="site">
         <div class="content">
-            <img src="/assets/images/logo-governo-do-estado-sp.png" alt="Logo Governo SP" class="logo-governo">
+            <img src="./assets/images/logo-governo-do-estado-sp.png" alt="Logo Governo SP" class="logo-governo">
 
-            <a href="/pages/guest/sobre.html" class="btn-about">SOBRE O SISTEMA</a>
+            <a href="./pages/guest/sobre.php" class="btn-about">SOBRE O SISTEMA</a>
 
             <p>Sistema Integrado de Votação - FATEC/CPS</p>
             <p>Versão 0.1 (11/06/2025)</p>

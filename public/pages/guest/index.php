@@ -1,23 +1,3 @@
-<?php
-// ================================
-// SALVAR EMAIL EM TXT (GET)
-// ================================
-if (isset($_GET['email']) && !empty($_GET['email'])) {
-    $email = trim($_GET['email']);
-
-    // Caminho do arquivo onde será salvo
-    $arquivo = __DIR__ . "/../../data/emails.txt";
-
-    // Garante que a pasta existe
-    if (!is_dir(__DIR__ . "/../../data")) {
-        mkdir(__DIR__ . "/../../data", 0777, true);
-    }
-
-    // Salva o e-mail com data e hora
-    $conteudo = date("d/m/Y H:i:s") . " - " . $email . PHP_EOL;
-    file_put_contents($arquivo, $conteudo, FILE_APPEND);
-}
-?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -26,9 +6,6 @@ if (isset($_GET['email']) && !empty($_GET['email'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIV - Sistema Integrado de Votações</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-
-    <!-- CSS Mantido Exatamente Igual -->
-    <link rel="stylesheet" href="/assets/styles/guest.css">
     <link rel="stylesheet" href="../../assets/styles/guest.css">
     <link rel="stylesheet" href="../../assets/styles/admin.css">
     <link rel="stylesheet" href="../../assets/styles/base.css">
@@ -104,19 +81,6 @@ if (isset($_GET['email']) && !empty($_GET['email'])) {
             </div>
 
         </div>
-
-        <section class="form-wrapper">
-            <form action="index.php" method="GET">
-                <input type="email" name="email" id="email" placeholder="Seu e-mail" required>
-                <button type="submit">
-                    <img src="../../assets/images/enviar.png" alt="Enviar">
-                </button>
-            </form>
-
-            <p class="description">
-                Insira seu e-mail para receber informações sobre novas eleições da sua FATEC!
-            </p>
-        </section>
     </main>
 
     <footer class="site">
