@@ -131,7 +131,7 @@ $candidaturas = $stmt->fetchAll();
 
             <div class="actions">
                 <img src="../../assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
-                <a href="../../pages/guest/index.html">Sair da Conta</a>
+                <a href="../../logout.php">Sair da Conta</a>
             </div>
         </nav>
     </header>

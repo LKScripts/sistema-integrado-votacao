@@ -177,7 +177,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         <div class="actions">
             <img src="../../assets/images/user-icon.png" class="user-icon">
-            <a href="../../pages/guest/index.php">Sair</a>
+            <a href="../../logout.php">Sair da Conta</a>
         </div>
     </nav>
 </header>

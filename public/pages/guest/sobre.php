@@ -26,15 +26,14 @@
             </div>
 
             <ul class="links">
-                <li><a href="../../pages/guest/index.php">Home</a></li>
-                <li><a href="../../pages/guest/sobre.php" class="active">Sobre</a></li>
-                <li><a href="../../pages/guest/login.php">Votação</a></li>
-                <li><a href="../../pages/guest/login.php">Inscrição</a></li>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="sobre.php" class="active">Sobre</a></li>
+                <li><a href="login.php">Votação</a></li>
+                <li><a href="login.php">Inscrição</a></li>
             </ul>
 
             <div class="actions">
-                <img src="../../assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
-                <a href="../../pages/guest/index.php">Sair da Conta</a>
+                <a href="login.php">LOGIN</a>
             </div>
         </nav>
     </header>
@@ -86,7 +85,7 @@
                     </p>
                 </section>
 
-                <a style="margin-top: 20px;" href="../../pages/guest/index.php" class="button primary">
+                <a style="margin-top: 20px;" href="index.php" class="button primary">
                     <i class="fas fa-arrow-left"></i>
                     Voltar
                 </a>

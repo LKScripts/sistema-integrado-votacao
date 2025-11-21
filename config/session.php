@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 // Função para verificar se o usuário está logado
 function verificarLogin() {
     if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['usuario_tipo'])) {
-        header("Location: /pages/guest/login.php");
+        header("Location: /sistema-integrado-votacao/public/pages/guest/login.php");
         exit;
     }
 }
@@ -16,7 +16,7 @@ function verificarLogin() {
 function verificarAdmin() {
     verificarLogin();
     if ($_SESSION['usuario_tipo'] !== 'admin') {
-        header("Location: /pages/guest/index.php");
+        header("Location: /sistema-integrado-votacao/public/pages/guest/index.php");
         exit;
     }
 }
@@ -25,7 +25,7 @@ function verificarAdmin() {
 function verificarAluno() {
     verificarLogin();
     if ($_SESSION['usuario_tipo'] !== 'aluno') {
-        header("Location: /pages/guest/index.php");
+        header("Location: /sistema-integrado-votacao/public/pages/guest/index.php");
         exit;
     }
 }
@@ -65,7 +65,7 @@ function loginAdmin($id_admin, $nome, $email) {
 function logout() {
     session_unset();
     session_destroy();
-    header("Location: /pages/guest/index.php");
+    header("Location: /sistema-integrado-votacao/public/pages/guest/index.php");
     exit;
 }
 
