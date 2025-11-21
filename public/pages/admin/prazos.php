@@ -88,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $descricao = "Nova eleição criada para $curso - {$semestre}º semestre";
             $stmtAudit->execute([$id_admin, $descricao]);
 
-            $mensagem = "✅ Prazo cadastrado com sucesso!";
+            $mensagem = "Prazo cadastrado com sucesso!";
             $tipo_mensagem = "success";
         } catch (PDOException $e) {
             $mensagem = "Erro ao cadastrar prazo: " . $e->getMessage();
