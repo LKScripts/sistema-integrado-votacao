@@ -21,83 +21,27 @@ SET time_zone = "+00:00";
 -- Database: `siv_db`
 --
 
+-- =====================================================
+-- STORED PROCEDURES, FUNCTIONS E EVENTS
+-- =====================================================
+-- IMPORTANTE: As procedures, functions e events foram movidas para
+-- o arquivo automacao_eleicoes.sql para melhor organização.
+--
+-- Execute após importar este arquivo:
+-- mysql -u root -p -P 3307 < database/automacao_eleicoes.sql
+--
+-- Procedures disponíveis (definidas em automacao_eleicoes.sql):
+-- - sp_atualizar_status_eleicoes()
+-- - sp_auto_finalizar_eleicoes()
+-- - sp_finalizar_eleicao(p_id_eleicao, p_id_admin)
+-- - sp_gerenciar_eleicoes_automaticamente()
+-- - fn_verificar_periodo_eleicao(p_id_eleicao)
+-- - evt_gerenciar_eleicoes (event agendado a cada 1 hora)
+-- =====================================================
+
 DELIMITER $$
---
--- Procedures
---
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_atualizar_status_eleicoes` ()   BEGIN
-    DECLARE v_eleicoes_atualizadas INT DEFAULT 0;
 
-    -- Atualizar para 'votacao_aberta'
-    UPDATE ELEICAO
-    SET status = 'votacao_aberta'
-    WHERE status = 'candidatura_aberta'
-      AND NOW() >= data_inicio_votacao
-      AND NOW() < data_fim_votacao;
-
-    SET v_eleicoes_atualizadas = ROW_COUNT();
-
-    -- Log de mudanças
-    IF v_eleicoes_atualizadas > 0 THEN
-        INSERT INTO AUDITORIA (id_admin, operacao, descricao, ip_origem, data_hora)
-        VALUES (
-            1,
-            'UPDATE',
-            CONCAT(v_eleicoes_atualizadas, ' eleição(ões) mudou(aram) para votacao_aberta automaticamente'),
-            '127.0.0.1',
-            NOW()
-        );
-    END IF;
-
-    -- Marcar eleições para finalização
-    UPDATE ELEICAO
-    SET status = 'aguardando_finalizacao'
-    WHERE status = 'votacao_aberta'
-      AND NOW() >= data_fim_votacao;
-
-    SET v_eleicoes_atualizadas = ROW_COUNT();
-
-    IF v_eleicoes_atualizadas > 0 THEN
-        INSERT INTO AUDITORIA (id_admin, operacao, descricao, ip_origem, data_hora)
-        VALUES (
-            1,
-            'UPDATE',
-            CONCAT(v_eleicoes_atualizadas, ' eleição(ões) finalizou(aram) votação automaticamente'),
-            '127.0.0.1',
-            NOW()
-        );
-    END IF;
-
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auto_finalizar_eleicoes` ()   BEGIN
-    DECLARE v_id_eleicao INT;
-    DECLARE v_done INT DEFAULT FALSE;
-
-    DECLARE cur_eleicoes CURSOR FOR
-        SELECT id_eleicao
-        FROM ELEICAO
-        WHERE status = 'aguardando_finalizacao';
-
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = TRUE;
-
-    OPEN cur_eleicoes;
-
-    read_loop: LOOP
-        FETCH cur_eleicoes INTO v_id_eleicao;
-
-        IF v_done THEN
-            LEAVE read_loop;
-        END IF;
-
-        CALL sp_finalizar_eleicao(v_id_eleicao, 1);
-
-    END LOOP;
-
-    CLOSE cur_eleicoes;
-
-END$$
-
+-- Manter apenas sp_finalizar_eleicao pois é referenciada por outras SPs
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_finalizar_eleicao` (IN `p_id_eleicao` INT, IN `p_id_admin` INT)   BEGIN
     DECLARE v_total_aptos INT DEFAULT 0;
     DECLARE v_total_votantes INT DEFAULT 0;
@@ -213,48 +157,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_finalizar_eleicao` (IN `p_id_ele
     );
 
     COMMIT;
-END$$
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_gerenciar_eleicoes_automaticamente` ()   BEGIN
-    CALL sp_atualizar_status_eleicoes();
-    CALL sp_auto_finalizar_eleicoes();
-END$$
-
---
--- Functions
---
-CREATE DEFINER=`root`@`localhost` FUNCTION `fn_verificar_periodo_eleicao` (`p_id_eleicao` INT) RETURNS VARCHAR(20) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci DETERMINISTIC BEGIN
-    DECLARE v_inicio_candidatura DATETIME;
-    DECLARE v_fim_candidatura DATETIME;
-    DECLARE v_inicio_votacao DATETIME;
-    DECLARE v_fim_votacao DATETIME;
-    DECLARE v_agora DATETIME;
-
-    SET v_agora = NOW();
-
-    SELECT
-        data_inicio_candidatura,
-        data_fim_candidatura,
-        data_inicio_votacao,
-        data_fim_votacao
-    INTO
-        v_inicio_candidatura,
-        v_fim_candidatura,
-        v_inicio_votacao,
-        v_fim_votacao
-    FROM ELEICAO
-    WHERE id_eleicao = p_id_eleicao;
-
-    IF v_agora < v_inicio_candidatura THEN
-        RETURN 'nao_iniciada';
-    ELSEIF v_agora >= v_inicio_candidatura AND v_agora < v_fim_candidatura THEN
-        RETURN 'candidatura';
-    ELSEIF v_agora >= v_inicio_votacao AND v_agora < v_fim_votacao THEN
-        RETURN 'votacao';
-    ELSE
-        RETURN 'encerrada';
-    END IF;
-
 END$$
 
 DELIMITER ;
@@ -886,15 +788,13 @@ ALTER TABLE `voto`
   ADD CONSTRAINT `fk_voto_candidatura` FOREIGN KEY (`id_candidatura`) REFERENCES `candidatura` (`id_candidatura`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_voto_eleicao` FOREIGN KEY (`id_eleicao`) REFERENCES `eleicao` (`id_eleicao`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-DELIMITER $$
---
--- Events
---
-CREATE DEFINER=`root`@`localhost` EVENT `evt_gerenciar_eleicoes` ON SCHEDULE EVERY 1 HOUR STARTS '2025-11-21 17:51:29' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
-    CALL sp_gerenciar_eleicoes_automaticamente();
-END$$
+-- =====================================================
+-- EVENTS
+-- =====================================================
+-- O evento evt_gerenciar_eleicoes foi movido para automacao_eleicoes.sql
+-- Execute o script de automação após importar este arquivo.
+-- =====================================================
 
-DELIMITER ;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

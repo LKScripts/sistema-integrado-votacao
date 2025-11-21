@@ -56,7 +56,9 @@ sistema-integrado-votacao/
 │   ├── logs/           # Logs do sistema
 │   └── uploads/        # Uploads de usuários
 ├── database/           # Scripts SQL
-│   └── siv_db.sql      # Schema do banco
+│   ├── siv_db.sql               # Schema principal (tabelas, views, triggers)
+│   ├── add_constraints.sql       # Constraints CHECK
+│   └── automacao_eleicoes.sql    # Procedures, functions e events
 ├── docs/               # Documentação
 └── src/                # Código fonte (futuro)
 ```
@@ -89,19 +91,42 @@ git clone https://github.com/seu-usuario/sistema-integrado-votacao.git
 cd sistema-integrado-votacao
 ```
 
-2. Configure o banco de dados:
+2. Configure o banco de dados em 3 etapas:
 ```bash
-mysql -u root -p < database/siv_db.sql
+# Passo 1: Importar estrutura base (tabelas, views, triggers)
+mysql -u root -p -P 3307 < database/siv_db.sql
+
+# Passo 2: Adicionar constraints CHECK
+mysql -u root -p -P 3307 < database/add_constraints.sql
+
+# Passo 3: Configurar automação de eleições (procedures, functions, events)
+mysql -u root -p -P 3307 < database/automacao_eleicoes.sql
 ```
+
+**Nota:** A porta 3307 é para XAMPP. Se estiver usando MySQL padrão, remova `-P 3307`.
 
 3. Configure as credenciais do banco em `config/conexao.php`
 
 4. Inicie o servidor PHP (apontando para a pasta public):
 ```bash
+# Opção 1: Servidor embutido do PHP
 php -S localhost:8000 -t public
+
+# Opção 2: XAMPP - copie o projeto para htdocs e acesse:
+# http://localhost/sistema-integrado-votacao/public
 ```
 
 5. Acesse no navegador: `http://localhost:8000`
+
+### Credenciais Padrão
+
+**Administrador:**
+- Email: `admin@fatec.sp.gov.br`
+- Senha: `password`
+
+**Aluno de Teste:**
+- Email: `joao.silva@fatec.sp.gov.br`
+- Senha: `password`
 
 ### Convenções de Código
 
