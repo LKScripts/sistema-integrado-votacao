@@ -1,6 +1,7 @@
 <?php
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
+require_once '../../../config/automacao_eleicoes.php';
 
 // Verifica se é aluno logado
 verificarAluno();
@@ -14,17 +15,8 @@ $semestre = $usuario['semestre'];
 $erro = "";
 $inscricao_sucesso = false;
 
-// Buscar eleição ativa para candidatura
-$stmtEleicao = $conn->prepare("
-    SELECT id_eleicao, data_inicio_candidatura, data_fim_candidatura, status
-    FROM ELEICAO
-    WHERE curso = ? AND semestre = ?
-    AND status = 'candidatura_aberta'
-    AND CURDATE() BETWEEN data_inicio_candidatura AND data_fim_candidatura
-    LIMIT 1
-");
-$stmtEleicao->execute([$curso, $semestre]);
-$eleicao = $stmtEleicao->fetch();
+// Buscar eleição ativa para candidatura (COM VERIFICAÇÃO AUTOMÁTICA)
+$eleicao = buscarEleicaoAtivaComVerificacao($curso, $semestre, 'candidatura');
 
 if (!$eleicao) {
     $erro = "Não há eleição aberta para candidatura no momento para seu curso e semestre.";
@@ -36,7 +28,12 @@ $id_eleicao = $eleicao['id_eleicao'] ?? null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $id_eleicao) {
     $proposta = trim($_POST['qualidades'] ?? '');
 
-    if (strlen($proposta) < 10) {
+    // VERIFICAÇÃO EXTRA: Garantir que período de candidatura ainda está aberto
+    $verificacao = verificarPeriodoCandidatura($id_eleicao);
+
+    if (!$verificacao['valido']) {
+        $erro = $verificacao['mensagem'];
+    } elseif (strlen($proposta) < 10) {
         $erro = "A proposta deve ter pelo menos 10 caracteres.";
     } else {
         // Verificar se já se candidatou nesta eleição

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 17, 2025 at 09:06 PM
+-- Generation Time: Nov 21, 2025 at 09:52 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,37 +20,93 @@ SET time_zone = "+00:00";
 --
 -- Database: `siv_db`
 --
--- ===============================================
--- IMPORTANTE: CONSTRAINTS CHECK
--- ===============================================
--- Este dump foi gerado pelo phpMyAdmin, que NÃO exporta constraints CHECK.
--- As constraints CHECK estão implementadas no banco de dados original, mas
--- precisam ser adicionadas manualmente após importar este arquivo.
---
--- Para adicionar as constraints CHECK após importação, execute:
---   database/add_constraints.sql
---
--- Ou execute manualmente os comandos ALTER TABLE disponíveis nesse arquivo.
---
--- Constraints CHECK implementadas:
---   - ALUNO: chk_semestre (semestre BETWEEN 1 AND 6)
---   - ELEICAO: chk_semestre_eleicao, chk_datas_candidatura,
---              chk_datas_votacao, chk_ordem_fases
---   - RESULTADO: chk_percentual (percentual_participacao BETWEEN 0 AND 100)
--- ===============================================
 
 DELIMITER $$
 --
 -- Procedures
 --
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_atualizar_status_eleicoes` ()   BEGIN
+    DECLARE v_eleicoes_atualizadas INT DEFAULT 0;
+
+    -- Atualizar para 'votacao_aberta'
+    UPDATE ELEICAO
+    SET status = 'votacao_aberta'
+    WHERE status = 'candidatura_aberta'
+      AND NOW() >= data_inicio_votacao
+      AND NOW() < data_fim_votacao;
+
+    SET v_eleicoes_atualizadas = ROW_COUNT();
+
+    -- Log de mudanças
+    IF v_eleicoes_atualizadas > 0 THEN
+        INSERT INTO AUDITORIA (id_admin, operacao, descricao, ip_origem, data_hora)
+        VALUES (
+            1,
+            'UPDATE',
+            CONCAT(v_eleicoes_atualizadas, ' eleição(ões) mudou(aram) para votacao_aberta automaticamente'),
+            '127.0.0.1',
+            NOW()
+        );
+    END IF;
+
+    -- Marcar eleições para finalização
+    UPDATE ELEICAO
+    SET status = 'aguardando_finalizacao'
+    WHERE status = 'votacao_aberta'
+      AND NOW() >= data_fim_votacao;
+
+    SET v_eleicoes_atualizadas = ROW_COUNT();
+
+    IF v_eleicoes_atualizadas > 0 THEN
+        INSERT INTO AUDITORIA (id_admin, operacao, descricao, ip_origem, data_hora)
+        VALUES (
+            1,
+            'UPDATE',
+            CONCAT(v_eleicoes_atualizadas, ' eleição(ões) finalizou(aram) votação automaticamente'),
+            '127.0.0.1',
+            NOW()
+        );
+    END IF;
+
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_auto_finalizar_eleicoes` ()   BEGIN
+    DECLARE v_id_eleicao INT;
+    DECLARE v_done INT DEFAULT FALSE;
+
+    DECLARE cur_eleicoes CURSOR FOR
+        SELECT id_eleicao
+        FROM ELEICAO
+        WHERE status = 'aguardando_finalizacao';
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = TRUE;
+
+    OPEN cur_eleicoes;
+
+    read_loop: LOOP
+        FETCH cur_eleicoes INTO v_id_eleicao;
+
+        IF v_done THEN
+            LEAVE read_loop;
+        END IF;
+
+        CALL sp_finalizar_eleicao(v_id_eleicao, 1);
+
+    END LOOP;
+
+    CLOSE cur_eleicoes;
+
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_finalizar_eleicao` (IN `p_id_eleicao` INT, IN `p_id_admin` INT)   BEGIN
-    DECLARE v_total_aptos INT;
-    DECLARE v_total_votantes INT;
-    DECLARE v_id_representante INT;
-    DECLARE v_votos_representante INT;
-    DECLARE v_id_suplente INT;
-    DECLARE v_votos_suplente INT;
-    DECLARE v_percentual DECIMAL(5,2);
+    DECLARE v_total_aptos INT DEFAULT 0;
+    DECLARE v_total_votantes INT DEFAULT 0;
+    DECLARE v_id_representante INT DEFAULT NULL;
+    DECLARE v_votos_representante INT DEFAULT 0;
+    DECLARE v_id_suplente INT DEFAULT NULL;
+    DECLARE v_votos_suplente INT DEFAULT 0;
+    DECLARE v_percentual DECIMAL(5,2) DEFAULT 0;
+    DECLARE v_count_candidatos INT DEFAULT 0;
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -71,33 +127,43 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_finalizar_eleicao` (IN `p_id_ele
     SELECT COUNT(*) INTO v_total_votantes
     FROM VOTO WHERE id_eleicao = p_id_eleicao;
 
-    -- CORREÇÃO: Calcular percentual com proteção contra divisão por zero
+    -- Calcular percentual
     SET v_percentual = IF(v_total_aptos > 0,
                           (v_total_votantes / v_total_aptos) * 100,
                           0);
 
-    -- Obter representante (mais votado)
-    SELECT c.id_candidatura, COUNT(v.id_voto)
-    INTO v_id_representante, v_votos_representante
-    FROM CANDIDATURA c
-    LEFT JOIN VOTO v ON c.id_candidatura = v.id_candidatura
-    WHERE c.id_eleicao = p_id_eleicao
-      AND c.status_validacao = 'deferido'
-    GROUP BY c.id_candidatura
-    ORDER BY COUNT(v.id_voto) DESC
-    LIMIT 1;
+    -- Verificar se existem candidatos deferidos
+    SELECT COUNT(*) INTO v_count_candidatos
+    FROM CANDIDATURA
+    WHERE id_eleicao = p_id_eleicao
+      AND status_validacao = 'deferido';
 
-    -- Obter suplente (segundo mais votado)
-    SELECT c.id_candidatura, COUNT(v.id_voto)
-    INTO v_id_suplente, v_votos_suplente
-    FROM CANDIDATURA c
-    LEFT JOIN VOTO v ON c.id_candidatura = v.id_candidatura
-    WHERE c.id_eleicao = p_id_eleicao
-      AND c.status_validacao = 'deferido'
-      AND c.id_candidatura != v_id_representante
-    GROUP BY c.id_candidatura
-    ORDER BY COUNT(v.id_voto) DESC
-    LIMIT 1;
+    -- Obter representante apenas se houver candidatos
+    IF v_count_candidatos > 0 THEN
+        SELECT c.id_candidatura, IFNULL(COUNT(v.id_voto), 0)
+        INTO v_id_representante, v_votos_representante
+        FROM CANDIDATURA c
+        LEFT JOIN VOTO v ON c.id_candidatura = v.id_candidatura
+        WHERE c.id_eleicao = p_id_eleicao
+          AND c.status_validacao = 'deferido'
+        GROUP BY c.id_candidatura
+        ORDER BY COUNT(v.id_voto) DESC
+        LIMIT 1;
+
+        -- Obter suplente se houver mais de 1 candidato
+        IF v_count_candidatos > 1 THEN
+            SELECT c.id_candidatura, IFNULL(COUNT(v.id_voto), 0)
+            INTO v_id_suplente, v_votos_suplente
+            FROM CANDIDATURA c
+            LEFT JOIN VOTO v ON c.id_candidatura = v.id_candidatura
+            WHERE c.id_eleicao = p_id_eleicao
+              AND c.status_validacao = 'deferido'
+              AND c.id_candidatura != v_id_representante
+            GROUP BY c.id_candidatura
+            ORDER BY COUNT(v.id_voto) DESC
+            LIMIT 1;
+        END IF;
+    END IF;
 
     -- Inserir resultado
     INSERT INTO RESULTADO (
@@ -133,16 +199,62 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_finalizar_eleicao` (IN `p_id_ele
         id_eleicao,
         tabela,
         operacao,
-        descricao
+        descricao,
+        ip_origem,
+        data_hora
     ) VALUES (
         p_id_admin,
         p_id_eleicao,
         'ELEICAO',
         'UPDATE',
-        CONCAT('Eleição finalizada - ID: ', p_id_eleicao)
+        CONCAT('Eleição ID ', p_id_eleicao, ' finalizada automaticamente'),
+        '127.0.0.1',
+        NOW()
     );
 
     COMMIT;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_gerenciar_eleicoes_automaticamente` ()   BEGIN
+    CALL sp_atualizar_status_eleicoes();
+    CALL sp_auto_finalizar_eleicoes();
+END$$
+
+--
+-- Functions
+--
+CREATE DEFINER=`root`@`localhost` FUNCTION `fn_verificar_periodo_eleicao` (`p_id_eleicao` INT) RETURNS VARCHAR(20) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci DETERMINISTIC BEGIN
+    DECLARE v_inicio_candidatura DATETIME;
+    DECLARE v_fim_candidatura DATETIME;
+    DECLARE v_inicio_votacao DATETIME;
+    DECLARE v_fim_votacao DATETIME;
+    DECLARE v_agora DATETIME;
+
+    SET v_agora = NOW();
+
+    SELECT
+        data_inicio_candidatura,
+        data_fim_candidatura,
+        data_inicio_votacao,
+        data_fim_votacao
+    INTO
+        v_inicio_candidatura,
+        v_fim_candidatura,
+        v_inicio_votacao,
+        v_fim_votacao
+    FROM ELEICAO
+    WHERE id_eleicao = p_id_eleicao;
+
+    IF v_agora < v_inicio_candidatura THEN
+        RETURN 'nao_iniciada';
+    ELSEIF v_agora >= v_inicio_candidatura AND v_agora < v_fim_candidatura THEN
+        RETURN 'candidatura';
+    ELSEIF v_agora >= v_inicio_votacao AND v_agora < v_fim_votacao THEN
+        RETURN 'votacao';
+    ELSE
+        RETURN 'encerrada';
+    END IF;
+
 END$$
 
 DELIMITER ;
@@ -168,7 +280,7 @@ CREATE TABLE `administrador` (
 --
 
 INSERT INTO `administrador` (`id_admin`, `nome_completo`, `email_corporativo`, `senha_hash`, `data_cadastro`, `ultimo_acesso`, `ativo`) VALUES
-(1, 'Administrador Sistema', 'admin@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2025-11-07 20:52:28', NULL, 1);
+(1, 'Administrador Sistema', 'admin@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '2025-11-07 20:52:28', '2025-11-21 03:29:28', 1);
 
 -- --------------------------------------------------------
 
@@ -193,7 +305,7 @@ CREATE TABLE `aluno` (
 --
 
 INSERT INTO `aluno` (`id_aluno`, `ra`, `nome_completo`, `email_institucional`, `senha_hash`, `curso`, `semestre`, `data_cadastro`, `ultimo_acesso`) VALUES
-(1, '20240001', 'João da Silva', 'joao.silva@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, '2025-11-07 20:52:28', NULL),
+(1, '20240001', 'João da Silva', 'joao.silva@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, '2025-11-07 20:52:28', '2025-11-21 02:53:17'),
 (2, '20240002', 'Maria Santos', 'maria.santos@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, '2025-11-07 20:52:28', NULL),
 (3, '20240003', 'Pedro Oliveira', 'pedro.oliveira@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, '2025-11-07 20:52:28', NULL),
 (4, '20240004', 'Ana Costa', 'ana.costa@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, '2025-11-07 20:52:28', NULL),
@@ -245,6 +357,17 @@ CREATE TABLE `auditoria` (
   `ip_origem` varchar(45) DEFAULT NULL,
   `data_hora` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `auditoria`
+--
+
+INSERT INTO `auditoria` (`id_auditoria`, `id_admin`, `id_eleicao`, `tabela`, `operacao`, `descricao`, `dados_anteriores`, `dados_novos`, `ip_origem`, `data_hora`) VALUES
+(1, 1, NULL, 'ADMINISTRADOR', 'LOGIN', 'Login realizado', NULL, NULL, '::1', '2025-11-20 14:42:06'),
+(2, 1, NULL, 'ADMINISTRADOR', 'LOGIN', 'Login realizado', NULL, NULL, '::1', '2025-11-21 03:29:28'),
+(3, 1, NULL, '', 'UPDATE', '1 eleição(ões) finalizou(aram) votação automaticamente', NULL, NULL, '127.0.0.1', '2025-11-21 17:57:30'),
+(4, 1, NULL, '', 'UPDATE', '1 eleição(ões) finalizou(aram) votação automaticamente', NULL, NULL, '127.0.0.1', '2025-11-21 20:14:20'),
+(5, 1, NULL, '', 'UPDATE', '1 eleição(ões) finalizou(aram) votação automaticamente', NULL, NULL, '127.0.0.1', '2025-11-21 20:37:42');
 
 -- --------------------------------------------------------
 
@@ -327,10 +450,17 @@ CREATE TABLE `eleicao` (
   `data_fim_candidatura` date NOT NULL,
   `data_inicio_votacao` date NOT NULL,
   `data_fim_votacao` date NOT NULL,
-  `status` enum('candidatura_aberta','votacao_aberta','encerrada') DEFAULT 'candidatura_aberta',
+  `status` enum('candidatura_aberta','votacao_aberta','aguardando_finalizacao','encerrada') DEFAULT 'candidatura_aberta',
   `data_criacao` timestamp NOT NULL DEFAULT current_timestamp(),
   `criado_por` int(11) NOT NULL
 ) ;
+
+--
+-- Dumping data for table `eleicao`
+--
+
+INSERT INTO `eleicao` (`id_eleicao`, `curso`, `semestre`, `data_inicio_candidatura`, `data_fim_candidatura`, `data_inicio_votacao`, `data_fim_votacao`, `status`, `data_criacao`, `criado_por`) VALUES
+(7, 'Teste Final', 3, '2025-11-01', '2025-11-06', '2025-11-07', '2025-11-20', '', '2025-11-21 20:37:36', 1);
 
 -- --------------------------------------------------------
 
@@ -341,7 +471,7 @@ CREATE TABLE `eleicao` (
 CREATE TABLE `resultado` (
   `id_resultado` int(11) NOT NULL,
   `id_eleicao` int(11) NOT NULL,
-  `id_representante` int(11) NOT NULL,
+  `id_representante` int(11) DEFAULT NULL,
   `id_suplente` int(11) DEFAULT NULL,
   `votos_representante` int(11) NOT NULL,
   `votos_suplente` int(11) DEFAULT NULL,
@@ -472,7 +602,7 @@ CREATE TABLE `v_contagem_votos` (
 ,`curso` varchar(100)
 ,`semestre` int(11)
 ,`total_votos` bigint(21)
-,`status_eleicao` enum('candidatura_aberta','votacao_aberta','encerrada')
+,`status_eleicao` enum('candidatura_aberta','votacao_aberta','aguardando_finalizacao','encerrada')
 );
 
 -- --------------------------------------------------------
@@ -485,7 +615,7 @@ CREATE TABLE `v_eleicoes_ativas` (
 `id_eleicao` int(11)
 ,`curso` varchar(100)
 ,`semestre` int(11)
-,`status` enum('candidatura_aberta','votacao_aberta','encerrada')
+,`status` enum('candidatura_aberta','votacao_aberta','aguardando_finalizacao','encerrada')
 ,`data_inicio_candidatura` date
 ,`data_fim_candidatura` date
 ,`data_inicio_votacao` date
@@ -680,7 +810,7 @@ ALTER TABLE `ata`
 -- AUTO_INCREMENT for table `auditoria`
 --
 ALTER TABLE `auditoria`
-  MODIFY `id_auditoria` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_auditoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `candidatura`
@@ -755,6 +885,16 @@ ALTER TABLE `voto`
   ADD CONSTRAINT `fk_voto_aluno` FOREIGN KEY (`id_aluno`) REFERENCES `aluno` (`id_aluno`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_voto_candidatura` FOREIGN KEY (`id_candidatura`) REFERENCES `candidatura` (`id_candidatura`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_voto_eleicao` FOREIGN KEY (`id_eleicao`) REFERENCES `eleicao` (`id_eleicao`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+DELIMITER $$
+--
+-- Events
+--
+CREATE DEFINER=`root`@`localhost` EVENT `evt_gerenciar_eleicoes` ON SCHEDULE EVERY 1 HOUR STARTS '2025-11-21 17:51:29' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+    CALL sp_gerenciar_eleicoes_automaticamente();
+END$$
+
+DELIMITER ;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

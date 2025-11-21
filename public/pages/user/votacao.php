@@ -1,6 +1,7 @@
 <?php
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
+require_once '../../../config/automacao_eleicoes.php';
 
 // Verifica se é aluno logado
 verificarAluno();
@@ -13,17 +14,8 @@ $semestre = $usuario['semestre'];
 $erro = "";
 $voto_confirmado = false;
 
-// Buscar eleição ativa para votação
-$stmtEleicao = $conn->prepare("
-    SELECT id_eleicao, status, data_inicio_votacao, data_fim_votacao
-    FROM ELEICAO
-    WHERE curso = ? AND semestre = ?
-    AND status = 'votacao_aberta'
-    AND CURDATE() BETWEEN data_inicio_votacao AND data_fim_votacao
-    LIMIT 1
-");
-$stmtEleicao->execute([$curso, $semestre]);
-$eleicao = $stmtEleicao->fetch();
+// Buscar eleição ativa para votação (COM VERIFICAÇÃO AUTOMÁTICA)
+$eleicao = buscarEleicaoAtivaComVerificacao($curso, $semestre, 'votacao');
 
 // Verificar se já votou
 $ja_votou = false;
@@ -37,18 +29,25 @@ if ($eleicao) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote']) && $eleicao && !$ja_votou) {
     $id_candidatura = intval($_POST['vote']);
 
-    // Inserir voto
-    $stmtVoto = $conn->prepare("
-        INSERT INTO VOTO (id_eleicao, id_aluno, id_candidatura, ip_votante)
-        VALUES (?, ?, ?, ?)
-    ");
-    $ip = $_SERVER['REMOTE_ADDR'];
+    // VERIFICAÇÃO EXTRA: Garantir que votação ainda está aberta (proteção contra formulários abertos após prazo)
+    $verificacao = verificarPeriodoVotacao($eleicao['id_eleicao']);
 
-    if ($stmtVoto->execute([$eleicao['id_eleicao'], $id_aluno, $id_candidatura, $ip])) {
-        $voto_confirmado = true;
-        $ja_votou = true;
+    if (!$verificacao['valido']) {
+        $erro = $verificacao['mensagem'];
     } else {
-        $erro = "Erro ao registrar voto. Tente novamente.";
+        // Inserir voto
+        $stmtVoto = $conn->prepare("
+            INSERT INTO VOTO (id_eleicao, id_aluno, id_candidatura, ip_votante)
+            VALUES (?, ?, ?, ?)
+        ");
+        $ip = $_SERVER['REMOTE_ADDR'];
+
+        if ($stmtVoto->execute([$eleicao['id_eleicao'], $id_aluno, $id_candidatura, $ip])) {
+            $voto_confirmado = true;
+            $ja_votou = true;
+        } else {
+            $erro = "Erro ao registrar voto. Tente novamente.";
+        }
     }
 }
 
