@@ -12,57 +12,101 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $senha = $_POST["senha"] ?? "";
     $confirma_senha = $_POST["confirma_senha"] ?? "";
     $curso = $_POST["curso"] ?? "";
-    $semestre = intval($_POST["semestre"] ?? 0);
+    $semestre = intval($_POST['semestre'] ?? 0);
 
-    // Validações
-    if (empty($nome) || empty($ra) || empty($email) || empty($senha) || empty($confirma_senha) || empty($curso) || $semestre < 1) {
-        $erro = "Todos os campos são obrigatórios!";
-    }
-    // Validar email institucional
-    elseif (!preg_match('/@fatec\.sp\.gov\.br$/i', $email)) {
-        $erro = "Use seu e-mail institucional da FATEC (@fatec.sp.gov.br)!";
-    }
-    // Validar senhas
-    elseif ($senha !== $confirma_senha) {
+    // Identificar tipo (admin ou aluno)
+    $is_admin = (
+        empty($ra) &&
+        empty($curso) &&
+        ($semestre === 0) &&
+        preg_match('/@cps\.sp\.gov\.br$/i', $email)
+    );
+
+    $is_aluno = (
+        !empty($ra) &&
+        !empty($curso) &&
+        $semestre >= 1 &&
+        preg_match('/@fatec\.sp\.gov\.br$/i', $email)
+    );
+
+    // Validações básicas comuns
+    if (empty($nome) || empty($email) || empty($senha) || empty($confirma_senha)) {
+        $erro = "Preencha os campos obrigatórios: nome, e-mail e senha.";
+    } elseif ($senha !== $confirma_senha) {
         $erro = "As senhas não coincidem!";
-    }
-    // Validar força da senha
-    elseif (strlen($senha) < 6) {
+    } elseif (strlen($senha) < 6) {
         $erro = "A senha deve ter pelo menos 6 caracteres!";
-    }
-    // Validar RA (apenas números)
-    elseif (!preg_match('/^\d+$/', $ra)) {
-        $erro = "O RA deve conter apenas números!";
-    }
-    else {
-        // Verificar se RA já existe
-        $stmtCheckRA = $conn->prepare("SELECT id_aluno FROM ALUNO WHERE ra = ?");
-        $stmtCheckRA->execute([$ra]);
-        if ($stmtCheckRA->fetch()) {
-            $erro = "Este RA já está cadastrado!";
-        } else {
-            // Verificar se email já existe
-            $stmtCheckEmail = $conn->prepare("SELECT id_aluno FROM ALUNO WHERE email_institucional = ?");
-            $stmtCheckEmail->execute([$email]);
-            if ($stmtCheckEmail->fetch()) {
-                $erro = "Este e-mail já está cadastrado!";
-            } else {
-                // Cadastrar aluno
-                try {
+    } elseif (!$is_admin && !$is_aluno) {
+        $erro = "Dados incompatíveis: para ALUNO use @fatec.sp.gov.br com RA/curso/semestre preenchidos; para ADMIN deixe RA/curso/semestre vazios e use @cps.sp.gov.br.";
+    } else {
+        // --------------------------------------------------
+        // CADASTRAR ADMINISTRADOR
+        // --------------------------------------------------
+        if ($is_admin) {
+            try {
+                // Verificar email duplicado na tabela ADMINISTRADOR
+                $stmtEmail = $conn->prepare("SELECT id_admin FROM ADMINISTRADOR WHERE email_corporativo = ?");
+                $stmtEmail->execute([$email]);
+
+                if ($stmtEmail->fetch()) {
+                    $erro = "Este e-mail já está cadastrado como administrador!";
+                } else {
                     $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
 
                     $stmtInsert = $conn->prepare("
-                        INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre)
-                        VALUES (?, ?, ?, ?, ?, ?)
+                        INSERT INTO ADMINISTRADOR (nome_completo, email_corporativo, senha_hash, ativo)
+                        VALUES (?, ?, ?, 1)
                     ");
 
-                    if ($stmtInsert->execute([$ra, $nome, $email, $senha_hash, $curso, $semestre])) {
+                    if ($stmtInsert->execute([$nome, $email, $senha_hash])) {
                         $sucesso = true;
                     } else {
-                        $erro = "Erro ao cadastrar. Tente novamente.";
+                        $erro = "Erro ao cadastrar administrador.";
+                    }
+                }
+            } catch (PDOException $e) {
+                $erro = "Erro no cadastro do administrador: " . $e->getMessage();
+            }
+        }
+
+        // --------------------------------------------------
+        // CADASTRAR ALUNO
+        // --------------------------------------------------
+        elseif ($is_aluno) {
+            // Validar RA numérico
+            if (!preg_match('/^\d+$/', $ra)) {
+                $erro = "O RA deve conter apenas números!";
+            } else {
+                try {
+                    // Verificar RA duplicado
+                    $stmtCheckRA = $conn->prepare("SELECT id_aluno FROM ALUNO WHERE ra = ?");
+                    $stmtCheckRA->execute([$ra]);
+                    if ($stmtCheckRA->fetch()) {
+                        $erro = "Este RA já está cadastrado!";
+                    } else {
+                        // Verificar email duplicado na tabela ALUNO
+                        $stmtCheckEmail = $conn->prepare("SELECT id_aluno FROM ALUNO WHERE email_institucional = ?");
+                        $stmtCheckEmail->execute([$email]);
+
+                        if ($stmtCheckEmail->fetch()) {
+                            $erro = "Este e-mail já está cadastrado!";
+                        } else {
+                            $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
+
+                            $stmtInsert = $conn->prepare("
+                                INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre)
+                                VALUES (?, ?, ?, ?, ?, ?)
+                            ");
+
+                            if ($stmtInsert->execute([$ra, $nome, $email, $senha_hash, $curso, $semestre])) {
+                                $sucesso = true;
+                            } else {
+                                $erro = "Erro ao cadastrar aluno.";
+                            }
+                        }
                     }
                 } catch (PDOException $e) {
-                    $erro = "Erro ao cadastrar: " . $e->getMessage();
+                    $erro = "Erro no cadastro do aluno: " . $e->getMessage();
                 }
             }
         }
@@ -112,9 +156,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <div class="callout info">
                     <div class="content">
                         <span>
-                            <strong>Cadastro de Aluno</strong><br>
-                            Use seu e-mail institucional da FATEC para criar sua conta.
-                            Após o cadastro, você poderá participar das eleições.
+                            <strong>Cadastro de Aluno / Administrador</strong><br>
+                            Para cadastrar como <strong>ALUNO</strong> use seu e-mail @fatec.sp.gov.br e preencha RA, curso e semestre.<br>
+                            Para cadastrar como <strong>ADMINISTRADOR</strong> deixe RA/curso/semestre vazios e utilize o e-mail @cps.sp.gov.br.
                         </span>
                     </div>
                 </div>
@@ -127,7 +171,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     </div>
                 <?php endif; ?>
 
-                <form method="POST">
+                <form method="POST" id="form-cadastro" novalidate>
                     <div class="input-group">
                         <label for="nome">Nome Completo</label>
                         <div class="input-field">
@@ -147,8 +191,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 <input type="text" id="ra" name="ra"
                                        placeholder="00000000"
                                        value="<?= htmlspecialchars($_POST['ra'] ?? '') ?>"
-                                       maxlength="20"
-                                       required>
+                                       maxlength="20">
                             </div>
                         </div>
 
@@ -156,7 +199,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             <label for="semestre">Semestre</label>
                             <div class="input-field">
                                 <i class="fas fa-calendar"></i>
-                                <select id="semestre" name="semestre" required>
+                                <select id="semestre" name="semestre">
                                     <option value="">Selecione</option>
                                     <?php for($i = 1; $i <= 6; $i++): ?>
                                         <option value="<?= $i ?>" <?= (isset($_POST['semestre']) && $_POST['semestre'] == $i) ? 'selected' : '' ?>>
@@ -172,7 +215,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         <label for="curso">Curso</label>
                         <div class="input-field">
                             <i class="fas fa-graduation-cap"></i>
-                            <select id="curso" name="curso" required>
+                            <select id="curso" name="curso">
                                 <option value="">Selecione seu curso</option>
                                 <option value="DSM" <?= (isset($_POST['curso']) && $_POST['curso'] == 'DSM') ? 'selected' : '' ?>>
                                     Desenvolvimento de Software Multiplataforma (DSM)
@@ -188,11 +231,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     </div>
 
                     <div class="input-group">
-                        <label for="email">Email Institucional</label>
+                        <label for="email">Email</label>
                         <div class="input-field">
                             <i class="fas fa-envelope"></i>
                             <input type="email" id="email" name="email"
-                                   placeholder="seu.nome@fatec.sp.gov.br"
+                                   placeholder="seu.nome@fatec.sp.gov.br ou @cps.sp.gov.br"
                                    value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
                                    required>
                         </div>
@@ -267,6 +310,36 @@ document.getElementById('confirma_senha')?.addEventListener('input', function() 
 document.getElementById('ra')?.addEventListener('input', function(e) {
     this.value = this.value.replace(/\D/g, '');
 });
+
+// Ajustar required dinamicamente (melhora UX)
+// Se email terminar em @cps.sp.gov.br => REMOVE required de RA/curso/semestre (admin)
+// Se email terminar em @fatec.sp.gov.br => ADICIONA required (aluno)
+function ajustarRequiredPorEmail() {
+    const email = (document.getElementById('email')?.value || '').toLowerCase();
+    const ra = document.getElementById('ra');
+    const curso = document.getElementById('curso');
+    const semestre = document.getElementById('semestre');
+
+    if (email.endsWith('@cps.sp.gov.br')) {
+        ra.removeAttribute('required');
+        curso.removeAttribute('required');
+        semestre.removeAttribute('required');
+    } else if (email.endsWith('@fatec.sp.gov.br')) {
+        ra.setAttribute('required', 'required');
+        curso.setAttribute('required', 'required');
+        semestre.setAttribute('required', 'required');
+    } else {
+        // domínio desconhecido: mantém sem required para RA/curso/semestre,
+        // mas o servidor validará e mostrará mensagem adequada.
+        ra.removeAttribute('required');
+        curso.removeAttribute('required');
+        semestre.removeAttribute('required');
+    }
+}
+
+document.getElementById('email')?.addEventListener('input', ajustarRequiredPorEmail);
+// Ao carregar a página, aplicar a regra se já houver valor
+window.addEventListener('load', ajustarRequiredPorEmail);
 </script>
 </body>
 </html>
