@@ -57,8 +57,11 @@ $sql = "
         c.data_inscricao,
         c.status_validacao,
         c.proposta,
+        c.foto_candidato,
+        c.justificativa_indeferimento,
         a.nome_completo,
         a.ra,
+        a.email_institucional,
         e.curso,
         e.semestre,
         e.id_eleicao
@@ -136,54 +139,127 @@ $candidaturas = $stmt->fetchAll();
         </nav>
     </header>
 
-    <div class="modal" id="edit-user-modal">
+    <?php if (!empty($mensagem)): ?>
+        <div class="modal feedback" style="display:block;">
+            <div class="content">
+                <a href="inscricoes.php" class="close">&times;</a>
+                <h3 class="title">Sucesso!</h3>
+                <div class="text">
+                    <p><?= htmlspecialchars($mensagem) ?></p>
+                </div>
+                <div class="modal-buttons">
+                    <a href="inscricoes.php" class="button primary">OK</a>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($erro)): ?>
+        <div class="modal feedback" style="display:block;">
+            <div class="content">
+                <a href="inscricoes.php" class="close">&times;</a>
+                <h3 class="title">Erro</h3>
+                <div class="text">
+                    <p><?= htmlspecialchars($erro) ?></p>
+                </div>
+                <div class="modal-buttons">
+                    <a href="inscricoes.php" class="button primary">OK</a>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php foreach ($candidaturas as $cand): ?>
+    <div class="modal" id="edit-user-modal-<?= $cand['id_candidatura'] ?>">
         <div class="content">
             <a href="#" class="close">&times;</a>
 
-            <h3 class="title">Perfil do Usuário</h3>
+            <h3 class="title">Validar Candidatura</h3>
 
             <div class="form-group">
-                <label for="userName">Nome Completo</label>
-                <input type="text" id="userName" value="Lucas Simões">
+                <label>Nome Completo</label>
+                <input type="text" value="<?= htmlspecialchars($cand['nome_completo']) ?>" readonly />
             </div>
 
             <div class="form-group">
-                <label for="">Curso</label>
-                <select id="">
-                    <option>Gestão Empresarial</option>
-                    <option selected>Desenvolvimento de Software</option>
-                    <option>Gestão da Produção Industrial</option>
-                </select>
+                <label>RA</label>
+                <input type="text" value="<?= htmlspecialchars($cand['ra']) ?>" readonly />
             </div>
 
             <div class="form-group">
-                <label for="u">Semestre</label>
-                <select id="">
-                    <option selected>1º Semestre</option>
-                    <option>2º Semestre</option>
-                    <option>3º Semestre</option>
-                    <option>4º Semestre</option>
-                    <option>5º Semestre</option>
-                    <option>6º Semestre</option>
-                </select>
+                <label>Email</label>
+                <input type="text" value="<?= htmlspecialchars($cand['email_institucional']) ?>" readonly />
             </div>
 
             <div class="form-group">
-                <label for="">Deferimento</label>
-                <select id="">
-                    <option>Deferido</option>
-                    <option selected>Indeferido</option>
-                    <option>Em análise</option>
-                </select>
+                <label>Curso</label>
+                <input type="text" value="<?= htmlspecialchars($cand['curso']) ?>" readonly />
             </div>
 
+            <div class="form-group">
+                <label>Semestre</label>
+                <input type="text" value="<?= $cand['semestre'] ?>º Semestre" readonly />
+            </div>
+
+            <div class="form-group">
+                <label>Proposta do Candidato</label>
+                <textarea readonly style="min-height: 100px;"><?= htmlspecialchars($cand['proposta']) ?></textarea>
+            </div>
+
+            <?php if (!empty($cand['foto_candidato'])): ?>
+            <div class="form-group">
+                <label>Foto do Candidato</label>
+                <img src="../../../storage/uploads/candidatos/<?= htmlspecialchars($cand['foto_candidato']) ?>"
+                     alt="Foto do candidato"
+                     style="max-width: 300px; max-height: 300px; border-radius: 8px; display: block; margin-top: 10px;" />
+            </div>
+            <?php endif; ?>
+
+            <div class="form-group">
+                <label>Status Atual</label>
+                <input type="text" value="<?= ucfirst($cand['status_validacao']) ?>" readonly />
+            </div>
+
+            <?php if ($cand['status_validacao'] === 'pendente'): ?>
+            <form method="POST" id="form-deferir-<?= $cand['id_candidatura'] ?>">
+                <input type="hidden" name="id_candidatura" value="<?= $cand['id_candidatura'] ?>" />
+                <input type="hidden" name="acao" value="deferir" />
+            </form>
+
+            <form method="POST" id="form-indeferir-<?= $cand['id_candidatura'] ?>">
+                <input type="hidden" name="id_candidatura" value="<?= $cand['id_candidatura'] ?>" />
+                <input type="hidden" name="acao" value="indeferir" />
+
+                <div class="form-group">
+                    <label for="justificativa-<?= $cand['id_candidatura'] ?>">Justificativa para Indeferimento</label>
+                    <textarea
+                        id="justificativa-<?= $cand['id_candidatura'] ?>"
+                        name="justificativa"
+                        placeholder="Digite o motivo do indeferimento..."
+                        style="min-height: 80px;"></textarea>
+                </div>
+            </form>
 
             <div class="modal-buttons">
                 <a href="#" class="button secondary">Cancelar</a>
-                <a href="#" class="button primary">Salvar Alterações</a>
+                <button type="button" onclick="document.getElementById('form-deferir-<?= $cand['id_candidatura'] ?>').submit();" class="button primary" style="background-color: #28a745;">Deferir</button>
+                <button type="button" onclick="if(document.getElementById('justificativa-<?= $cand['id_candidatura'] ?>').value.trim() === '') { alert('Por favor, informe a justificativa para indeferir.'); return false; } document.getElementById('form-indeferir-<?= $cand['id_candidatura'] ?>').submit();" class="button primary" style="background-color: #dc3545;">Indeferir</button>
             </div>
+            <?php else: ?>
+            <?php if ($cand['status_validacao'] === 'indeferido' && !empty($cand['justificativa_indeferimento'])): ?>
+            <div class="form-group">
+                <label>Justificativa do Indeferimento</label>
+                <textarea readonly style="min-height: 80px;"><?= htmlspecialchars($cand['justificativa_indeferimento']) ?></textarea>
+            </div>
+            <?php endif; ?>
+            <div class="modal-buttons">
+                <a href="#" class="button secondary">Fechar</a>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
+    <?php endforeach; ?>
+
 
     <main class="manage-applicants">
         <div class="container">
