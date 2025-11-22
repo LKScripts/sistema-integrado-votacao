@@ -360,9 +360,66 @@ CREATE TABLE `eleicao` (
 --
 -- Dumping data for table `eleicao`
 --
+-- IMPORTANTE: Use APENAS as siglas padronizadas:
+-- 'DSM' - Desenvolvimento de Software Multiplataforma
+-- 'GE' - Gestao Empresarial
+-- 'GPI' - Gestao da Producao Industrial
+--
 
-INSERT INTO `eleicao` (`id_eleicao`, `curso`, `semestre`, `data_inicio_candidatura`, `data_fim_candidatura`, `data_inicio_votacao`, `data_fim_votacao`, `status`, `data_criacao`, `criado_por`) VALUES
-(7, 'Teste Final', 3, '2025-11-01', '2025-11-06', '2025-11-07', '2025-11-20', '', '2025-11-21 20:37:36', 1);
+-- Padronizar cursos existentes para siglas
+UPDATE `eleicao` SET curso = 'DSM'
+WHERE curso IN (
+    'Desenvolvimento de Software Multiplataforma',
+    'desenvolvimento de software multiplataforma',
+    'DSM - Desenvolvimento de Software Multiplataforma',
+    'Desenv. Software Multiplataforma'
+);
+
+UPDATE `eleicao` SET curso = 'GE'
+WHERE curso IN (
+    'Gestão Empresarial',
+    'Gestao Empresarial',
+    'gestao empresarial',
+    'GESTAO EMPRESARIAL'
+);
+
+UPDATE `eleicao` SET curso = 'GPI'
+WHERE curso IN (
+    'Gestão da Produção Industrial',
+    'Gestao da Producao Industrial',
+    'gestao da producao industrial',
+    'GESTAO DA PRODUCAO INDUSTRIAL',
+    'Gestao Producao Industrial'
+);
+
+UPDATE `aluno` SET curso = 'DSM'
+WHERE curso IN (
+    'Desenvolvimento de Software Multiplataforma',
+    'desenvolvimento de software multiplataforma',
+    'DSM - Desenvolvimento de Software Multiplataforma',
+    'Desenv. Software Multiplataforma'
+);
+
+UPDATE `aluno` SET curso = 'GE'
+WHERE curso IN (
+    'Gestão Empresarial',
+    'Gestao Empresarial',
+    'gestao empresarial',
+    'GESTAO EMPRESARIAL'
+);
+
+UPDATE `aluno` SET curso = 'GPI'
+WHERE curso IN (
+    'Gestão da Produção Industrial',
+    'Gestao da Producao Industrial',
+    'gestao da producao industrial',
+    'GESTAO DA PRODUCAO INDUSTRIAL',
+    'Gestao Producao Industrial'
+);
+
+-- Exemplo de eleicao (ajuste as datas conforme necessario)
+-- INSERT INTO `eleicao` (`curso`, `semestre`, `data_inicio_candidatura`, `data_fim_candidatura`, `data_inicio_votacao`, `data_fim_votacao`, `status`, `criado_por`) VALUES
+-- ('DSM', 2, '2025-11-01', '2025-11-30', '2025-12-01', '2025-12-15', 'candidatura_aberta', 1);
 
 -- --------------------------------------------------------
 

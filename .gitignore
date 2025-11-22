@@ -1,1 +1,40 @@
-.vscode
+# IDEs e Editores
+.vscode/
+.idea/
+*.code-workspace
+
+# Uploads de Usuários
+storage/uploads/candidatos/*.jpg
+storage/uploads/candidatos/*.jpeg
+storage/uploads/candidatos/*.png
+storage/uploads/candidatos/*.gif
+storage/uploads/candidatos/*.webp
+
+# Manter apenas arquivo de segurança
+!storage/uploads/candidatos/.htaccess
+!storage/uploads/candidatos/.gitkeep
+
+# Configurações Sensíveis
+.env
+.env.local
+.env.production
+
+# Logs e Cache
+*.log
+storage/logs/
+storage/cache/
+temp/
+tmp/
+
+# Arquivos Temporários do Sistema
+Thumbs.db
+.DS_Store
+*.swp
+*.swo
+*~
+desktop.ini
+
+# Backups
+*.bak
+*.backup
+*.sql.backup

@@ -220,11 +220,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 <option value="DSM" <?= (isset($_POST['curso']) && $_POST['curso'] == 'DSM') ? 'selected' : '' ?>>
                                     Desenvolvimento de Software Multiplataforma (DSM)
                                 </option>
-                                <option value="Gestão Empresarial" <?= (isset($_POST['curso']) && $_POST['curso'] == 'Gestão Empresarial') ? 'selected' : '' ?>>
-                                    Gestão Empresarial
+                                <option value="GE" <?= (isset($_POST['curso']) && $_POST['curso'] == 'GE') ? 'selected' : '' ?>>
+                                    Gestão Empresarial (GE)
                                 </option>
-                                <option value="Gestão da Produção Industrial" <?= (isset($_POST['curso']) && $_POST['curso'] == 'Gestão da Produção Industrial') ? 'selected' : '' ?>>
-                                    Gestão da Produção Industrial
+                                <option value="GPI" <?= (isset($_POST['curso']) && $_POST['curso'] == 'GPI') ? 'selected' : '' ?>>
+                                    Gestão da Produção Industrial (GPI)
                                 </option>
                             </select>
                         </div>
