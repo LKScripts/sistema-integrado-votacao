@@ -1,6 +1,6 @@
-@import url("/assets/styles/base.css");
-@import url("/assets/styles/header-site.css");
-@import url("/assets/styles/footer-site.css");
+@import url("base.css");
+@import url("header-site.css");
+@import url("footer-site.css");
 
 /* Início estilização página inicial visitante (/pages/guest/index.html) */
 main.guest-home {
@@ -484,3 +484,67 @@ main.login .wrapper-form .input-field select:focus {
     }
 }
 /* Fim estilização página cadastro (/pages/guest/cadastro.php) */
+
+/* Início estilização de alertas */
+.alert {
+    position: relative;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
+}
+
+/* Alert Info (azul) */
+.alert.info {
+    color: #004085;
+    background-color: #cfe2ff;
+    border: 1px solid #b6d4fe;
+}
+
+/* Alert Success (verde) */
+.alert.success {
+    color: #0f5132;
+    background-color: #d1e7dd;
+    border: 1px solid #badbcc;
+}
+
+/* Alert Warning (amarelo/laranja) */
+.alert.warning {
+    color: #664d03;
+    background-color: #fff3cd;
+    border: 1px solid #ffecb5;
+}
+
+/* Alert Danger/Error (vermelho) */
+.alert.danger,
+.alert.error {
+    color: #842029;
+    background-color: #f8d7da;
+    border: 1px solid #f5c2c7;
+}
+
+/* Compatibilidade com classe antiga "callout" */
+.callout {
+    position: relative;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
+}
+
+.callout.info {
+    color: #004085;
+    background-color: #cfe2ff;
+    border: 1px solid #b6d4fe;
+}
+
+.callout.warning {
+    color: #664d03;
+    background-color: #fff3cd;
+    border: 1px solid #ffecb5;
+}
+
+.callout.success {
+    color: #0f5132;
+    background-color: #d1e7dd;
+    border: 1px solid #badbcc;
+}
+/* Fim estilização de alertas */

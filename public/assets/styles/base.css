@@ -1,6 +1,6 @@
 /* Importa recursos, reseta CSS, define variáveis e classes genéricas */
 
-@import url("/assets/styles/fonts.local.css");
+@import url("fonts.css");
 /* @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"); */
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css");
 
@@ -118,6 +118,7 @@ button {
     font-size: 2em;
 }
 
+/* Desabilitado - causa barra indesejada à esquerda
 .callout::before {
     content: "";
     position: absolute;
@@ -127,32 +128,37 @@ button {
     height: 100%;
 }
 
-.callout.info > div i {
-    color: var(--primary);
-}
 .callout.info::before {
     background: var(--primary);
+}
+
+.callout.success::before {
+    background: var(--bootstrap-success);
+}
+
+.callout.danger::before {
+    background: var(--bootstrap-danger);
+}
+
+.callout.warning::before {
+    background: var(--bootstrap-warning);
+}
+*/
+
+.callout.info > div i {
+    color: var(--primary);
 }
 
 .callout.success > div i {
     color: var(--bootstrap-success);
 }
-.callout.success::before {
-    background: var(--bootstrap-success);
-}
 
 .callout.danger > div i {
     color: var(--bootstrap-danger);
 }
-.callout.danger::before {
-    background: var(--bootstrap-danger);
-}
 
 .callout.warning > div i {
     color: var(--bootstrap-warning);
-}
-.callout.warning::before {
-    background: var(--bootstrap-warning);
 }
 
 .card-wrapper {

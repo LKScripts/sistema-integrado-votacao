@@ -1,6 +1,7 @@
-@import url("/assets/styles/base.css");
-@import url("/assets/styles/header-site.css");
-@import url("/assets/styles/footer-site.css");
+@import url("base.css");
+@import url("header-site.css");
+@import url("footer-site.css");
+
 /* Início estilização página inicial (/pages/admin/index.html) */
 main.dashboard {
     display: flex;
@@ -357,3 +358,23 @@ main.manage-reports .card-wrapper .card h1.title {
 }
 
 /* Fim estilização página de relatórios (/pages/admin/relatorios.html) */
+
+/* ========================================
+   SOBRESCRITA: Header azul para área admin
+   ======================================== */
+header.site .navbar {
+    background: linear-gradient(135deg, #0d1b48 0%, #1a2a6c 100%) !important;
+}
+
+header.site .navbar .links li a.active,
+header.site .navbar .links li a:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+header.site .navbar .actions a {
+    background-color: #005f73 !important;
+}
+
+header.site .navbar .actions a:hover {
+    background-color: #004654 !important;
+}
