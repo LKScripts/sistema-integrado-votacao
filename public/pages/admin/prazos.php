@@ -1,6 +1,7 @@
 <?php
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
+require_once '../../../config/csrf.php';
 
 // Verificar se é administrador
 verificarAdmin();
@@ -12,6 +13,8 @@ $mensagem = "";
 $tipo_mensagem = ""; // success | error
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // VALIDAR CSRF PRIMEIRO
+    validarCSRFOuMorrer("Token de segurança inválido. Recarregue a página e tente criar a eleição novamente.");
 
     $curso            = $_POST['curso'] ?? '';
     $semestre         = intval($_POST['semestre'] ?? 0);
@@ -188,6 +191,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <h1 class="title">Gerenciar Prazos</h1>
 
             <form class="form-deadline" method="POST">
+                <?= campoCSRF() ?>
 
                 <div class="input-group">
                     <label>Curso</label>

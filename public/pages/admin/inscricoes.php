@@ -1,6 +1,7 @@
 <?php
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
+require_once '../../../config/csrf.php';
 
 // Verifica se é administrador logado
 verificarAdmin();
@@ -13,6 +14,9 @@ $erro = "";
 
 // Processar validação de candidatura
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_candidatura'])) {
+    // VALIDAR CSRF PRIMEIRO
+    validarCSRFOuMorrer("Token de segurança inválido. Recarregue a página e tente validar novamente.");
+
     $id_candidatura = intval($_POST['id_candidatura']);
     $acao = $_POST['acao'] ?? '';
     $justificativa = trim($_POST['justificativa'] ?? '');
@@ -222,11 +226,13 @@ $candidaturas = $stmt->fetchAll();
 
             <?php if ($cand['status_validacao'] === 'pendente'): ?>
             <form method="POST" id="form-deferir-<?= $cand['id_candidatura'] ?>">
+                <?= campoCSRF() ?>
                 <input type="hidden" name="id_candidatura" value="<?= $cand['id_candidatura'] ?>" />
                 <input type="hidden" name="acao" value="deferir" />
             </form>
 
             <form method="POST" id="form-indeferir-<?= $cand['id_candidatura'] ?>">
+                <?= campoCSRF() ?>
                 <input type="hidden" name="id_candidatura" value="<?= $cand['id_candidatura'] ?>" />
                 <input type="hidden" name="acao" value="indeferir" />
 
