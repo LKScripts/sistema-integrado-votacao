@@ -2,6 +2,7 @@
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
 require_once '../../../config/csrf.php';
+require_once '../../../config/rate_limit.php';
 
 $erro = "";
 
@@ -11,8 +12,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $email = $_POST["email"] ?? "";
     $senha = $_POST["password"] ?? "";
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 
     if (!empty($email) && !empty($senha)) {
+
+        // ===== VERIFICAR RATE LIMITING =====
+        $bloqueio = verificarBloqueio($email, $ip);
+
+        if ($bloqueio['bloqueado']) {
+            $tempo = formatarTempoRestante($bloqueio['tempo_restante']);
+            $erro = "Muitas tentativas de login falhadas. Tente novamente em {$tempo}.";
+            error_log("Login bloqueado por rate limit - Email: {$email}, IP: {$ip}");
+        } else {
 
         // ===== LOGIN DE ADMINISTRADOR =====
         $stmtAdmin = $conn->prepare("
@@ -27,12 +38,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if ($admin) {
             // Verificar senha com password_verify
             if (password_verify($senha, $admin["senha_hash"])) {
+                // ===== LOGIN BEM-SUCEDIDO =====
+                // Limpar tentativas anteriores
+                limparTentativas($email, $ip);
+
+                // Registrar sucesso na tabela de tentativas
+                registrarTentativaLogin($email, $ip, true);
+
                 // Registrar login na auditoria
                 $stmtAudit = $conn->prepare("
                     INSERT INTO AUDITORIA (id_admin, tabela, operacao, descricao, ip_origem)
                     VALUES (?, 'ADMINISTRADOR', 'LOGIN', 'Login realizado', ?)
                 ");
-                $ip = $_SERVER['REMOTE_ADDR'];
                 $stmtAudit->execute([$admin["id_admin"], $ip]);
 
                 // Fazer login usando função da session.php
@@ -56,6 +73,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if ($aluno) {
             // Verificar senha com password_verify
             if (password_verify($senha, $aluno["senha_hash"])) {
+                // ===== LOGIN BEM-SUCEDIDO =====
+                // Limpar tentativas anteriores
+                limparTentativas($email, $ip);
+
+                // Registrar sucesso na tabela de tentativas
+                registrarTentativaLogin($email, $ip, true);
+
                 // Fazer login usando função da session.php
                 loginAluno(
                     $aluno["id_aluno"],
@@ -71,7 +95,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
 
+        // ===== LOGIN FALHOU =====
+        // Registrar tentativa falha
+        registrarTentativaLogin($email, $ip, false);
+
         $erro = "E-mail ou senha incorretos!";
+
+        } // Fecha o bloco do rate limiting (else do if bloqueado)
 
     } else {
         $erro = "Preencha todos os campos!";
@@ -87,13 +117,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <title>SIV - Sistema Integrado de Votações</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
-    <link rel="stylesheet" href="/assets/styles/guest.css">
     <link rel="stylesheet" href="../../assets/styles/guest.css">
-    <link rel="stylesheet" href="../../assets/styles/admin.css">
     <link rel="stylesheet" href="../../assets/styles/base.css">
     <link rel="stylesheet" href="../../assets/styles/fonts.css">
-    <link rel="stylesheet" href="../../assets/styles/footer-site.css">
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
+    <link rel="stylesheet" href="../../assets/styles/footer-site.css">
 </head>
 <body>
 <main class="login">
@@ -127,7 +155,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <label for="email">Email</label>
                     <div class="input-field">
                         <i class="fas fa-envelope"></i>
-                        <input type="email" id="email" name="email" placeholder="seu.email@fatec.sp.gov.br" required>
+                        <input type="email" id="email" name="email" placeholder="seu.email@fatec.sp.gov.br" autocomplete="email" required>
                     </div>
                 </div>
 
@@ -135,7 +163,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <label for="password">Senha</label>
                     <div class="input-field">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
+                        <input type="password" id="password" name="password" placeholder="Digite sua senha" autocomplete="current-password" required>
                     </div>
                 </div>
 
