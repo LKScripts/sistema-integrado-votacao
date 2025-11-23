@@ -2,6 +2,7 @@
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
 require_once '../../../config/automacao_eleicoes.php';
+require_once '../../../config/csrf.php';
 
 // Verifica se é aluno logado
 verificarAluno();
@@ -27,6 +28,9 @@ if ($eleicao) {
 
 // Processa o voto se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote']) && $eleicao && !$ja_votou) {
+    // VALIDAR CSRF PRIMEIRO
+    validarCSRFOuMorrer("Token de segurança inválido. Recarregue a página e tente votar novamente.");
+
     $id_candidatura = intval($_POST['vote']);
 
     // VERIFICAÇÃO EXTRA: Garantir que votação ainda está aberta (proteção contra formulários abertos após prazo)
@@ -178,6 +182,7 @@ if ($eleicao) {
                         </div>
                         <?php if (!$ja_votou): ?>
                             <form method="post" onsubmit="return confirm('Confirma seu voto em <?= htmlspecialchars($candidato['nome_completo']) ?>?');">
+                                <?= campoCSRF() ?>
                                 <input type="hidden" name="vote" value="<?= $candidato['id_candidatura'] ?>">
                                 <button type="submit" class="vote">
                                     <i class="fas fa-vote-yea"></i>

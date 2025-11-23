@@ -2,6 +2,7 @@
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
 require_once '../../../config/automacao_eleicoes.php';
+require_once '../../../config/csrf.php';
 
 // Verifica se é aluno logado
 verificarAluno();
@@ -42,6 +43,9 @@ if ($id_eleicao) {
 
 // Verifica se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $id_eleicao) {
+    // VALIDAR CSRF PRIMEIRO
+    validarCSRFOuMorrer("Token de segurança inválido. Recarregue a página e tente se inscrever novamente.");
+
     $proposta = trim($_POST['qualidades'] ?? '');
 
     // VERIFICAÇÃO EXTRA: Garantir que período de candidatura ainda está aberto
@@ -190,6 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $id_eleicao) {
                 <?php endif; ?>
 
                 <form class="form-application" method="POST" enctype="multipart/form-data">
+                    <?= campoCSRF() ?>
                     <div class="input-group">
                         <label for="nome">Nome do aluno</label>
                         <input id="nome" name="nome" type="text" value="<?= htmlspecialchars($nome) ?>" readonly />
