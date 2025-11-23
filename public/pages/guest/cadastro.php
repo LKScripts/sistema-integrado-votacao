@@ -1,11 +1,15 @@
 <?php
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
+require_once '../../../config/csrf.php';
 
 $erro = "";
 $sucesso = false;
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // VALIDAR CSRF PRIMEIRO
+    validarCSRFOuMorrer("Token de segurança inválido. Recarregue a página e tente cadastrar novamente.");
+
     $nome = trim($_POST["nome"] ?? "");
     $ra = trim($_POST["ra"] ?? "");
     $email = trim($_POST["email"] ?? "");
@@ -172,6 +176,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <?php endif; ?>
 
                 <form method="POST" id="form-cadastro" novalidate>
+                    <?= campoCSRF() ?>
                     <div class="input-group">
                         <label for="nome">Nome Completo</label>
                         <div class="input-field">

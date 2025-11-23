@@ -1,10 +1,14 @@
 <?php
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
+require_once '../../../config/csrf.php';
 
 $erro = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // VALIDAR CSRF PRIMEIRO
+    validarCSRFOuMorrer("Token de segurança inválido. Recarregue a página e tente fazer login novamente.");
+
     $email = $_POST["email"] ?? "";
     $senha = $_POST["password"] ?? "";
 
@@ -118,6 +122,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <?php endif; ?>
 
             <form method="POST">
+                <?= campoCSRF() ?>
                 <div class="input-group">
                     <label for="email">Email</label>
                     <div class="input-field">
