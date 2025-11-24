@@ -299,16 +299,20 @@ form[class^="form-"] .form-buttons .button {
     pointer-events: auto;
 }
 
-#edit-user-modal:target {
-    opacity: 1;
-    pointer-events: auto;
+#edit-user-modal:target,
+[id^="edit-user-modal-"]:target {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    display: flex !important;
 }
 
 .modal .content {
     position: relative;
     padding: 30px;
     width: 90%;
-    max-width: 500px;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
     background: white;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     border-radius: 15px;
@@ -345,9 +349,11 @@ form[class^="form-"] .form-buttons .button {
     cursor: pointer;
 }
 
-#edit-user-modal:target {
-    opacity: 1;
-    pointer-events: auto;
+#edit-user-modal:target,
+[id^="edit-user-modal-"]:target {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    display: flex !important;
 }
 
 .modal .form-group {
@@ -364,7 +370,8 @@ form[class^="form-"] .form-buttons .button {
 }
 
 .modal .form-group input,
-.modal .form-group select {
+.modal .form-group select,
+.modal .form-group textarea {
     width: 100%;
     padding: 12px 15px;
     border: 1px solid #ddd;
@@ -372,10 +379,17 @@ form[class^="form-"] .form-buttons .button {
     font-size: 1rem;
     transition: border-color 0.3s;
     background: white;
+    font-family: inherit;
+}
+
+.modal .form-group textarea {
+    min-height: 120px;
+    resize: vertical;
 }
 
 .modal .form-group input:focus,
-.modal .form-group select:focus {
+.modal .form-group select:focus,
+.modal .form-group textarea:focus {
     border-color: #005c6d;
     outline: none;
     box-shadow: 0 0 0 2px rgba(0, 92, 109, 0.2);
@@ -384,5 +398,7 @@ form[class^="form-"] .form-buttons .button {
 .modal .modal-buttons {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 15px;
+    margin-top: 25px;
+    flex-wrap: wrap;
 }
