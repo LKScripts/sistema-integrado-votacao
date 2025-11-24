@@ -50,10 +50,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_candidatura'])) {
     }
 }
 
-// Buscar candidaturas com filtros
+// Buscar candidaturas com filtros e paginação
 $filtro_curso = $_GET['curso'] ?? '';
 $filtro_semestre = $_GET['semestre'] ?? '';
 $filtro_nome = $_GET['nome'] ?? '';
+
+// Paginação
+$registros_por_pagina = 20;
+$pagina_atual = isset($_GET['pagina']) ? max(1, intval($_GET['pagina'])) : 1;
+$offset = ($pagina_atual - 1) * $registros_por_pagina;
+
+// Query para contar total de registros
+$sql_count = "
+    SELECT COUNT(*) as total
+    FROM CANDIDATURA c
+    JOIN ALUNO a ON c.id_aluno = a.id_aluno
+    JOIN ELEICAO e ON c.id_eleicao = e.id_eleicao
+    WHERE 1=1
+";
 
 $sql = "
     SELECT
@@ -76,31 +90,43 @@ $sql = "
 ";
 
 $params = [];
-$types = "";
 
-if (!empty($filtro_curso)) {
+if (!empty($filtro_curso) && $filtro_curso !== 'Todos os Cursos') {
     $sql .= " AND e.curso = ?";
+    $sql_count .= " AND e.curso = ?";
     $params[] = $filtro_curso;
-    $types .= "s";
 }
 
-if (!empty($filtro_semestre)) {
+if (!empty($filtro_semestre) && $filtro_semestre !== 'Todos Semestres') {
     $sql .= " AND e.semestre = ?";
+    $sql_count .= " AND e.semestre = ?";
     $params[] = intval($filtro_semestre);
-    $types .= "i";
 }
 
 if (!empty($filtro_nome)) {
     $sql .= " AND a.nome_completo LIKE ?";
+    $sql_count .= " AND a.nome_completo LIKE ?";
     $params[] = "%$filtro_nome%";
-    $types .= "s";
 }
 
-$sql .= " ORDER BY c.data_inscricao DESC";
+// Contar total de registros
+$stmt_count = $conn->prepare($sql_count);
+$stmt_count->execute($params);
+$total_registros = $stmt_count->fetch()['total'];
+$total_paginas = ceil($total_registros / $registros_por_pagina);
+
+// Buscar registros da página atual
+$sql .= " ORDER BY c.data_inscricao DESC LIMIT ? OFFSET ?";
+$params[] = $registros_por_pagina;
+$params[] = $offset;
 
 $stmt = $conn->prepare($sql);
 $stmt->execute($params);
 $candidaturas = $stmt->fetchAll();
+
+// Calcular range de registros exibidos
+$primeiro_registro = $total_registros > 0 ? $offset + 1 : 0;
+$ultimo_registro = min($offset + $registros_por_pagina, $total_registros);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -119,6 +145,14 @@ $candidaturas = $stmt->fetchAll();
     <link rel="stylesheet" href="../../assets/styles/fonts.css">
     <link rel="stylesheet" href="../../assets/styles/footer-site.css">
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
+    <style>
+        .form-filters .button.primary:hover {
+            background: #004654 !important;
+        }
+        .form-filters .button.secondary:hover {
+            background: #5a6268 !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -134,6 +168,7 @@ $candidaturas = $stmt->fetchAll();
             <li><a href="../../pages/admin/inscricoes.php"class="active">Inscrições</a></li>
             <li><a href="../../pages/admin/prazos.php" >Prazos</a></li>
             <li><a href="../../pages/admin/relatorios.php">Relatórios</a></li>
+            <li><a href="../../pages/admin/cadastro-admin.php">Cadastro Admin</a></li>
             </ul>
 
             <div class="actions">
@@ -207,7 +242,7 @@ $candidaturas = $stmt->fetchAll();
 
             <div class="form-group">
                 <label>Proposta do Candidato</label>
-                <textarea readonly style="min-height: 100px;"><?= htmlspecialchars($cand['proposta']) ?></textarea>
+                <textarea readonly><?= htmlspecialchars($cand['proposta']) ?></textarea>
             </div>
 
             <?php if (!empty($cand['foto_candidato'])): ?>
@@ -241,8 +276,7 @@ $candidaturas = $stmt->fetchAll();
                     <textarea
                         id="justificativa-<?= $cand['id_candidatura'] ?>"
                         name="justificativa"
-                        placeholder="Digite o motivo do indeferimento..."
-                        style="min-height: 80px;"></textarea>
+                        placeholder="Digite o motivo do indeferimento..."></textarea>
                 </div>
             </form>
 
@@ -255,7 +289,7 @@ $candidaturas = $stmt->fetchAll();
             <?php if ($cand['status_validacao'] === 'indeferido' && !empty($cand['justificativa_indeferimento'])): ?>
             <div class="form-group">
                 <label>Justificativa do Indeferimento</label>
-                <textarea readonly style="min-height: 80px;"><?= htmlspecialchars($cand['justificativa_indeferimento']) ?></textarea>
+                <textarea readonly><?= htmlspecialchars($cand['justificativa_indeferimento']) ?></textarea>
             </div>
             <?php endif; ?>
             <div class="modal-buttons">
@@ -270,22 +304,21 @@ $candidaturas = $stmt->fetchAll();
     <main class="manage-applicants">
         <div class="container">
             <h1>Gerenciar Inscrições</h1>
-            <form class="form-filters">
+            <form class="form-filters" method="GET" action="">
                 <div class="column">
-                    <label for="name">Nome do aluno</label>
-                    <input id="applicant-name" type="text" />
+                    <label for="nome">Nome do aluno</label>
+                    <input id="nome" name="nome" type="text" value="<?= htmlspecialchars($filtro_nome) ?>" placeholder="Digite o nome do aluno" />
                 </div>
 
                 <div class="column half">
                     <div class="input-group">
-                        <label for="course">Curso</label>
+                        <label for="curso">Curso</label>
                         <div class="wrapper-select">
-                            <select id="course">
-                                <option value="" selected>Selecione uma opção</option>
-                                <option value="1">Desenvolvimento de Software Multiplataforma</option>
-                                <option value="2">Gestão Empresarial</option>
-                                <option value="3">Gestão da Produção Industrial</option>
-                                <option value="4">Todos os Cursos</option>
+                            <select id="curso" name="curso">
+                                <option value="">Todos os Cursos</option>
+                                <option value="DSM" <?= $filtro_curso === 'DSM' ? 'selected' : '' ?>>DSM - Desenvolvimento de Software Multiplataforma</option>
+                                <option value="GE" <?= $filtro_curso === 'GE' ? 'selected' : '' ?>>GE - Gestão Empresarial</option>
+                                <option value="GPI" <?= $filtro_curso === 'GPI' ? 'selected' : '' ?>>GPI - Gestão da Produção Industrial</option>
                             </select>
                         </div>
                     </div>
@@ -293,22 +326,32 @@ $candidaturas = $stmt->fetchAll();
 
                 <div class="column half">
                     <div class="input-group">
-                        <label for="semester">Semestre</label>
+                        <label for="semestre">Semestre</label>
                         <div class="wrapper-select">
-                            <select id="semester">
-                                <option value="" selected>Selecione uma opção</option>
-                                <option value="1">1º Semestre</option>
-                                <option value="2">2º Semestre</option>
-                                <option value="3">3º Semestre</option>
-                                <option value="4">4º Semestre</option>
-                                <option value="5">5º Semestre</option>
-                                <option value="6">6º Semestre</option>
-                                <option value="7">Todos Semestres</option>
+                            <select id="semestre" name="semestre">
+                                <option value="">Todos os Semestres</option>
+                                <option value="1" <?= $filtro_semestre === '1' ? 'selected' : '' ?>>1º Semestre</option>
+                                <option value="2" <?= $filtro_semestre === '2' ? 'selected' : '' ?>>2º Semestre</option>
+                                <option value="3" <?= $filtro_semestre === '3' ? 'selected' : '' ?>>3º Semestre</option>
+                                <option value="4" <?= $filtro_semestre === '4' ? 'selected' : '' ?>>4º Semestre</option>
+                                <option value="5" <?= $filtro_semestre === '5' ? 'selected' : '' ?>>5º Semestre</option>
+                                <option value="6" <?= $filtro_semestre === '6' ? 'selected' : '' ?>>6º Semestre</option>
                             </select>
                         </div>
                     </div>
+                </div>
+
+                <div style="display: flex; flex-direction: row; gap: 10px; align-items: flex-end; margin-top: 15px;">
+                    <button type="submit" class="button primary" style="padding: 12px 30px; background: #005f73; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.3s;">
+                        Aplicar Filtros
+                    </button>
+                    <a href="inscricoes.php" class="button secondary" style="padding: 12px 30px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; transition: background 0.3s;">
+                        Limpar
+                    </a>
                 </div>
             </form>
+
+            <div style="width: 100%; height: 2px; background-color: #999; margin: 25px 0;"></div>
 
             <section class="list-applicants">
                 <table>
@@ -351,46 +394,89 @@ $candidaturas = $stmt->fetchAll();
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="6" style="text-align: center; padding: 20px;">
-                                    Nenhuma candidatura encontrada.
+                                <td colspan="6" style="text-align: center; padding: 40px 20px;">
+                                    <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 20px; display: inline-block;">
+                                        <i class="fa-solid fa-info-circle" style="color: #856404; font-size: 1.5rem; margin-bottom: 10px;"></i>
+                                        <p style="color: #856404; margin: 10px 0 0 0; font-weight: 500;">
+                                            Nenhuma candidatura encontrada.
+                                        </p>
+                                        <?php if (!empty($filtro_curso) || !empty($filtro_semestre) || !empty($filtro_nome)): ?>
+                                        <p style="color: #856404; margin: 15px 0 0 0; font-size: 0.9rem;">
+                                            Tente ajustar os filtros ou <a href="inscricoes.php" style="display: inline-block; background: #005f73; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; margin-top: 5px; transition: background 0.3s;">limpar a busca</a>.
+                                        </p>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endif; ?>
+                    </tbody>
 
+                    <?php if ($total_registros > 0): ?>
                     <tfoot>
                         <tr>
                             <td colspan="6">
                                 <div class="pagination">
-                                    <div class="results">Mostrando 10 de 100 resultados</div>
+                                    <div class="results">
+                                        Mostrando <?= $primeiro_registro ?> a <?= $ultimo_registro ?> de <?= $total_registros ?> resultado<?= $total_registros != 1 ? 's' : '' ?>
+                                    </div>
+                                    <?php if ($total_paginas > 1): ?>
                                     <ul>
+                                        <?php
+                                        // Construir query string com filtros
+                                        $query_params = [];
+                                        if (!empty($filtro_nome)) $query_params[] = 'nome=' . urlencode($filtro_nome);
+                                        if (!empty($filtro_curso)) $query_params[] = 'curso=' . urlencode($filtro_curso);
+                                        if (!empty($filtro_semestre)) $query_params[] = 'semestre=' . urlencode($filtro_semestre);
+                                        $query_string = !empty($query_params) ? '&' . implode('&', $query_params) : '';
+                                        ?>
+
+                                        <!-- Botão Anterior -->
                                         <li>
-                                            <i class="fa-solid fa-chevron-left"></i>
+                                            <?php if ($pagina_atual > 1): ?>
+                                                <a href="?pagina=<?= $pagina_atual - 1 ?><?= $query_string ?>">
+                                                    <i class="fa-solid fa-chevron-left"></i>
+                                                </a>
+                                            <?php else: ?>
+                                                <span style="opacity: 0.3; cursor: not-allowed;">
+                                                    <i class="fa-solid fa-chevron-left"></i>
+                                                </span>
+                                            <?php endif; ?>
                                         </li>
+
+                                        <?php
+                                        // Mostrar até 5 páginas
+                                        $inicio = max(1, $pagina_atual - 2);
+                                        $fim = min($total_paginas, $pagina_atual + 2);
+
+                                        for ($i = $inicio; $i <= $fim; $i++):
+                                        ?>
+                                            <li>
+                                                <a href="?pagina=<?= $i ?><?= $query_string ?>"
+                                                   <?= $i == $pagina_atual ? 'style="background: #005f73; color: white; font-weight: bold;"' : '' ?>>
+                                                    <?= $i ?>
+                                                </a>
+                                            </li>
+                                        <?php endfor; ?>
+
+                                        <!-- Botão Próximo -->
                                         <li>
-                                            <a href="#">1</a>
-                                        </li>
-                                        <li>
-                                            <a href="#">2</a>
-                                        </li>
-                                        <li>
-                                            <a href="#">3</a>
-                                        </li>
-                                        <li>
-                                            <a href="#">4</a>
-                                        </li>
-                                        <li>
-                                            <a href="#">5</a>
-                                        </li>
-                                        <li>
-                                            <i class="fa-solid fa-chevron-right"></i>
+                                            <?php if ($pagina_atual < $total_paginas): ?>
+                                                <a href="?pagina=<?= $pagina_atual + 1 ?><?= $query_string ?>">
+                                                    <i class="fa-solid fa-chevron-right"></i>
+                                                </a>
+                                            <?php else: ?>
+                                                <span style="opacity: 0.3; cursor: not-allowed;">
+                                                    <i class="fa-solid fa-chevron-right"></i>
+                                                </span>
+                                            <?php endif; ?>
                                         </li>
                                     </ul>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
                     </tfoot>
-
-                    </tbody>
+                    <?php endif; ?>
                 </table>
             </section>
         </div>
@@ -406,6 +492,30 @@ $candidaturas = $stmt->fetchAll();
             <p>Versão 0.1 (11/06/2025)</p>
         </div>
     </footer>
+
+    <script>
+    // Fechar modal ao clicar fora do conteúdo
+    document.addEventListener('DOMContentLoaded', function() {
+        const modals = document.querySelectorAll('.modal');
+
+        modals.forEach(function(modal) {
+            modal.addEventListener('click', function(e) {
+                // Se clicou no backdrop (fora do .content), fecha o modal
+                if (e.target === modal) {
+                    window.location.hash = '';
+                    // Alternativa: history.pushState("", document.title, window.location.pathname);
+                }
+            });
+        });
+
+        // Fechar modal com tecla ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && window.location.hash) {
+                window.location.hash = '';
+            }
+        });
+    });
+    </script>
 </body>
 
 </html>
