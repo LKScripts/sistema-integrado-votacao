@@ -2,6 +2,7 @@
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
 require_once '../../../config/csrf.php';
+require_once '../../../config/email.php';
 
 $erro = "";
 $sucesso = false;
@@ -18,21 +19,92 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $curso = $_POST["curso"] ?? "";
     $semestre = intval($_POST['semestre'] ?? 0);
 
-    // Validações básicas para ALUNO
+    // Identificar tipo (admin ou aluno)
+    $is_admin = (
+        empty($ra) &&
+        empty($curso) &&
+        ($semestre === 0) &&
+        preg_match('/@cps\.sp\.gov\.br$/i', $email)
+    );
+
+    $is_aluno = (
+        !empty($ra) &&
+        !empty($curso) &&
+        $semestre >= 1 &&
+        preg_match('/@fatec\.sp\.gov\.br$/i', $email)
+    );
+
+    // Validações básicas comuns
     if (empty($nome) || empty($email) || empty($senha) || empty($confirma_senha)) {
         $erro = "Preencha os campos obrigatórios: nome, e-mail e senha.";
-    } elseif (empty($ra) || empty($curso) || $semestre < 1) {
-        $erro = "Preencha todos os campos: RA, curso e semestre são obrigatórios.";
     } elseif ($senha !== $confirma_senha) {
         $erro = "As senhas não coincidem!";
     } elseif (strlen($senha) < 6) {
         $erro = "A senha deve ter pelo menos 6 caracteres!";
-    } elseif (!preg_match('/@fatec\.sp\.gov\.br$/i', $email)) {
-        $erro = "Use um e-mail institucional @fatec.sp.gov.br";
+    } elseif (!$is_admin && !$is_aluno) {
+        $erro = "Dados incompatíveis: para ALUNO use @fatec.sp.gov.br com RA/curso/semestre preenchidos; para ADMIN deixe RA/curso/semestre vazios e use @cps.sp.gov.br.";
     } else {
+        // --------------------------------------------------
+        // CADASTRAR ADMINISTRADOR
+        // --------------------------------------------------
+        if ($is_admin) {
+            try {
+                // Verificar email duplicado na tabela ADMINISTRADOR
+                $stmtEmail = $conn->prepare("SELECT id_admin FROM ADMINISTRADOR WHERE email_corporativo = ?");
+                $stmtEmail->execute([$email]);
+
+                if ($stmtEmail->fetch()) {
+                    $erro = "Este e-mail já está cadastrado como administrador!";
+                } else {
+                    $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
+
+                    $stmtInsert = $conn->prepare("
+                        INSERT INTO ADMINISTRADOR (nome_completo, email_corporativo, senha_hash, ativo)
+                        VALUES (?, ?, ?, 0)
+                    ");
+
+                    if ($stmtInsert->execute([$nome, $email, $senha_hash])) {
+                        $id_admin = $conn->lastInsertId();
+
+                        // Gerar token de confirmação
+                        $token = bin2hex(random_bytes(32));
+                        $dataExpiracao = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+                        $stmtToken = $conn->prepare("
+                            INSERT INTO email_confirmacao (token, tipo_usuario, id_usuario, email, data_expiracao)
+                            VALUES (?, 'admin', ?, ?, ?)
+                        ");
+
+                        if ($stmtToken->execute([$token, $id_admin, $email, $dataExpiracao])) {
+                            // Enviar e-mail de confirmação
+                            try {
+                                $emailService = new EmailService();
+                                $emailEnviado = $emailService->enviarConfirmacaoCadastro($email, $nome, $token, 'admin');
+
+                                if ($emailEnviado) {
+                                    $sucesso = true;
+                                } else {
+                                    $erro = "Cadastro realizado, mas houve erro ao enviar o e-mail de confirmação. Entre em contato com o suporte.";
+                                }
+                            } catch (Exception $e) {
+                                $erro = "Cadastro realizado, mas o serviço de e-mail não está configurado. Entre em contato com o suporte.";
+                            }
+                        } else {
+                            $erro = "Erro ao gerar token de confirmação.";
+                        }
+                    } else {
+                        $erro = "Erro ao cadastrar administrador.";
+                    }
+                }
+            } catch (PDOException $e) {
+                $erro = "Erro no cadastro do administrador: " . $e->getMessage();
+            }
+        }
+
         // --------------------------------------------------
         // CADASTRAR ALUNO
         // --------------------------------------------------
+        elseif ($is_aluno) {
             // Validar RA numérico
             if (!preg_match('/^\d+$/', $ra)) {
                 $erro = "O RA deve conter apenas números!";
@@ -54,12 +126,39 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
 
                             $stmtInsert = $conn->prepare("
-                                INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre)
-                                VALUES (?, ?, ?, ?, ?, ?)
+                                INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre, ativo)
+                                VALUES (?, ?, ?, ?, ?, ?, 0)
                             ");
 
                             if ($stmtInsert->execute([$ra, $nome, $email, $senha_hash, $curso, $semestre])) {
-                                $sucesso = true;
+                                $id_aluno = $conn->lastInsertId();
+
+                                // Gerar token de confirmação
+                                $token = bin2hex(random_bytes(32));
+                                $dataExpiracao = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+                                $stmtToken = $conn->prepare("
+                                    INSERT INTO email_confirmacao (token, tipo_usuario, id_usuario, email, data_expiracao)
+                                    VALUES (?, 'aluno', ?, ?, ?)
+                                ");
+
+                                if ($stmtToken->execute([$token, $id_aluno, $email, $dataExpiracao])) {
+                                    // Enviar e-mail de confirmação
+                                    try {
+                                        $emailService = new EmailService();
+                                        $emailEnviado = $emailService->enviarConfirmacaoCadastro($email, $nome, $token, 'aluno');
+
+                                        if ($emailEnviado) {
+                                            $sucesso = true;
+                                        } else {
+                                            $erro = "Cadastro realizado, mas houve erro ao enviar o e-mail de confirmação. Entre em contato com o suporte.";
+                                        }
+                                    } catch (Exception $e) {
+                                        $erro = "Cadastro realizado, mas o serviço de e-mail não está configurado. Entre em contato com o suporte.";
+                                    }
+                                } else {
+                                    $erro = "Erro ao gerar token de confirmação.";
+                                }
                             } else {
                                 $erro = "Erro ao cadastrar aluno.";
                             }
@@ -69,6 +168,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $erro = "Erro no cadastro do aluno: " . $e->getMessage();
                 }
             }
+        }
     }
 }
 ?>
@@ -101,7 +201,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <div class="content">
                         <span style="color: #155724;">
                             <strong>✅ Cadastro realizado com sucesso!</strong><br>
-                            Você já pode fazer login com suas credenciais.
+                            Um e-mail de confirmação foi enviado para sua caixa de entrada. Verifique sua caixa de e-mail e clique no link para ativar sua conta.
                         </span>
                     </div>
                 </div>
@@ -114,8 +214,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <div class="callout info">
                     <div class="content">
                         <span>
-                            <strong>Cadastro de Aluno</strong><br>
-                            Use seu e-mail institucional @fatec.sp.gov.br e preencha todos os campos: RA, curso e semestre.
+                            <strong>Cadastro de Aluno / Administrador</strong><br>
+                            Para cadastrar como <strong>ALUNO</strong> use seu e-mail @fatec.sp.gov.br e preencha RA, curso e semestre.<br>
+                            Para cadastrar como <strong>ADMINISTRADOR</strong> deixe RA/curso/semestre vazios e utilize o e-mail @cps.sp.gov.br.
                         </span>
                     </div>
                 </div>
@@ -189,14 +290,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     </div>
 
                     <div class="input-group">
-                        <label for="email">Email Institucional</label>
+                        <label for="email">Email</label>
                         <div class="input-field">
                             <i class="fas fa-envelope"></i>
                             <input type="email" id="email" name="email"
-                                   placeholder="seu.nome@fatec.sp.gov.br"
+                                   placeholder="seu.nome@fatec.sp.gov.br ou @cps.sp.gov.br"
                                    value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-                                   pattern=".*@fatec\.sp\.gov\.br$"
-                                   title="Use um e-mail institucional @fatec.sp.gov.br"
                                    required>
                         </div>
                     </div>
@@ -271,18 +370,35 @@ document.getElementById('ra')?.addEventListener('input', function(e) {
     this.value = this.value.replace(/\D/g, '');
 });
 
-// Garantir que RA, curso e semestre são sempre obrigatórios (cadastro apenas de aluno)
-function garantirCamposObrigatorios() {
+// Ajustar required dinamicamente (melhora UX)
+// Se email terminar em @cps.sp.gov.br => REMOVE required de RA/curso/semestre (admin)
+// Se email terminar em @fatec.sp.gov.br => ADICIONA required (aluno)
+function ajustarRequiredPorEmail() {
+    const email = (document.getElementById('email')?.value || '').toLowerCase();
     const ra = document.getElementById('ra');
     const curso = document.getElementById('curso');
     const semestre = document.getElementById('semestre');
 
-    if (ra) ra.setAttribute('required', 'required');
-    if (curso) curso.setAttribute('required', 'required');
-    if (semestre) semestre.setAttribute('required', 'required');
+    if (email.endsWith('@cps.sp.gov.br')) {
+        ra.removeAttribute('required');
+        curso.removeAttribute('required');
+        semestre.removeAttribute('required');
+    } else if (email.endsWith('@fatec.sp.gov.br')) {
+        ra.setAttribute('required', 'required');
+        curso.setAttribute('required', 'required');
+        semestre.setAttribute('required', 'required');
+    } else {
+        // domínio desconhecido: mantém sem required para RA/curso/semestre,
+        // mas o servidor validará e mostrará mensagem adequada.
+        ra.removeAttribute('required');
+        curso.removeAttribute('required');
+        semestre.removeAttribute('required');
+    }
 }
 
-window.addEventListener('load', garantirCamposObrigatorios);
+document.getElementById('email')?.addEventListener('input', ajustarRequiredPorEmail);
+// Ao carregar a página, aplicar a regra se já houver valor
+window.addEventListener('load', ajustarRequiredPorEmail);
 </script>
 </body>
 </html>
