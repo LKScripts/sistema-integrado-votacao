@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         // ===== LOGIN DE ALUNO =====
         $stmt = $conn->prepare("
-            SELECT id_aluno, nome_completo, email_institucional, senha_hash, ra, curso, semestre
+            SELECT id_aluno, nome_completo, email_institucional, senha_hash, ra, curso, semestre, ativo
             FROM ALUNO
             WHERE email_institucional = ?
         ");
@@ -71,8 +71,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $aluno = $stmt->fetch();
 
         if ($aluno) {
+            // Verificar se a conta está ativa
+            if ($aluno["ativo"] != 1) {
+                $erro = "Sua conta ainda não foi ativada. Verifique seu e-mail e clique no link de confirmação.";
+            }
             // Verificar senha com password_verify
-            if (password_verify($senha, $aluno["senha_hash"])) {
+            elseif (password_verify($senha, $aluno["senha_hash"])) {
                 // ===== LOGIN BEM-SUCEDIDO =====
                 // Limpar tentativas anteriores
                 limparTentativas($email, $ip);
