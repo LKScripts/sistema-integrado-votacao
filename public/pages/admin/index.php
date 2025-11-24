@@ -30,6 +30,7 @@
                 <li><a href="../../pages/admin/inscricoes.php">Inscrições</a></li>
                 <li><a href="../../pages/admin/prazos.php">Prazos</a></li>
                 <li><a href="../../pages/admin/relatorios.php">Relatórios</a></li>
+                <li><a href="../../pages/admin/cadastro-admin.php">Cadastro Admin</a></li>
             </ul>
 
             <div class="actions">

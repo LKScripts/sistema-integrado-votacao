@@ -176,6 +176,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <li><a href="inscricoes.php">Inscrições</a></li>
             <li><a href="prazos.php" class="active">Prazos</a></li>
             <li><a href="relatorios.php">Relatórios</a></li>
+            <li><a href="cadastro-admin.php">Cadastro Admin</a></li>
         </ul>
 
         <div class="actions">

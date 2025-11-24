@@ -79,7 +79,6 @@ if ($eleicao) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="/assets/styles/guest.css">
     <link rel="stylesheet" href="../../assets/styles/guest.css">
-    <link rel="stylesheet" href="../../assets/styles/admin.css">
     <link rel="stylesheet" href="../../assets/styles/base.css">
     <link rel="stylesheet" href="../../assets/styles/user.css">
     <link rel="stylesheet" href="../../assets/styles/fonts.css">
