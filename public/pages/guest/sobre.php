@@ -25,7 +25,7 @@
             </div>
 
             <ul class="links">
-                <li><a href="index.php">Home</a></li>
+                <li><a href="../../index.php">Home</a></li>
                 <li><a href="sobre.php" class="active">Sobre</a></li>
                 <li><a href="login.php">Votação</a></li>
                 <li><a href="login.php">Inscrição</a></li>

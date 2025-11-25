@@ -83,7 +83,7 @@
                     </div>
                 </div>
 
-                <a href="../../pages/guest/index.php" class="button primary">
+                <a href="../../index.php" class="button primary">
                     <i class="fas fa-arrow-left"></i>
                     Voltar
                 </a>

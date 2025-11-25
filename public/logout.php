@@ -54,6 +54,6 @@ session_regenerate_id(true);
 session_destroy();
 
 // Redireciona para página inicial
-header("Location: pages/guest/index.php");
+header("Location: /sistema-integrado-votacao/public/index.php");
 exit;
 ?>
