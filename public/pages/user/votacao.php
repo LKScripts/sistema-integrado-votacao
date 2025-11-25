@@ -39,18 +39,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote']) && $eleicao &
     if (!$verificacao['valido']) {
         $erro = $verificacao['mensagem'];
     } else {
-        // Inserir voto
-        $stmtVoto = $conn->prepare("
-            INSERT INTO VOTO (id_eleicao, id_aluno, id_candidatura, ip_votante)
-            VALUES (?, ?, ?, ?)
+        // VALIDAÇÃO CRÍTICA: Verificar se o candidato pertence a esta eleição e está deferido
+        $stmtValidaCandidato = $conn->prepare("
+            SELECT id_candidatura
+            FROM CANDIDATURA
+            WHERE id_candidatura = ?
+              AND id_eleicao = ?
+              AND status_validacao = 'deferido'
         ");
-        $ip = $_SERVER['REMOTE_ADDR'];
+        $stmtValidaCandidato->execute([$id_candidatura, $eleicao['id_eleicao']]);
 
-        if ($stmtVoto->execute([$eleicao['id_eleicao'], $id_aluno, $id_candidatura, $ip])) {
-            $voto_confirmado = true;
-            $ja_votou = true;
+        if (!$stmtValidaCandidato->fetch()) {
+            $erro = "Candidato inválido ou não aprovado para esta eleição.";
         } else {
-            $erro = "Erro ao registrar voto. Tente novamente.";
+            // Inserir voto
+            $stmtVoto = $conn->prepare("
+                INSERT INTO VOTO (id_eleicao, id_aluno, id_candidatura, ip_votante)
+                VALUES (?, ?, ?, ?)
+            ");
+            $ip = $_SERVER['REMOTE_ADDR'];
+
+            if ($stmtVoto->execute([$eleicao['id_eleicao'], $id_aluno, $id_candidatura, $ip])) {
+                $voto_confirmado = true;
+                $ja_votou = true;
+            } else {
+                $erro = "Erro ao registrar voto. Tente novamente.";
+            }
         }
     }
 }
@@ -126,6 +140,14 @@ if ($eleicao) {
                     <div class="modal-buttons">
                         <a href="../../pages/user/index.php" class="button primary">Voltar</a>
                     </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!empty($erro)): ?>
+            <div class="callout danger" style="margin-bottom: 20px;">
+                <div class="content">
+                    <span><strong>Erro:</strong> <?= htmlspecialchars($erro) ?></span>
                 </div>
             </div>
         <?php endif; ?>

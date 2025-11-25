@@ -94,7 +94,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $mensagem = "Prazo cadastrado com sucesso!";
             $tipo_mensagem = "success";
         } catch (PDOException $e) {
-            $mensagem = "Erro ao cadastrar prazo: " . $e->getMessage();
+            // Logar erro completo para debug
+            error_log("Erro ao cadastrar eleição/prazo: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+
+            // Mensagem genérica para o usuário
+            if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                $mensagem = "Já existe uma eleição cadastrada para este curso e semestre.";
+            } else {
+                $mensagem = "Erro ao processar cadastro da eleição. Verifique os dados e tente novamente.";
+            }
             $tipo_mensagem = "error";
         }
     }

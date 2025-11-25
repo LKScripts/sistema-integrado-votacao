@@ -1,6 +1,13 @@
 <?php
 // Sistema de gerenciamento de sessões
 if (session_status() === PHP_SESSION_NONE) {
+    // Configurar opções de segurança da sessão
+    ini_set('session.cookie_httponly', 1); // Previne acesso via JavaScript (XSS)
+    ini_set('session.cookie_samesite', 'Strict'); // Previne CSRF
+
+    // Descomentar para HTTPS (Quando colocar o site no ar):
+    // ini_set('session.cookie_secure', 1); // Apenas HTTPS
+
     session_start();
 }
 
@@ -32,6 +39,9 @@ function verificarAluno() {
 
 // Função para fazer login de aluno
 function loginAluno($id_aluno, $nome, $email, $ra, $curso, $semestre) {
+    // Regenerar session ID para prevenir session fixation attack
+    session_regenerate_id(true);
+
     $_SESSION['usuario_id'] = $id_aluno;
     $_SESSION['usuario_tipo'] = 'aluno';
     $_SESSION['usuario_nome'] = $nome;
@@ -49,6 +59,9 @@ function loginAluno($id_aluno, $nome, $email, $ra, $curso, $semestre) {
 
 // Função para fazer login de administrador
 function loginAdmin($id_admin, $nome, $email) {
+    // Regenerar session ID para prevenir session fixation attack
+    session_regenerate_id(true);
+
     $_SESSION['usuario_id'] = $id_admin;
     $_SESSION['usuario_tipo'] = 'admin';
     $_SESSION['usuario_nome'] = $nome;

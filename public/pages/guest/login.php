@@ -26,14 +26,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } else {
 
         // ===== LOGIN DE ADMINISTRADOR =====
-        $stmtAdmin = $conn->prepare("
-            SELECT id_admin, nome_completo, email_corporativo, senha_hash, ativo
-            FROM ADMINISTRADOR
-            WHERE email_corporativo = ? AND ativo = 1
-        ");
+        try {
+            $stmtAdmin = $conn->prepare("
+                SELECT id_admin, nome_completo, email_corporativo, senha_hash, ativo
+                FROM ADMINISTRADOR
+                WHERE email_corporativo = ? AND ativo = 1
+            ");
 
-        $stmtAdmin->execute([$email]);
-        $admin = $stmtAdmin->fetch();
+            $stmtAdmin->execute([$email]);
+            $admin = $stmtAdmin->fetch();
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar admin no login: " . $e->getMessage());
+            $erro = "Erro ao processar login. Tente novamente.";
+            $admin = false;
+        }
 
         if ($admin) {
             // Verificar senha com password_verify
@@ -61,14 +67,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         // ===== LOGIN DE ALUNO =====
-        $stmt = $conn->prepare("
-            SELECT id_aluno, nome_completo, email_institucional, senha_hash, ra, curso, semestre, ativo
-            FROM ALUNO
-            WHERE email_institucional = ?
-        ");
+        try {
+            $stmt = $conn->prepare("
+                SELECT id_aluno, nome_completo, email_institucional, senha_hash, ra, curso, semestre, ativo
+                FROM ALUNO
+                WHERE email_institucional = ?
+            ");
 
-        $stmt->execute([$email]);
-        $aluno = $stmt->fetch();
+            $stmt->execute([$email]);
+            $aluno = $stmt->fetch();
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar aluno no login: " . $e->getMessage());
+            $erro = "Erro ao processar login. Tente novamente.";
+            $aluno = false;
+        }
 
         if ($aluno) {
             // Verificar se a conta está ativa

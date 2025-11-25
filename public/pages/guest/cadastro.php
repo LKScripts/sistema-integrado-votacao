@@ -3,9 +3,11 @@ require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
 require_once '../../../config/csrf.php';
 require_once '../../../config/email.php';
+require_once '../../../config/dev_mode.php';
 
 $erro = "";
 $sucesso = false;
+$dev_mode_html = ""; // Para exibir mensagem de dev mode
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // VALIDAR CSRF PRIMEIRO
@@ -24,14 +26,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         empty($ra) &&
         empty($curso) &&
         ($semestre === 0) &&
-        preg_match('/@cps\.sp\.gov\.br$/i', $email)
+        (isDevMode() || preg_match('/@cps\.sp\.gov\.br$/i', $email))
     );
 
     $is_aluno = (
         !empty($ra) &&
         !empty($curso) &&
         $semestre >= 1 &&
-        preg_match('/@fatec\.sp\.gov\.br$/i', $email)
+        (isDevMode() || preg_match('/@fatec\.sp\.gov\.br$/i', $email))
     );
 
     // Validações básicas comuns
@@ -76,18 +78,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         ");
 
                         if ($stmtToken->execute([$token, $id_admin, $email, $dataExpiracao])) {
-                            // Enviar e-mail de confirmação
-                            try {
-                                $emailService = new EmailService();
-                                $emailEnviado = $emailService->enviarConfirmacaoCadastro($email, $nome, $token, 'admin');
+                            // Enviar email (produção ou hybrid mode)
+                            if (shouldSendRealEmail()) {
+                                try {
+                                    $emailService = new EmailService();
+                                    $emailEnviado = $emailService->enviarConfirmacaoCadastro($email, $nome, $token, 'admin');
 
-                                if ($emailEnviado) {
-                                    $sucesso = true;
-                                } else {
-                                    $erro = "Cadastro realizado, mas houve erro ao enviar o e-mail de confirmação. Entre em contato com o suporte.";
+                                    if ($emailEnviado) {
+                                        $sucesso = true;
+                                        // Modo hybrid: mostra popup E envia email
+                                        if (isDevMode()) {
+                                            $dev_mode_html = exibirMensagemDevMode($token, $email);
+                                        }
+                                    } else {
+                                        $erro = "Cadastro realizado, mas houve erro ao enviar o e-mail de confirmação. Entre em contato com o suporte.";
+                                    }
+                                } catch (Exception $e) {
+                                    $erro = "Cadastro realizado, mas o serviço de e-mail não está configurado. Entre em contato com o suporte.";
                                 }
-                            } catch (Exception $e) {
-                                $erro = "Cadastro realizado, mas o serviço de e-mail não está configurado. Entre em contato com o suporte.";
+                            } else {
+                                // Modo dev puro: só mostra popup
+                                $sucesso = true;
+                                $dev_mode_html = exibirMensagemDevMode($token, $email);
                             }
                         } else {
                             $erro = "Erro ao gerar token de confirmação.";
@@ -97,7 +109,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     }
                 }
             } catch (PDOException $e) {
-                $erro = "Erro no cadastro do administrador: " . $e->getMessage();
+                // Logar erro completo para debug (não mostrar ao usuário)
+                error_log("Erro ao cadastrar admin: " . $e->getMessage());
+                error_log("Stack trace: " . $e->getTraceAsString());
+
+                // Mensagem genérica para o usuário
+                if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                    $erro = "Este e-mail já está cadastrado no sistema.";
+                } else {
+                    $erro = "Erro ao processar cadastro. Tente novamente ou contate o suporte.";
+                }
             }
         }
 
@@ -143,18 +164,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 ");
 
                                 if ($stmtToken->execute([$token, $id_aluno, $email, $dataExpiracao])) {
-                                    // Enviar e-mail de confirmação
-                                    try {
-                                        $emailService = new EmailService();
-                                        $emailEnviado = $emailService->enviarConfirmacaoCadastro($email, $nome, $token, 'aluno');
+                                    // Enviar email (produção ou hybrid mode)
+                                    if (shouldSendRealEmail()) {
+                                        try {
+                                            $emailService = new EmailService();
+                                            $emailEnviado = $emailService->enviarConfirmacaoCadastro($email, $nome, $token, 'aluno');
 
-                                        if ($emailEnviado) {
-                                            $sucesso = true;
-                                        } else {
-                                            $erro = "Cadastro realizado, mas houve erro ao enviar o e-mail de confirmação. Entre em contato com o suporte.";
+                                            if ($emailEnviado) {
+                                                $sucesso = true;
+                                                // Modo hybrid: mostra popup E envia email
+                                                if (isDevMode()) {
+                                                    $dev_mode_html = exibirMensagemDevMode($token, $email);
+                                                }
+                                            } else {
+                                                $erro = "Cadastro realizado, mas houve erro ao enviar o e-mail de confirmação. Entre em contato com o suporte.";
+                                            }
+                                        } catch (Exception $e) {
+                                            $erro = "Cadastro realizado, mas o serviço de e-mail não está configurado. Entre em contato com o suporte.";
                                         }
-                                    } catch (Exception $e) {
-                                        $erro = "Cadastro realizado, mas o serviço de e-mail não está configurado. Entre em contato com o suporte.";
+                                    } else {
+                                        // Modo dev puro: só mostra popup
+                                        $sucesso = true;
+                                        $dev_mode_html = exibirMensagemDevMode($token, $email);
                                     }
                                 } else {
                                     $erro = "Erro ao gerar token de confirmação.";
@@ -165,7 +196,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         }
                     }
                 } catch (PDOException $e) {
-                    $erro = "Erro no cadastro do aluno: " . $e->getMessage();
+                    // Logar erro completo para debug (não mostrar ao usuário)
+                    error_log("Erro ao cadastrar aluno: " . $e->getMessage());
+                    error_log("Stack trace: " . $e->getTraceAsString());
+
+                    // Mensagem genérica para o usuário
+                    if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                        if (strpos($e->getMessage(), 'email') !== false) {
+                            $erro = "Este e-mail já está cadastrado no sistema.";
+                        } elseif (strpos($e->getMessage(), 'ra') !== false) {
+                            $erro = "Este RA já está cadastrado no sistema.";
+                        } else {
+                            $erro = "Estes dados já estão cadastrados no sistema.";
+                        }
+                    } else {
+                        $erro = "Erro ao processar cadastro. Tente novamente ou contate o suporte.";
+                    }
                 }
             }
         }
@@ -188,6 +234,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
 </head>
 <body>
+<?php if (!empty($dev_mode_html)) echo $dev_mode_html; ?>
+
 <main class="login">
     <div class="container">
         <div class="wrapper-form cadastro">

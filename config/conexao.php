@@ -16,7 +16,14 @@ try {
     ];
     $conn = new PDO($dsn, $usuario, $senha, $options);
 } catch (PDOException $e) {
-    error_log($e->getMessage());
+    // Logar erro completo para debug (sem expor ao usuário)
+    error_log("ERRO CRÍTICO DE CONEXÃO: " . $e->getMessage());
+    error_log("Stack trace: " . $e->getTraceAsString());
+
+    // Mensagem genérica para o usuário
     die("Falha na conexão com o banco de dados. Entre em contato com o suporte.");
 }
+
+// Incluir helper de tratamento de erros
+require_once __DIR__ . '/error_handler.php';
 ?>

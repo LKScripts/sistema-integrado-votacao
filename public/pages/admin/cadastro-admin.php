@@ -74,7 +74,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 }
             }
         } catch (PDOException $e) {
-            $mensagem = "Erro no cadastro: " . htmlspecialchars($e->getMessage());
+            // Logar erro completo para debug
+            error_log("Erro ao cadastrar admin (por outro admin): " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+
+            // Mensagem genérica para o usuário
+            if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                $mensagem = "Este e-mail já está cadastrado no sistema.";
+            } else {
+                $mensagem = "Erro ao processar cadastro. Tente novamente.";
+            }
             $tipo_mensagem = "error";
         }
     }
