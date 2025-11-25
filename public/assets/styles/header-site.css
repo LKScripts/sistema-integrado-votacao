@@ -75,6 +75,18 @@ header.site .navbar .actions a:hover {
     background-color: #004654;
 }
 
+/* Botão secundário (cadastro) - Mesmo estilo do primário */
+header.site .navbar .actions a.btn-secondary {
+    background-color: var(--primary);
+    border: none;
+    color: white;
+}
+
+header.site .navbar .actions a.btn-secondary:hover {
+    background-color: #004654;
+    color: white;
+}
+
 @media (max-width: 1024px) {
     header.site .navbar {
         flex-direction: column;

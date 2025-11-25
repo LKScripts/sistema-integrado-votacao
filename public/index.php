@@ -33,6 +33,7 @@
             </ul>
 
             <div class="actions">
+                <a href="./pages/guest/cadastro.php" class="btn-secondary">CADASTRAR</a>
                 <a href="./pages/guest/login.php">LOGIN</a>
             </div>
         </nav>
