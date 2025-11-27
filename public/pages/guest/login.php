@@ -69,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // ===== LOGIN DE ALUNO =====
         try {
             $stmt = $conn->prepare("
-                SELECT id_aluno, nome_completo, email_institucional, senha_hash, ra, curso, semestre, ativo
+                SELECT id_aluno, nome_completo, email_institucional, senha_hash, ra, curso, semestre, ativo, foto_perfil
                 FROM ALUNO
                 WHERE email_institucional = ?
             ");
@@ -103,7 +103,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $aluno["email_institucional"],
                     $aluno["ra"],
                     $aluno["curso"],
-                    $aluno["semestre"]
+                    $aluno["semestre"],
+                    $aluno["foto_perfil"]
                 );
 
                 header("Location: ../user/index.php");
