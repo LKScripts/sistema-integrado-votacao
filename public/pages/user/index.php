@@ -1,5 +1,51 @@
 <?php
 // pages/user/index.php
+require_once '../../../config/session.php';
+require_once '../../../config/conexao.php';
+require_once '../../../config/automacao_eleicoes.php';
+
+verificarAluno();
+
+$usuario = obterUsuarioLogado();
+$id_aluno = $usuario['id'];
+$curso = $usuario['curso'];
+$semestre = $usuario['semestre'];
+
+// Verificar estado das eleições para este aluno
+$eleicao_candidatura = buscarEleicaoAtivaComVerificacao($curso, $semestre, 'candidatura');
+$eleicao_votacao = buscarEleicaoAtivaComVerificacao($curso, $semestre, 'votacao');
+
+// Verificar se o aluno tem candidatura cadastrada
+$tem_candidatura = false;
+$candidatura = null;
+
+if ($eleicao_candidatura || $eleicao_votacao) {
+    $id_eleicao = $eleicao_candidatura['id_eleicao'] ?? $eleicao_votacao['id_eleicao'] ?? null;
+
+    if ($id_eleicao) {
+        $stmt = $conn->prepare("
+            SELECT c.*, e.status as status_eleicao
+            FROM CANDIDATURA c
+            JOIN ELEICAO e ON c.id_eleicao = e.id_eleicao
+            WHERE c.id_aluno = ?
+            AND e.curso = ?
+            AND e.semestre = ?
+            ORDER BY c.data_inscricao DESC
+            LIMIT 1
+        ");
+        $stmt->execute([$id_aluno, $curso, $semestre]);
+        $candidatura = $stmt->fetch();
+
+        if ($candidatura) {
+            $tem_candidatura = true;
+        }
+    }
+}
+
+// Determinar estado dos botões
+$pode_inscrever = !empty($eleicao_candidatura);
+$pode_votar = !empty($eleicao_votacao);
+$pode_acompanhar = $tem_candidatura;
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -9,35 +55,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIV - Sistema Integrado de Votações</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="../../assets/styles/guest.css">
     <link rel="stylesheet" href="../../assets/styles/base.css">
-    <link rel="stylesheet" href="../../assets/styles/user.css">
     <link rel="stylesheet" href="../../assets/styles/fonts.css">
-    <link rel="stylesheet" href="../../assets/styles/footer-site.css">
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
+    <link rel="stylesheet" href="../../assets/styles/footer-site.css">
+    <link rel="stylesheet" href="../../assets/styles/user.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
-    <header class="site">
-        <nav class="navbar">
-            <div class="logo">
-                <img src="../../assets/images/fatec-ogari.png" alt="Logo Fatec Itapira">
-                <img src="../../assets/images/logo-cps.png" alt="Logo CPS">
-            </div>
-
-            <ul class="links">
-                <li><a href="../../pages/user/index.php" class="active">Home</a></li>
-                <li><a href="../../pages/user/inscricao.php">Inscrição</a></li>
-                <li><a href="../../pages/user/votacao.php">Votação</a></li>
-                <li><a href="../../pages/user/sobre.php">Sobre</a></li>
-            </ul>
-
-            <div class="actions">
-                <img src="../../assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
-                <a href="../../logout.php">Sair da Conta</a>
-            </div>
-        </nav>
-    </header>
+    <?php include 'components/header.php'; ?>
 
     <main class="user-home">
         <div class="card-wrapper">
@@ -83,14 +110,51 @@
 
         <div class="card-wrapper">
             <div class="card">
-                <h1>EDITAIS ABERTOS PARA INSCRIÇÃO</h1>
-                <p>Clique no botão "QUERO ME INSCREVER" para ver as regras.</p>
+                <h1>AÇÕES DISPONÍVEIS</h1>
+                <p>Confira as ações disponíveis de acordo com o período eleitoral:</p>
+
+                <?php if (!$pode_inscrever && !$pode_votar && !$pode_acompanhar): ?>
+                    <div class="callout warning" style="margin-top: 20px;">
+                        <div class="content">
+                            <span>⏳ <strong>Nenhuma eleição ativa no momento</strong> para seu curso e semestre. Aguarde a abertura de novos editais.</span>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="button-group">
-                <a href="../../pages/user/inscricao.php" class="button primary">QUERO ME INSCREVER</a>
-                <a href="../../assets/user/votacao.php" class="button primary disabled">QUERO VOTAR</a>
-                <a href="#" class="button primary disabled">ACOMPANHAR INSCRIÇÃO</a>
+                <!-- Botão Inscrever -->
+                <?php if ($pode_inscrever): ?>
+                    <a href="../../pages/user/inscricao.php" class="button primary">
+                        <i class="fas fa-user-plus"></i> QUERO ME INSCREVER
+                    </a>
+                <?php else: ?>
+                    <button class="button primary disabled" disabled title="Período de inscrições encerrado">
+                        <i class="fas fa-user-plus"></i> QUERO ME INSCREVER
+                    </button>
+                <?php endif; ?>
+
+                <!-- Botão Votar -->
+                <?php if ($pode_votar): ?>
+                    <a href="../../pages/user/votacao.php" class="button primary">
+                        <i class="fas fa-vote-yea"></i> QUERO VOTAR
+                    </a>
+                <?php else: ?>
+                    <button class="button primary disabled" disabled title="Período de votação não iniciado ou encerrado">
+                        <i class="fas fa-vote-yea"></i> QUERO VOTAR
+                    </button>
+                <?php endif; ?>
+
+                <!-- Botão Acompanhar -->
+                <?php if ($pode_acompanhar): ?>
+                    <a href="../../pages/user/acompanhar_inscricao.php" class="button primary">
+                        <i class="fas fa-clipboard-check"></i> ACOMPANHAR INSCRIÇÃO
+                    </a>
+                <?php else: ?>
+                    <button class="button primary disabled" disabled title="Você não possui inscrição cadastrada">
+                        <i class="fas fa-clipboard-check"></i> ACOMPANHAR INSCRIÇÃO
+                    </button>
+                <?php endif; ?>
             </div>
         </div>
     </main>
