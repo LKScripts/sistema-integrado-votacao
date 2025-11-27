@@ -21,6 +21,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $curso = $_POST["curso"] ?? "";
     $semestre = intval($_POST['semestre'] ?? 0);
 
+    // Variáveis para upload de foto
+    $foto_perfil = null;
+    $foto_perfil_original = null;
+
     // Identificar tipo (admin ou aluno)
     $is_admin = (
         empty($ra) &&
@@ -126,10 +130,43 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // CADASTRAR ALUNO
         // --------------------------------------------------
         elseif ($is_aluno) {
+            // Processar upload de foto (opcional)
+            if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] === UPLOAD_ERR_OK) {
+                $arquivo = $_FILES['foto_perfil'];
+                $extensao = strtolower(pathinfo($arquivo['name'], PATHINFO_EXTENSION));
+                $extensoes_permitidas = ['jpg', 'jpeg', 'png', 'gif'];
+                $tamanho_maximo = 5 * 1024 * 1024; // 5MB
+
+                if (!in_array($extensao, $extensoes_permitidas)) {
+                    $erro = "Formato de imagem inválido. Use JPG, PNG ou GIF.";
+                } elseif ($arquivo['size'] > $tamanho_maximo) {
+                    $erro = "A imagem deve ter no máximo 5MB.";
+                } else {
+                    // Criar diretório se não existir
+                    $diretorio_upload = '../../../uploads/fotos_perfil/';
+                    if (!is_dir($diretorio_upload)) {
+                        mkdir($diretorio_upload, 0755, true);
+                    }
+
+                    // Nome único para o arquivo
+                    $nome_arquivo = uniqid('perfil_', true) . '.' . $extensao;
+                    $caminho_completo = $diretorio_upload . $nome_arquivo;
+
+                    if (move_uploaded_file($arquivo['tmp_name'], $caminho_completo)) {
+                        $foto_perfil = '/uploads/fotos_perfil/' . $nome_arquivo;
+                        $foto_perfil_original = $arquivo['name'];
+                    } else {
+                        $erro = "Erro ao fazer upload da foto.";
+                    }
+                }
+            }
+
             // Validar RA numérico
-            if (!preg_match('/^\d+$/', $ra)) {
+            if (empty($erro) && !preg_match('/^\d+$/', $ra)) {
                 $erro = "O RA deve conter apenas números!";
-            } else {
+            }
+
+            if (empty($erro)) {
                 try {
                     // Verificar RA duplicado
                     $stmtCheckRA = $conn->prepare("SELECT id_aluno FROM ALUNO WHERE ra = ?");
@@ -147,11 +184,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
 
                             $stmtInsert = $conn->prepare("
-                                INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre, ativo)
-                                VALUES (?, ?, ?, ?, ?, ?, 0)
+                                INSERT INTO ALUNO (ra, nome_completo, email_institucional, foto_perfil, foto_perfil_original, senha_hash, curso, semestre, ativo)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
                             ");
 
-                            if ($stmtInsert->execute([$ra, $nome, $email, $senha_hash, $curso, $semestre])) {
+                            if ($stmtInsert->execute([$ra, $nome, $email, $foto_perfil, $foto_perfil_original, $senha_hash, $curso, $semestre])) {
                                 $id_aluno = $conn->lastInsertId();
 
                                 // Gerar token de confirmação
@@ -277,7 +314,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     </div>
                 <?php endif; ?>
 
-                <form method="POST" id="form-cadastro" novalidate>
+                <form method="POST" id="form-cadastro" enctype="multipart/form-data" novalidate>
                     <?= campoCSRF() ?>
                     <div class="input-group">
                         <label for="nome">Nome Completo</label>
@@ -345,6 +382,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                    placeholder="seu.nome@fatec.sp.gov.br ou @cps.sp.gov.br"
                                    value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
                                    required>
+                        </div>
+                    </div>
+
+                    <div class="input-group" id="foto-perfil-group">
+                        <label for="foto_perfil">Foto de Perfil (Opcional)</label>
+                        <div class="upload-foto-perfil" style="display: flex; flex-direction: column; align-items: center; gap: 15px; padding: 20px; border: 2px dashed #ddd; border-radius: 10px; background: #f9f9f9;">
+                            <div class="preview-foto" style="width: 120px; height: 120px; border-radius: 50%; overflow: hidden; background: #e0e0e0; display: flex; align-items: center; justify-content: center; border: 4px solid #005c6d;">
+                                <i class="fas fa-user" style="font-size: 3rem; color: #005c6d;" id="icon-placeholder"></i>
+                                <img id="preview-img" src="" alt="Preview" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                            <input type="file" id="foto_perfil" name="foto_perfil" accept="image/jpeg,image/jpg,image/png,image/gif" style="display: none;">
+                            <label for="foto_perfil" class="button secondary" style="cursor: pointer; margin: 0;">
+                                <i class="fas fa-camera"></i>
+                                Escolher Foto
+                            </label>
+                            <p style="font-size: 0.85rem; color: #666; text-align: center; margin: 0;">JPG, PNG ou GIF (máx. 5MB)</p>
                         </div>
                     </div>
 
@@ -447,6 +500,55 @@ function ajustarRequiredPorEmail() {
 document.getElementById('email')?.addEventListener('input', ajustarRequiredPorEmail);
 // Ao carregar a página, aplicar a regra se já houver valor
 window.addEventListener('load', ajustarRequiredPorEmail);
+
+// Preview da foto de perfil
+document.getElementById('foto_perfil')?.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('preview-img');
+    const placeholder = document.getElementById('icon-placeholder');
+
+    if (file) {
+        // Validar tamanho
+        if (file.size > 5 * 1024 * 1024) {
+            alert('A imagem deve ter no máximo 5MB.');
+            this.value = '';
+            return;
+        }
+
+        // Validar tipo
+        const tiposPermitidos = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!tiposPermitidos.includes(file.type)) {
+            alert('Formato inválido. Use JPG, PNG ou GIF.');
+            this.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            preview.src = event.target.result;
+            preview.style.display = 'block';
+            placeholder.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Ocultar campo de foto para administradores
+function ajustarCampoFoto() {
+    const email = (document.getElementById('email')?.value || '').toLowerCase();
+    const fotoGroup = document.getElementById('foto-perfil-group');
+
+    if (fotoGroup) {
+        if (email.endsWith('@cps.sp.gov.br')) {
+            fotoGroup.style.display = 'none';
+        } else {
+            fotoGroup.style.display = 'block';
+        }
+    }
+}
+
+document.getElementById('email')?.addEventListener('input', ajustarCampoFoto);
+window.addEventListener('load', ajustarCampoFoto);
 </script>
 </body>
 </html>
