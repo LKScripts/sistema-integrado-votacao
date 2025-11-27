@@ -1,3 +1,7 @@
+<?php
+require_once '../../../config/session.php';
+verificarAluno();
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -6,13 +10,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIV - Sistema Integrado de Votações</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="/assets/styles/guest.css">
-    <link rel="stylesheet" href="../../assets/styles/guest.css">
     <link rel="stylesheet" href="../../assets/styles/base.css">
-    <link rel="stylesheet" href="../../assets/styles/user.css">
     <link rel="stylesheet" href="../../assets/styles/fonts.css">
-    <link rel="stylesheet" href="../../assets/styles/footer-site.css">
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
+    <link rel="stylesheet" href="../../assets/styles/footer-site.css">
+    <link rel="stylesheet" href="../../assets/styles/user.css">
 </head>
 
 <body>
@@ -31,13 +33,13 @@
             </ul>
 
             <div class="actions">
-                <img src="../../assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
+                <img src="<?= htmlspecialchars(obterFotoUsuario()) ?>" alt="Avatar do usuário" class="user-icon">
                 <a href="../../logout.php">Sair da Conta</a>
             </div>
         </nav>
     </header>
 
-    <main class="about">
+    <main class="user-home">
         <div class="card-wrapper">
             <div class="card">
                 <section class="voting">
