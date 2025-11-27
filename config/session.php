@@ -38,7 +38,7 @@ function verificarAluno() {
 }
 
 // Função para fazer login de aluno
-function loginAluno($id_aluno, $nome, $email, $ra, $curso, $semestre) {
+function loginAluno($id_aluno, $nome, $email, $ra, $curso, $semestre, $foto_perfil = null) {
     // Regenerar session ID para prevenir session fixation attack
     session_regenerate_id(true);
 
@@ -49,6 +49,7 @@ function loginAluno($id_aluno, $nome, $email, $ra, $curso, $semestre) {
     $_SESSION['usuario_ra'] = $ra;
     $_SESSION['usuario_curso'] = $curso;
     $_SESSION['usuario_semestre'] = $semestre;
+    $_SESSION['usuario_foto'] = $foto_perfil;
 
     // Atualizar último acesso
     require_once __DIR__ . '/conexao.php';
@@ -95,8 +96,55 @@ function obterUsuarioLogado() {
         'email' => $_SESSION['usuario_email'],
         'ra' => $_SESSION['usuario_ra'] ?? null,
         'curso' => $_SESSION['usuario_curso'] ?? null,
-        'semestre' => $_SESSION['usuario_semestre'] ?? null
+        'semestre' => $_SESSION['usuario_semestre'] ?? null,
+        'foto' => $_SESSION['usuario_foto'] ?? null
     ];
+}
+
+// Função para obter URL da foto do usuário (com fallback para imagem padrão)
+function obterFotoUsuario() {
+    // Primeiro tentar da sessão
+    $foto = $_SESSION['usuario_foto'] ?? null;
+
+    // Se não tiver na sessão e for aluno, buscar do banco
+    if (empty($foto) && isset($_SESSION['usuario_tipo']) && $_SESSION['usuario_tipo'] === 'aluno' && isset($_SESSION['usuario_id'])) {
+        try {
+            // Criar conexão local para evitar problemas de escopo global
+            $host = "localhost";
+            $usuario = "root";
+            $senha = "";
+            $banco = "siv_db";
+            $porta = 3306;
+
+            $dsn = "mysql:host=$host;dbname=$banco;port=$porta;charset=utf8mb4";
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ];
+            $connLocal = new PDO($dsn, $usuario, $senha, $options);
+
+            $stmt = $connLocal->prepare("SELECT foto_perfil FROM ALUNO WHERE id_aluno = ?");
+            $stmt->execute([$_SESSION['usuario_id']]);
+            $result = $stmt->fetch();
+
+            if ($result && !empty($result['foto_perfil'])) {
+                $foto = $result['foto_perfil'];
+                // Atualizar sessão para não precisar buscar novamente
+                $_SESSION['usuario_foto'] = $foto;
+            }
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar foto do usuário: " . $e->getMessage());
+        }
+    }
+
+    // Se tiver foto, retornar
+    if (!empty($foto)) {
+        return $foto;
+    }
+
+    // Fallback para imagem padrão
+    return '../../assets/images/user-icon.png';
 }
 
 // Função para verificar se está logado (retorna boolean)
