@@ -1,6 +1,6 @@
-@import url("/assets/styles/base.css");
-@import url("/assets/styles/header-site.css");
-@import url("/assets/styles/footer-site.css");
+@import url("base.css");
+@import url("header-site.css");
+@import url("footer-site.css");
 
 /* Estilos genéricos */
 .card-wrapper {
@@ -72,6 +72,8 @@ main.user-home .card-wrapper .voting-illustration {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
+    margin-top: 40px;
 }
 
 main.user-home .card-wrapper .voting-illustration img {
@@ -201,13 +203,19 @@ main.user-vote section.candidates {
 main.user-vote section.candidates .candidate-card {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     position: relative;
     overflow: hidden;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    min-width: 300px;
+    width: 350px;
+    min-height: 500px;
+    transition: box-shadow 0.2s ease;
+}
+
+main.user-vote section.candidates .candidate-card:hover {
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
 }
 
 @media (max-width: 740px) {
@@ -225,8 +233,16 @@ main.user-vote section.candidates .candidate-card .media {
     align-items: center;
     width: 100%;
     height: 150px;
-    background: linear-gradient(to right, #005c6d, #005262, #004957, #061e2e);
+    background: #005c6d;
     color: #fff;
+}
+
+main.user-vote section.candidates .candidate-card .media img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid white;
+    object-fit: cover;
 }
 
 main.user-vote section.candidates .candidate-card .media .placeholder {
@@ -247,6 +263,7 @@ main.user-vote section.candidates .candidate-card .content {
     flex-direction: column;
     width: 100%;
     padding: 25px 20px;
+    flex: 1;
 }
 
 main.user-vote section.candidates .candidate-card .content h2 {
@@ -269,25 +286,74 @@ main.user-vote section.candidates .candidate-card .content .info-row i {
     color: #3498db;
 }
 
-main.user-vote section.candidates .candidate-card a.vote {
-    display: inline-block;
-    background: linear-gradient(to right, #005c6d, #005262, #004957, #061e2e);
-    background-size: 200% 100%;
-    padding: 15px 0;
+main.user-vote section.candidates .candidate-card .content .info-row.proposta-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+}
+
+main.user-vote section.candidates .candidate-card .ver-mais-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    color: #005c6d;
+    background: #e3f2f5;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+    align-self: flex-start;
+    transition: all 0.2s ease;
+}
+
+main.user-vote section.candidates .candidate-card[style*="cursor: pointer"]:hover .ver-mais-badge {
+    background: #c8e6ed;
+    color: #004a5a;
+}
+
+main.user-vote section.candidates .candidate-card .ver-mais-badge i {
+    font-size: 0.9rem;
+    width: auto;
+}
+
+main.user-vote section.candidates .candidate-card form {
+    width: 100%;
+    margin: 0;
+}
+
+main.user-vote section.candidates .candidate-card a.vote,
+main.user-vote section.candidates .candidate-card button.vote {
+    display: block;
+    background: #005c6d;
+    padding: 18px 0;
     width: 100%;
     border: none;
     border-top: 1px solid #eee;
-    font-size: 1.2rem;
-    font-weight: 600;
+    font-size: 1.1rem;
+    font-weight: 700;
     text-decoration: none;
     color: #fff;
     text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     transition: all 0.3s ease;
     cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-main.user-vote section.candidates .candidate-card a.vote:hover {
-    background-position: 100%;
+main.user-vote section.candidates .candidate-card a.vote:hover,
+main.user-vote section.candidates .candidate-card button.vote:hover:not(:disabled) {
+    background: #007a8f;
+}
+
+main.user-vote section.candidates .candidate-card a.vote:active,
+main.user-vote section.candidates .candidate-card button.vote:active:not(:disabled) {
+    background: #005c6d;
+}
+
+main.user-vote section.candidates .candidate-card button.vote i {
+    margin-right: 8px;
 }
 
 main.user-vote .callout {
@@ -327,6 +393,99 @@ main.user-vote .instructions strong {
 }
 #votar-gabriel-borges:target ~ .modal .candidate-name::after {
     content: " Gabriel Borges.";
+}
+
+/* Modal para proposta completa */
+.modal-proposta {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-proposta-content {
+    background: white;
+    border-radius: 15px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-proposta-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 2px solid #e0e0e0;
+    background: linear-gradient(to right, #005c6d, #005262);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+.modal-proposta-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.modal-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.modal-proposta-body {
+    padding: 25px;
+}
+
+.modal-proposta-body h4 {
+    color: #005c6d;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.modal-proposta-body p {
+    color: #333;
+    font-size: 1rem;
+    line-height: 1.6;
+    text-align: justify;
+    white-space: pre-wrap;
 }
 
 /* Fim estilização página de votação (/pages/user/votacao.html) */
