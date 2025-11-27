@@ -35,8 +35,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } elseif ($inscricao_fim < $inscricao_inicio) {
         $mensagem = "⚠ A data de <b>término das inscrições</b> deve ser maior ou igual ao início.";
         $tipo_mensagem = "error";
-    } elseif ($votacao_inicio < $inscricao_fim) {
-        $mensagem = "⚠ A data de <b>início da votação</b> deve ser maior ou igual que o fim das inscrições.";
+    } elseif ($votacao_inicio <= $inscricao_fim) {
+        $mensagem = "⚠ A data de <b>início da votação</b> deve ser posterior ao fim das inscrições.";
         $tipo_mensagem = "error";
     } elseif ($votacao_fim < $votacao_inicio) {
         $mensagem = "⚠ A data de <b>término da votação</b> deve ser maior ou igual que o início da votação.";
