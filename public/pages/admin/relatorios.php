@@ -62,6 +62,7 @@ $resultados = $stmt->fetchAll();
                 <li><a href="../../pages/admin/prazos.php">Prazos</a></li>
                 <li><a href="../../pages/admin/relatorios.php" class="active">Relatórios</a></li>
                 <li><a href="../../pages/admin/cadastro-admin.php">Cadastro Admin</a></li>
+                <li><a href="../../pages/admin/gerenciar-alunos.php">Gerenciar Alunos</a></li>
             </ul>
 
             <div class="actions">
