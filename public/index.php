@@ -55,6 +55,7 @@
                     <h2>Deseja se Candidatar?</h2>
                     <p>Você deve possuir credencial ativa no sistema SIV e estar apto ás regras específicas do edital.
                     </p>
+                    <a href="./pages/guest/cadastro.php" class="button primary">Cadastre-se Aqui</a>
                 </div>
             </div>
 
