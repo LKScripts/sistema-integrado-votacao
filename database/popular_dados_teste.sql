@@ -47,7 +47,7 @@ INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, se
 ('2024DSM009', 'Thiago Barros Lopes', 'thiago.lopes@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 1, 1),
 ('2024DSM010', 'Camila Araújo Silva', 'camila.araujo@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 1, 1);
 
--- DSM - Semestre 2 (12 alunos)
+-- DSM - Semestre 2 (20 alunos - 12 já votaram, 8 disponíveis para teste)
 INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre, ativo) VALUES
 ('2023DSM001', 'Felipe Gomes Cardoso', 'felipe.cardoso@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, 1),
 ('2023DSM002', 'Isabela Mendes Freitas', 'isabela.freitas@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, 1),
@@ -60,7 +60,16 @@ INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, se
 ('2023DSM009', 'Gustavo Ferreira Santos', 'gustavo.ferreira@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, 1),
 ('2023DSM010', 'Carolina Vieira Melo', 'carolina.melo@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, 1),
 ('2023DSM011', 'Diego Rezende Cunha', 'diego.cunha@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, 1),
-('2023DSM012', 'Patrícia Monteiro Ramos', 'patricia.ramos@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, 1);
+('2023DSM012', 'Patrícia Monteiro Ramos', 'patricia.ramos@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, 1),
+-- NOVOS ALUNOS DSM-2 (disponíveis para teste de voto em branco)
+('2023DSM013', 'João Pedro Silva Teste', 'joao.teste@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, 1),
+('2023DSM014', 'Maria Eduarda Teste', 'maria.teste@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, 1),
+('2023DSM015', 'Pedro Henrique Teste', 'pedro.teste@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, 1),
+('2023DSM016', 'Ana Clara Teste', 'ana.teste@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, 1),
+('2023DSM017', 'Lucas Gabriel Teste', 'lucas.teste@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, 1),
+('2023DSM018', 'Sophia Oliveira Teste', 'sophia.teste@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, 1),
+('2023DSM019', 'Miguel Santos Teste', 'miguel.teste@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, 1),
+('2023DSM020', 'Alice Costa Teste', 'alice.teste@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 2, 1);
 
 -- DSM - Semestre 3 (10 alunos)
 INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre, ativo) VALUES
@@ -93,7 +102,7 @@ INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, se
 ('2024GE010', 'Simone Barbosa Prado', 'simone.prado@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 2, 1),
 ('2024GE011', 'Anderson Silva Martins', 'anderson.martins@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 2, 1);
 
--- GE - Semestre 4 (13 alunos)
+-- GE - Semestre 4 (20 alunos - 13 já votaram, 7 disponíveis para teste)
 INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre, ativo) VALUES
 ('2023GE001', 'Marcos Vinícius Correia', 'marcos.correia@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
 ('2023GE002', 'Bianca Rocha Teixeira', 'bianca.teixeira@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
@@ -107,7 +116,15 @@ INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, se
 ('2023GE010', 'Viviane Santos Cardoso', 'viviane.cardoso@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
 ('2023GE011', 'Cristiano Moura Machado', 'cristiano.machado@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
 ('2023GE012', 'Luciana Rezende Fonseca', 'luciana.fonseca@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
-('2023GE013', 'Sérgio Henrique Barros', 'sergio.barros@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1);
+('2023GE013', 'Sérgio Henrique Barros', 'sergio.barros@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
+-- NOVOS ALUNOS GE-4 (disponíveis para teste de voto em branco)
+('2023GE014', 'Rafael Mendes Teste', 'rafael.teste.ge@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
+('2023GE015', 'Camila Rodrigues Teste', 'camila.teste.ge@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
+('2023GE016', 'Thiago Alves Teste', 'thiago.teste.ge@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
+('2023GE017', 'Beatriz Martins Teste', 'beatriz.teste.ge@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
+('2023GE018', 'Gabriel Costa Teste', 'gabriel.teste.ge@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
+('2023GE019', 'Larissa Souza Teste', 'larissa.teste.ge@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
+('2023GE020', 'Felipe Lima Teste', 'felipe.teste.ge@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1);
 
 -- GE - Semestre 5 (10 alunos)
 INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre, ativo) VALUES
@@ -139,7 +156,7 @@ INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, se
 ('2024GPI009', 'Júlio César Rocha', 'julio.rocha@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 3, 1),
 ('2024GPI010', 'Kelly Andrade Siqueira', 'kelly.siqueira@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 3, 1);
 
--- GPI - Semestre 6 (12 alunos)
+-- GPI - Semestre 6 (20 alunos - 12 já votaram, 8 disponíveis para teste)
 INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre, ativo) VALUES
 ('2022GPI001', 'Nilton Souza Lopes', 'nilton.lopes@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 6, 1),
 ('2022GPI002', 'Olívia Ribeiro Dias', 'olivia.dias@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 6, 1),
@@ -152,7 +169,16 @@ INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, se
 ('2022GPI009', 'Valter Lima Martins', 'valter.martins@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 6, 1),
 ('2022GPI010', 'Wanda Silva Farias', 'wanda.farias@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 6, 1),
 ('2022GPI011', 'Xavier Gomes Correia', 'xavier.correia@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 6, 1),
-('2022GPI012', 'Yasmin Rodrigues Teixeira', 'yasmin.teixeira@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 6, 1);
+('2022GPI012', 'Yasmin Rodrigues Teixeira', 'yasmin.teixeira@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 6, 1),
+-- NOVOS ALUNOS GPI-6 (disponíveis para teste de voto em branco)
+('2022GPI013', 'Amanda Silva Teste', 'amanda.teste.gpi@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 6, 1),
+('2022GPI014', 'Bruno Oliveira Teste', 'bruno.teste.gpi@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 6, 1),
+('2022GPI015', 'Carolina Pereira Teste', 'carolina.teste.gpi@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 6, 1),
+('2022GPI016', 'Daniel Santos Teste', 'daniel.teste.gpi@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 6, 1),
+('2022GPI017', 'Eduarda Lima Teste', 'eduarda.teste.gpi@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 6, 1),
+('2022GPI018', 'Fernando Costa Teste', 'fernando.teste.gpi@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 6, 1),
+('2022GPI019', 'Gabriela Alves Teste', 'gabriela.teste.gpi@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 6, 1),
+('2022GPI020', 'Henrique Souza Teste', 'henrique.teste.gpi@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 6, 1);
 
 -- =====================================================
 -- ELEIÇÕES
@@ -245,19 +271,21 @@ VALUES
 
 -- Eleição 2: GE - Semestre 2 (candidatura_aberta)
 -- 3 candidatos: 2 deferidos, 1 pendente
+-- NOTA: IDs ajustados após adição de 8 alunos em DSM-2 (deslocamento de +8)
 INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
 VALUES
-(2, 34, 'Fortalecer a relação com empresas locais para conseguir mais estágios e visitas técnicas.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 2 DAY)),
-(2, 36, 'Criar projeto de mentoria entre veteranos e calouros para facilitar adaptação ao curso.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 2 DAY)),
-(2, 38, 'Organizar semana de empreendedorismo com workshops e palestras sobre gestão de negócios.', 'pendente', NULL, NULL, NULL);
+(2, 42, 'Fortalecer a relação com empresas locais para conseguir mais estágios e visitas técnicas.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(2, 44, 'Criar projeto de mentoria entre veteranos e calouros para facilitar adaptação ao curso.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(2, 46, 'Organizar semana de empreendedorismo com workshops e palestras sobre gestão de negócios.', 'pendente', NULL, NULL, NULL);
 
 -- Eleição 3: GPI - Semestre 3 (candidatura_aberta)
 -- 3 candidatos: 1 deferido, 2 pendentes
+-- NOTA: IDs ajustados (deslocamento de +15)
 INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
 VALUES
-(3, 68, 'Promover visitas técnicas a indústrias da região e criar parcerias para projetos práticos.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
-(3, 70, 'Implementar grupos de estudo focados em certificações industriais e normas de qualidade.', 'pendente', NULL, NULL, NULL),
-(3, 72, 'Melhorar o acesso a softwares de simulação industrial e criar biblioteca de cases práticos.', 'pendente', NULL, NULL, NULL);
+(3, 83, 'Promover visitas técnicas a indústrias da região e criar parcerias para projetos práticos.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(3, 85, 'Implementar grupos de estudo focados em certificações industriais e normas de qualidade.', 'pendente', NULL, NULL, NULL),
+(3, 87, 'Melhorar o acesso a softwares de simulação industrial e criar biblioteca de cases práticos.', 'pendente', NULL, NULL, NULL);
 
 -- =====================================================
 -- CANDIDATURAS - Eleições com VOTAÇÃO ABERTA
@@ -274,20 +302,22 @@ VALUES
 
 -- Eleição 5: GE - Semestre 4 (votacao_aberta)
 -- 3 candidatos, TODOS deferidos
+-- NOTA: IDs ajustados (deslocamento de +15)
 INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
 VALUES
-(5, 45, 'Criar núcleo de estudos em gestão estratégica e realizar simulações de negócios.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY)),
-(5, 47, 'Organizar feira de empreendedorismo com participação de startups e empresas consolidadas.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY)),
-(5, 49, 'Implementar programa de consultoria júnior para empresas locais com supervisão de professores.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY));
+(5, 60, 'Criar núcleo de estudos em gestão estratégica e realizar simulações de negócios.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(5, 62, 'Organizar feira de empreendedorismo com participação de startups e empresas consolidadas.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(5, 64, 'Implementar programa de consultoria júnior para empresas locais com supervisão de professores.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY));
 
 -- Eleição 6: GPI - Semestre 6 (votacao_aberta)
 -- 4 candidatos, TODOS deferidos
+-- NOTA: IDs ajustados (GPI-6 agora IDs 92-111, deslocamento +15)
 INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
 VALUES
-(6, 79, 'Criar laboratório de processos industriais com equipamentos de automação e controle.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
-(6, 81, 'Desenvolver projetos de melhoria contínua em parceria com indústrias da região.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
-(6, 83, 'Organizar semana de qualidade e produtividade com certificações e workshops especializados.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
-(6, 85, 'Implementar sistema de gestão à vista e painéis de indicadores no laboratório de práticas.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY));
+(6, 94, 'Criar laboratório de processos industriais com equipamentos de automação e controle.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(6, 96, 'Desenvolver projetos de melhoria contínua em parceria com indústrias da região.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(6, 98, 'Organizar semana de qualidade e produtividade com certificações e workshops especializados.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(6, 100, 'Implementar sistema de gestão à vista e painéis de indicadores no laboratório de práticas.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY));
 
 -- =====================================================
 -- VOTOS - Apenas nas Eleições com VOTAÇÃO ABERTA
@@ -311,42 +341,44 @@ INSERT INTO VOTO (id_eleicao, id_candidatura, id_aluno, data_hora_voto) VALUES
 (4, 13, 20, DATE_SUB(NOW(), INTERVAL 38 HOUR)), -- Carolina (ID 20) vota em candidato 3
 (4, 14, 22, DATE_SUB(NOW(), INTERVAL 26 HOUR)); -- Patrícia (ID 22) vota em candidato 4
 
--- Votos Eleição 5: GE - Semestre 4 (13 alunos aptos - IDs 44 a 56)
+-- Votos Eleição 5: GE - Semestre 4 (20 alunos aptos - IDs 52 a 71, antes eram 44 a 56)
 -- Distribuição: Candidato 1=6 votos, Candidato 2=4 votos, Candidato 3=3 votos
 -- (IDs das candidaturas: 15, 16, 17)
 -- DATAS DINÂMICAS: Votos de 2 dias atrás até hoje
+-- NOTA: IDs dos alunos ajustados (+15 de deslocamento)
 INSERT INTO VOTO (id_eleicao, id_candidatura, id_aluno, data_hora_voto) VALUES
-(5, 15, 44, DATE_SUB(NOW(), INTERVAL 2 DAY)), -- Marcos (ID 44) vota em candidato 1
-(5, 15, 45, DATE_SUB(NOW(), INTERVAL 47 HOUR)), -- Bianca (ID 45) vota em candidato 1
-(5, 15, 47, DATE_SUB(NOW(), INTERVAL 45 HOUR)), -- Juliana (ID 47) vota em candidato 1
-(5, 15, 49, DATE_SUB(NOW(), INTERVAL 43 HOUR)), -- Adriana (ID 49) vota em candidato 1
-(5, 15, 51, DATE_SUB(NOW(), INTERVAL 41 HOUR)), -- Renata (ID 51) vota em candidato 1
-(5, 15, 53, DATE_SUB(NOW(), INTERVAL 15 HOUR)), -- Viviane (ID 53) vota em candidato 1
-(5, 16, 46, DATE_SUB(NOW(), INTERVAL 46 HOUR)), -- Alexandre (ID 46) vota em candidato 2
-(5, 16, 48, DATE_SUB(NOW(), INTERVAL 44 HOUR)), -- Fernando (ID 48) vota em candidato 2
-(5, 16, 52, DATE_SUB(NOW(), INTERVAL 40 HOUR)), -- Leandro (ID 52) vota em candidato 2
-(5, 16, 55, DATE_SUB(NOW(), INTERVAL 13 HOUR)), -- Luciana (ID 55) vota em candidato 2
-(5, 17, 50, DATE_SUB(NOW(), INTERVAL 42 HOUR)), -- César (ID 50) vota em candidato 3
-(5, 17, 54, DATE_SUB(NOW(), INTERVAL 14 HOUR)), -- Cristiano (ID 54) vota em candidato 3
-(5, 17, 56, DATE_SUB(NOW(), INTERVAL 12 HOUR)); -- Sérgio (ID 56) vota em candidato 3
+(5, 15, 52, DATE_SUB(NOW(), INTERVAL 2 DAY)), -- Marcos vota em candidato 1
+(5, 15, 53, DATE_SUB(NOW(), INTERVAL 47 HOUR)), -- Bianca vota em candidato 1
+(5, 15, 55, DATE_SUB(NOW(), INTERVAL 45 HOUR)), -- Juliana vota em candidato 1
+(5, 15, 57, DATE_SUB(NOW(), INTERVAL 43 HOUR)), -- Adriana vota em candidato 1
+(5, 15, 59, DATE_SUB(NOW(), INTERVAL 41 HOUR)), -- Renata vota em candidato 1
+(5, 15, 61, DATE_SUB(NOW(), INTERVAL 15 HOUR)), -- Viviane vota em candidato 1
+(5, 16, 54, DATE_SUB(NOW(), INTERVAL 46 HOUR)), -- Alexandre vota em candidato 2
+(5, 16, 56, DATE_SUB(NOW(), INTERVAL 44 HOUR)), -- Fernando vota em candidato 2
+(5, 16, 60, DATE_SUB(NOW(), INTERVAL 40 HOUR)), -- Leandro vota em candidato 2
+(5, 16, 63, DATE_SUB(NOW(), INTERVAL 13 HOUR)), -- Luciana vota em candidato 2
+(5, 17, 58, DATE_SUB(NOW(), INTERVAL 42 HOUR)), -- César vota em candidato 3
+(5, 17, 62, DATE_SUB(NOW(), INTERVAL 14 HOUR)), -- Cristiano vota em candidato 3
+(5, 17, 64, DATE_SUB(NOW(), INTERVAL 12 HOUR)); -- Sérgio vota em candidato 3
 
--- Votos Eleição 6: GPI - Semestre 6 (12 alunos aptos - IDs 77 a 88)
+-- Votos Eleição 6: GPI - Semestre 6 (20 alunos aptos - IDs 92 a 111, antes eram 77 a 88)
 -- Distribuição: Candidato 1=4 votos, Candidato 2=3 votos, Candidato 3=3 votos, Candidato 4=2 votos
 -- (IDs das candidaturas: 18, 19, 20, 21)
 -- DATAS DINÂMICAS: Votos de 3 dias atrás até 1 dia atrás
+-- NOTA: IDs dos alunos ajustados (+15 de deslocamento)
 INSERT INTO VOTO (id_eleicao, id_candidatura, id_aluno, data_hora_voto) VALUES
-(6, 18, 77, DATE_SUB(NOW(), INTERVAL 3 DAY)), -- Nilton (ID 77) vota em candidato 1
-(6, 18, 79, DATE_SUB(NOW(), INTERVAL 66 HOUR)), -- Pedro (ID 79) vota em candidato 1
-(6, 18, 82, DATE_SUB(NOW(), INTERVAL 62 HOUR)), -- Suzana (ID 82) vota em candidato 1
-(6, 18, 85, DATE_SUB(NOW(), INTERVAL 39 HOUR)), -- Úrsula (ID 85) vota em candidato 1
-(6, 19, 78, DATE_SUB(NOW(), INTERVAL 67 HOUR)), -- Olívia (ID 78) vota em candidato 2
-(6, 19, 81, DATE_SUB(NOW(), INTERVAL 64 HOUR)), -- Robson (ID 81) vota em candidato 2
-(6, 19, 84, DATE_SUB(NOW(), INTERVAL 56 HOUR)), -- Tiago (ID 84) vota em candidato 2
-(6, 20, 80, DATE_SUB(NOW(), INTERVAL 65 HOUR)), -- Queila (ID 80) vota em candidato 3
-(6, 20, 83, DATE_SUB(NOW(), INTERVAL 61 HOUR)), -- Valter (ID 83) vota em candidato 3
-(6, 20, 87, DATE_SUB(NOW(), INTERVAL 37 HOUR)), -- Xavier (ID 87) vota em candidato 3
-(6, 21, 86, DATE_SUB(NOW(), INTERVAL 38 HOUR)), -- Wanda (ID 86) vota em candidato 4
-(6, 21, 88, DATE_SUB(NOW(), INTERVAL 35 HOUR)); -- Yasmin (ID 88) vota em candidato 4
+(6, 18, 92, DATE_SUB(NOW(), INTERVAL 3 DAY)), -- Nilton vota em candidato 1
+(6, 18, 94, DATE_SUB(NOW(), INTERVAL 66 HOUR)), -- Pedro vota em candidato 1
+(6, 18, 97, DATE_SUB(NOW(), INTERVAL 62 HOUR)), -- Suzana vota em candidato 1
+(6, 18, 100, DATE_SUB(NOW(), INTERVAL 39 HOUR)), -- Úrsula vota em candidato 1
+(6, 19, 93, DATE_SUB(NOW(), INTERVAL 67 HOUR)), -- Olívia vota em candidato 2
+(6, 19, 96, DATE_SUB(NOW(), INTERVAL 64 HOUR)), -- Robson vota em candidato 2
+(6, 19, 99, DATE_SUB(NOW(), INTERVAL 56 HOUR)), -- Tiago vota em candidato 2
+(6, 20, 95, DATE_SUB(NOW(), INTERVAL 65 HOUR)), -- Queila vota em candidato 3
+(6, 20, 98, DATE_SUB(NOW(), INTERVAL 61 HOUR)), -- Valter vota em candidato 3
+(6, 20, 102, DATE_SUB(NOW(), INTERVAL 37 HOUR)), -- Xavier vota em candidato 3
+(6, 21, 101, DATE_SUB(NOW(), INTERVAL 38 HOUR)), -- Wanda vota em candidato 4
+(6, 21, 103, DATE_SUB(NOW(), INTERVAL 35 HOUR)); -- Yasmin vota em candidato 4
 
 -- =====================================================
 -- FINALIZAÇÃO
@@ -391,7 +423,7 @@ ORDER BY e.id_eleicao;
 
 -- Verificação de datas das eleições
 SELECT '' as '';
-SELECT '📅 VERIFICAÇÃO DE DATAS DAS ELEIÇÕES:' as '';
+SELECT 'VERIFICAÇÃO DE DATAS DAS ELEIÇÕES:' as '';
 SELECT '' as '';
 SELECT
     id_eleicao,
@@ -402,28 +434,9 @@ SELECT
     DATE_FORMAT(data_inicio_votacao, '%d/%m/%Y') as inicio_votacao,
     DATE_FORMAT(data_fim_votacao, '%d/%m/%Y') as fim_votacao,
     CASE
-        WHEN CURDATE() BETWEEN data_inicio_candidatura AND data_fim_candidatura THEN '✅ Candidatura OK'
-        WHEN CURDATE() BETWEEN data_inicio_votacao AND data_fim_votacao THEN '✅ Votação OK'
-        ELSE '❌ Fora do período'
+        WHEN CURDATE() BETWEEN data_inicio_candidatura AND data_fim_candidatura THEN '[OK] Candidatura OK'
+        WHEN CURDATE() BETWEEN data_inicio_votacao AND data_fim_votacao THEN '[OK] Votação OK'
+        ELSE '[X] Fora do período'
     END as validacao
 FROM ELEICAO
 ORDER BY id_eleicao;
-
--- Mensagem final
-SELECT '' as '';
-SELECT '✅ DADOS POPULADOS COM SUCESSO!' as '';
-SELECT '' as '';
-SELECT CONCAT('📅 Data de execução: ', DATE_FORMAT(NOW(), '%d/%m/%Y às %H:%i:%s')) as '';
-SELECT '' as '';
-SELECT 'CREDENCIAIS DE TESTE:' as '';
-SELECT '- Email de qualquer aluno listado acima' as '';
-SELECT '- Senha: password' as '';
-SELECT '' as '';
-SELECT 'ELEIÇÕES DISPONÍVEIS:' as '';
-SELECT '- 3 eleições com CANDIDATURA ABERTA (DSM-1, GE-2, GPI-3)' as '';
-SELECT '- 3 eleições com VOTAÇÃO ABERTA (DSM-2, GE-4, GPI-6)' as '';
-SELECT '' as '';
-SELECT '🔒 GARANTIA DE SEGURANÇA:' as '';
-SELECT '- Eleições válidas até 12-14/12 (se executado hoje)' as '';
-SELECT '- Cobre com FOLGA as apresentações de 02/12 e 08/12' as '';
-SELECT '- Pode re-executar em 10/12 para maior segurança (opcional)' as '';
