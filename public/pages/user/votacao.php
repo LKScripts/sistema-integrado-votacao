@@ -31,7 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote']) && $eleicao &
     // VALIDAR CSRF PRIMEIRO
     validarCSRFOuMorrer("Token de segurança inválido. Recarregue a página e tente votar novamente.");
 
-    $id_candidatura = intval($_POST['vote']);
+    // Aceitar voto em branco ou voto em candidato específico
+    $id_candidatura = $_POST['vote'] === 'branco' ? null : intval($_POST['vote']);
 
     // VERIFICAÇÃO EXTRA: Garantir que votação ainda está aberta (proteção contra formulários abertos após prazo)
     $verificacao = verificarPeriodoVotacao($eleicao['id_eleicao']);
@@ -39,31 +40,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote']) && $eleicao &
     if (!$verificacao['valido']) {
         $erro = $verificacao['mensagem'];
     } else {
-        // VALIDAÇÃO CRÍTICA: Verificar se o candidato pertence a esta eleição e está deferido
-        $stmtValidaCandidato = $conn->prepare("
-            SELECT id_candidatura
-            FROM CANDIDATURA
-            WHERE id_candidatura = ?
-              AND id_eleicao = ?
-              AND status_validacao = 'deferido'
-        ");
-        $stmtValidaCandidato->execute([$id_candidatura, $eleicao['id_eleicao']]);
-
-        if (!$stmtValidaCandidato->fetch()) {
-            $erro = "Candidato inválido ou não aprovado para esta eleição.";
-        } else {
-            // Inserir voto
+        // Se for voto em branco, inserir direto sem validação de candidato
+        if ($id_candidatura === null) {
             $stmtVoto = $conn->prepare("
                 INSERT INTO VOTO (id_eleicao, id_aluno, id_candidatura, ip_votante)
-                VALUES (?, ?, ?, ?)
+                VALUES (?, ?, NULL, ?)
             ");
             $ip = $_SERVER['REMOTE_ADDR'];
 
-            if ($stmtVoto->execute([$eleicao['id_eleicao'], $id_aluno, $id_candidatura, $ip])) {
+            if ($stmtVoto->execute([$eleicao['id_eleicao'], $id_aluno, $ip])) {
                 $voto_confirmado = true;
                 $ja_votou = true;
             } else {
-                $erro = "Erro ao registrar voto. Tente novamente.";
+                $erro = "Erro ao registrar voto em branco. Tente novamente.";
+            }
+        } else {
+            // VALIDAÇÃO CRÍTICA: Verificar se o candidato pertence a esta eleição e está deferido
+            $stmtValidaCandidato = $conn->prepare("
+                SELECT id_candidatura
+                FROM CANDIDATURA
+                WHERE id_candidatura = ?
+                  AND id_eleicao = ?
+                  AND status_validacao = 'deferido'
+            ");
+            $stmtValidaCandidato->execute([$id_candidatura, $eleicao['id_eleicao']]);
+
+            if (!$stmtValidaCandidato->fetch()) {
+                $erro = "Candidato inválido ou não aprovado para esta eleição.";
+            } else {
+                // Inserir voto
+                $stmtVoto = $conn->prepare("
+                    INSERT INTO VOTO (id_eleicao, id_aluno, id_candidatura, ip_votante)
+                    VALUES (?, ?, ?, ?)
+                ");
+                $ip = $_SERVER['REMOTE_ADDR'];
+
+                if ($stmtVoto->execute([$eleicao['id_eleicao'], $id_aluno, $id_candidatura, $ip])) {
+                    $voto_confirmado = true;
+                    $ja_votou = true;
+                } else {
+                    $erro = "Erro ao registrar voto. Tente novamente.";
+                }
             }
         }
     }
@@ -140,7 +157,7 @@ if ($eleicao) {
                 <div class="content">
                     <h3 class="title">Voto Confirmado!</h3>
                     <div class="text">
-                        <p>✅ Seu voto foi registrado com sucesso!</p>
+                        <p>Seu voto foi registrado com sucesso!</p>
                         <p>Obrigado por participar das votações!</p>
                     </div>
                     <div class="modal-buttons">
@@ -256,6 +273,24 @@ if ($eleicao) {
                     <?php endif; ?>
                 <?php endforeach; ?>
             </section>
+
+            <?php if (!$ja_votou): ?>
+                <!-- Opção de Voto em Branco -->
+                <div class="voto-branco-container">
+                    <h3>Não quer votar em nenhum candidato?</h3>
+                    <p class="voto-branco-descricao">
+                        Ao votar em branco, seu voto será contabilizado na participação, mas não será atribuído a nenhum candidato.
+                    </p>
+                    <form method="post" onsubmit="return confirm('Confirma voto EM BRANCO?\n\nVocê não votará em nenhum candidato, mas sua participação será registrada.');">
+                        <?= campoCSRF() ?>
+                        <input type="hidden" name="vote" value="branco">
+                        <button type="submit" class="button-voto-branco">
+                            <i class="fas fa-ban"></i>
+                            <span>VOTAR EM BRANCO</span>
+                        </button>
+                    </form>
+                </div>
+            <?php endif; ?>
         <?php endif; ?>
 
         <div class="callout info">
@@ -263,10 +298,11 @@ if ($eleicao) {
                 <div class="instructions">
                     <p class="title">Como votar</p>
                     <ol>
-                        <li><strong>Escolha seu candidato:</strong> Clique no botão "VOTAR" abaixo do seu candidato preferido.</li>
+                        <li><strong>Escolha seu candidato:</strong> Clique no botão "VOTAR" abaixo do seu candidato preferido, ou vote em branco.</li>
                         <li><strong>Confirme sua escolha:</strong> Você verá uma janela de confirmação para verificar seu voto.</li>
                         <li><strong>Finalizando seu voto:</strong> Após confirmação, seu voto será registrado com segurança no sistema.</li>
-                        <li><strong>Apenas um voto:</strong> Você pode votar em apenas um candidato!</li>
+                        <li><strong>Apenas um voto:</strong> Você pode votar em apenas um candidato ou em branco!</li>
+                        <li><strong>Voto em branco:</strong> Seu voto conta na participação, mas não escolhe nenhum candidato.</li>
                     </ol>
                 </div>
             </div>
