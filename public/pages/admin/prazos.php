@@ -12,6 +12,12 @@ $id_admin = $usuario['id'];
 $mensagem = "";
 $tipo_mensagem = ""; // success | error
 
+// Verificar se houve sucesso via GET (após redirect)
+if (isset($_GET['success']) && $_GET['success'] == '1') {
+    $mensagem = "Eleição cadastrada com sucesso!";
+    $tipo_mensagem = "success";
+}
+
 // Buscar eleições existentes (ativas e futuras)
 $sql_eleicoes = "SELECT
     id_eleicao,
@@ -71,11 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // ============================
 
         if ($curso === "Todos os Cursos") {
-            $lista_cursos = [
-                "Desenvolvimento de Software Multiplataforma",
-                "Gestão Empresarial",
-                "Gestão da Produção Industrial"
-            ];
+            $lista_cursos = ["DSM", "GE", "GPI"];
         } else {
             $lista_cursos = [$curso];
         }
@@ -111,11 +113,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $descricao = "Nova eleição criada para $curso - {$semestre}º semestre";
             $stmtAudit->execute([$id_admin, $descricao]);
 
-            $mensagem = "Eleição cadastrada com sucesso!";
-            $tipo_mensagem = "success";
-
-            // Limpar localStorage após sucesso
-            echo "<script>localStorage.removeItem('prazos_rascunho');</script>";
+            // Redirecionar para evitar resubmissão do formulário (padrão PRG: Post-Redirect-Get)
+            header("Location: prazos.php?success=1");
+            exit();
         } catch (PDOException $e) {
             // Logar erro completo para debug
             error_log("Erro ao cadastrar eleição/prazo: " . $e->getMessage());
@@ -136,11 +136,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 function obterNomeCurso($sigla) {
     $cursos = [
         'DSM' => 'Desenvolvimento de Software Multiplataforma',
-        'Desenvolvimento de Software Multiplataforma' => 'DSM',
         'GE' => 'Gestão Empresarial',
-        'Gestão Empresarial' => 'Gestão Empresarial',
         'GPI' => 'Gestão da Produção Industrial',
-        'Gestão da Produção Industrial' => 'Gestão Produção'
+        // Compatibilidade reversa
+        'Desenvolvimento de Software Multiplataforma' => 'Desenvolvimento de Software Multiplataforma',
+        'Gestão Empresarial' => 'Gestão Empresarial',
+        'Gestão da Produção Industrial' => 'Gestão da Produção Industrial'
     ];
     return $cursos[$sigla] ?? $sigla;
 }
@@ -747,9 +748,9 @@ function obterStatusLegivel($status) {
                     <label for="curso">Curso *</label>
                     <select name="curso" id="curso" required>
                         <option value="">Selecione o curso</option>
-                        <option value="Desenvolvimento de Software Multiplataforma">DSM - Desenvolvimento de Software Multiplataforma</option>
-                        <option value="Gestão Empresarial">GE - Gestão Empresarial</option>
-                        <option value="Gestão da Produção Industrial">GPI - Gestão da Produção Industrial</option>
+                        <option value="DSM">DSM - Desenvolvimento de Software Multiplataforma</option>
+                        <option value="GE">GE - Gestão Empresarial</option>
+                        <option value="GPI">GPI - Gestão da Produção Industrial</option>
                         <option value="Todos os Cursos">Todos os Cursos</option>
                     </select>
                 </div>
@@ -1099,28 +1100,22 @@ document.getElementById('curso').addEventListener('change', function() {
 // ====================================
 
 document.getElementById('inscricao_inicio').addEventListener('change', function() {
-    validarInscricaoInicio();
-    validarInscricaoFim();
-    validarVotacaoInicio();
-    validarVotacaoFim();
+    validarTudo();
     salvarRascunho();
 });
 
 document.getElementById('inscricao_fim').addEventListener('change', function() {
-    validarInscricaoFim();
-    validarVotacaoInicio();
-    validarVotacaoFim();
+    validarTudo();
     salvarRascunho();
 });
 
 document.getElementById('votacao_inicio').addEventListener('change', function() {
-    validarVotacaoInicio();
-    validarVotacaoFim();
+    validarTudo();
     salvarRascunho();
 });
 
 document.getElementById('votacao_fim').addEventListener('change', function() {
-    validarVotacaoFim();
+    validarTudo();
     salvarRascunho();
 });
 
@@ -1128,6 +1123,10 @@ document.getElementById('semestre').addEventListener('change', function() {
     salvarRascunho();
     validarTudo();
 });
+
+// Validar também quando outros campos forem alterados
+document.getElementById('curso').addEventListener('input', validarTudo);
+document.getElementById('semestre').addEventListener('input', validarTudo);
 
 // ====================================
 // FILTROS DE ELEIÇÕES
@@ -1234,6 +1233,14 @@ function limparFormulario() {
 
 function closeFeedbackModal() {
     document.getElementById('feedbackModal').remove();
+
+    // Limpar localStorage quando fechar modal de sucesso
+    localStorage.removeItem('prazos_rascunho');
+
+    // Limpar parâmetro success da URL
+    if (window.location.search.includes('success=1')) {
+        window.history.replaceState({}, document.title, 'prazos.php');
+    }
 }
 
 // ====================================
