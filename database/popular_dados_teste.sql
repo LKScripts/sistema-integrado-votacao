@@ -1,6 +1,18 @@
 USE siv_db;
 
 -- =====================================================
+-- SCRIPT DE DADOS DE TESTE - SIV
+-- =====================================================
+-- IMPORTANTE: Este script é apenas para TESTE/DESENVOLVIMENTO
+-- NÃO execute em ambiente de produção
+--
+-- FOTOS DOS CANDIDATOS:
+-- Todas as imagens são de paisagens/lugares/comidas do Unsplash (sem pessoas)
+-- - Montanhas, praias, comidas, cidades, natureza
+-- - Um candidato por eleição não tem foto (demonstrar não-obrigatoriedade)
+-- =====================================================
+
+-- =====================================================
 -- LIMPEZA DE DADOS ANTERIORES
 -- =====================================================
 
@@ -104,7 +116,7 @@ INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, se
 
 -- GE - Semestre 4 (20 alunos - 13 já votaram, 7 disponíveis para teste)
 INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre, ativo) VALUES
-('2023GE001', 'Marcos Vinícius Correia', 'marcos.correia@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
+('2023GE001', 'Marcos Vinícius Correia', 'Veja', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
 ('2023GE002', 'Bianca Rocha Teixeira', 'bianca.teixeira@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
 ('2023GE003', 'Alexandre Campos Neves', 'alexandre.neves@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
 ('2023GE004', 'Juliana Costa Ramos', 'juliana.ramos@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
@@ -261,63 +273,63 @@ VALUES ('GPI', 6,
 -- =====================================================
 
 -- Eleição 1: DSM - Semestre 1 (candidatura_aberta)
--- 4 candidatos: 2 deferidos, 1 pendente, 1 indeferido
-INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
+-- 4 candidatos: 2 deferidos (1 COM foto, 1 SEM foto), 1 pendente, 1 indeferido
+INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, foto_candidato, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
 VALUES
-(1, 1, 'Proposta para melhorar a comunicação entre alunos e professores, criando grupos de estudo e eventos de integração.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY)),
-(1, 3, 'Melhorar a estrutura do laboratório de informática e promover hackathons internos para desenvolver habilidades práticas.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY)),
-(1, 5, 'Criar canal de feedback direto com coordenação e organizar palestras com profissionais da área de tecnologia.', 'pendente', NULL, NULL, NULL),
-(1, 7, 'Implementar aulas extras aos finais de semana.', 'indeferido', 'Proposta inviável devido a restrições de disponibilidade de professores e infraestrutura.', 1, DATE_SUB(NOW(), INTERVAL 2 DAY));
+(1, 1, 'Proposta para melhorar a comunicação entre alunos e professores, criando grupos de estudo e eventos de integração.', 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(1, 3, 'Melhorar a estrutura do laboratório de informática e promover hackathons internos para desenvolver habilidades práticas.', NULL, 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(1, 5, 'Criar canal de feedback direto com coordenação e organizar palestras com profissionais da área de tecnologia.', 'https://images.unsplash.com/photo-1511884642898-4c92249e20b6?w=400', 'pendente', NULL, NULL, NULL),
+(1, 7, 'Implementar aulas extras aos finais de semana.', 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400', 'indeferido', 'Proposta inviável devido a restrições de disponibilidade de professores e infraestrutura.', 1, DATE_SUB(NOW(), INTERVAL 2 DAY));
 
 -- Eleição 2: GE - Semestre 2 (candidatura_aberta)
--- 3 candidatos: 2 deferidos, 1 pendente
+-- 3 candidatos: 2 deferidos (1 COM foto, 1 SEM foto), 1 pendente
 -- NOTA: IDs ajustados após adição de 8 alunos em DSM-2 (deslocamento de +8)
-INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
+INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, foto_candidato, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
 VALUES
-(2, 42, 'Fortalecer a relação com empresas locais para conseguir mais estágios e visitas técnicas.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 2 DAY)),
-(2, 44, 'Criar projeto de mentoria entre veteranos e calouros para facilitar adaptação ao curso.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 2 DAY)),
-(2, 46, 'Organizar semana de empreendedorismo com workshops e palestras sobre gestão de negócios.', 'pendente', NULL, NULL, NULL);
+(2, 42, 'Fortalecer a relação com empresas locais para conseguir mais estágios e visitas técnicas.', 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=400', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(2, 44, 'Criar projeto de mentoria entre veteranos e calouros para facilitar adaptação ao curso.', NULL, 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 2 DAY)),
+(2, 46, 'Organizar semana de empreendedorismo com workshops e palestras sobre gestão de negócios.', 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400', 'pendente', NULL, NULL, NULL);
 
 -- Eleição 3: GPI - Semestre 3 (candidatura_aberta)
--- 3 candidatos: 1 deferido, 2 pendentes
+-- 3 candidatos: 1 deferido (SEM foto), 2 pendentes
 -- NOTA: IDs ajustados (deslocamento de +15)
-INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
+INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, foto_candidato, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
 VALUES
-(3, 83, 'Promover visitas técnicas a indústrias da região e criar parcerias para projetos práticos.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
-(3, 85, 'Implementar grupos de estudo focados em certificações industriais e normas de qualidade.', 'pendente', NULL, NULL, NULL),
-(3, 87, 'Melhorar o acesso a softwares de simulação industrial e criar biblioteca de cases práticos.', 'pendente', NULL, NULL, NULL);
+(3, 83, 'Promover visitas técnicas a indústrias da região e criar parcerias para projetos práticos.', NULL, 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(3, 85, 'Implementar grupos de estudo focados em certificações industriais e normas de qualidade.', 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=400', 'pendente', NULL, NULL, NULL),
+(3, 87, 'Melhorar o acesso a softwares de simulação industrial e criar biblioteca de cases práticos.', 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=400', 'pendente', NULL, NULL, NULL);
 
 -- =====================================================
 -- CANDIDATURAS - Eleições com VOTAÇÃO ABERTA
 -- =====================================================
 
 -- Eleição 4: DSM - Semestre 2 (votacao_aberta)
--- 4 candidatos, TODOS deferidos (necessário para permitir votação)
-INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
+-- 4 candidatos, TODOS deferidos (3 COM foto, 1 SEM foto)
+INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, foto_candidato, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
 VALUES
-(4, 11, 'Criar clube de programação com competições e desafios semanais para aprimorar habilidades técnicas.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 5 DAY)),
-(4, 13, 'Estabelecer parcerias com empresas de tecnologia para palestras, workshops e oportunidades de estágio.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 5 DAY)),
-(4, 15, 'Desenvolver projetos open-source em equipe e criar repositório de códigos para consulta dos alunos.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 5 DAY)),
-(4, 17, 'Organizar eventos de networking com ex-alunos e profissionais atuantes na área de desenvolvimento.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 5 DAY));
+(4, 11, 'Criar clube de programação com competições e desafios semanais para aprimorar habilidades técnicas.', 'https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?w=400', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(4, 13, 'Estabelecer parcerias com empresas de tecnologia para palestras, workshops e oportunidades de estágio.', NULL, 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(4, 15, 'Desenvolver projetos open-source em equipe e criar repositório de códigos para consulta dos alunos.', 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 5 DAY)),
+(4, 17, 'Organizar eventos de networking com ex-alunos e profissionais atuantes na área de desenvolvimento.', 'https://images.unsplash.com/photo-1527489377706-5bf97e608852?w=400', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 5 DAY));
 
 -- Eleição 5: GE - Semestre 4 (votacao_aberta)
--- 3 candidatos, TODOS deferidos
+-- 3 candidatos, TODOS deferidos (2 COM foto, 1 SEM foto)
 -- NOTA: IDs ajustados (deslocamento de +15)
-INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
+INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, foto_candidato, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
 VALUES
-(5, 60, 'Criar núcleo de estudos em gestão estratégica e realizar simulações de negócios.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY)),
-(5, 62, 'Organizar feira de empreendedorismo com participação de startups e empresas consolidadas.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY)),
-(5, 64, 'Implementar programa de consultoria júnior para empresas locais com supervisão de professores.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY));
+(5, 60, 'Criar núcleo de estudos em gestão estratégica e realizar simulações de negócios.', 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(5, 62, 'Organizar feira de empreendedorismo com participação de startups e empresas consolidadas.', 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY)),
+(5, 64, 'Implementar programa de consultoria júnior para empresas locais com supervisão de professores.', NULL, 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 3 DAY));
 
 -- Eleição 6: GPI - Semestre 6 (votacao_aberta)
--- 4 candidatos, TODOS deferidos
+-- 4 candidatos, TODOS deferidos (3 COM foto, 1 SEM foto)
 -- NOTA: IDs ajustados (GPI-6 agora IDs 92-111, deslocamento +15)
-INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
+INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, foto_candidato, status_validacao, justificativa_indeferimento, validado_por, data_validacao)
 VALUES
-(6, 94, 'Criar laboratório de processos industriais com equipamentos de automação e controle.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
-(6, 96, 'Desenvolver projetos de melhoria contínua em parceria com indústrias da região.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
-(6, 98, 'Organizar semana de qualidade e produtividade com certificações e workshops especializados.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
-(6, 100, 'Implementar sistema de gestão à vista e painéis de indicadores no laboratório de práticas.', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY));
+(6, 94, 'Criar laboratório de processos industriais com equipamentos de automação e controle.', 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(6, 96, 'Desenvolver projetos de melhoria contínua em parceria com indústrias da região.', 'https://images.unsplash.com/photo-1504309092620-4d0ec726efa4?w=400', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(6, 98, 'Organizar semana de qualidade e produtividade com certificações e workshops especializados.', NULL, 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY)),
+(6, 100, 'Implementar sistema de gestão à vista e painéis de indicadores no laboratório de práticas.', 'https://images.unsplash.com/photo-1518976024611-28bf4b48222e?w=400', 'deferido', NULL, 1, DATE_SUB(NOW(), INTERVAL 4 DAY));
 
 -- =====================================================
 -- VOTOS - Apenas nas Eleições com VOTAÇÃO ABERTA
