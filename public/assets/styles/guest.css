@@ -196,6 +196,12 @@ main.login .wrapper-form [class^="button"] {
     margin-bottom: 1em;
 }
 
+/* Garantir que botões secondary tenham texto branco (ícones e texto) */
+main.login .wrapper-form .button.secondary,
+main.login .wrapper-form .button.secondary i {
+    color: white;
+}
+
 main.login .wrapper-visual {
     position: relative;
     display: flex;
