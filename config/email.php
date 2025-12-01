@@ -74,7 +74,21 @@ class EmailService {
                         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
                         .header { background-color: #c8102e; color: white; padding: 20px; text-align: center; }
                         .content { background-color: #f9f9f9; padding: 30px; border: 1px solid #ddd; }
-                        .button { display: inline-block; padding: 12px 30px; background-color: #c8102e; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+                        .button {
+                            display: inline-block;
+                            padding: 12px 30px;
+                            background-color: #c8102e;
+                            color: white !important;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            margin: 20px 0;
+                            font-weight: bold;
+                        }
+                        /* Garantir cor branca em todos os estados do link */
+                        a.button:link { color: white !important; }
+                        a.button:visited { color: white !important; }
+                        a.button:hover { color: white !important; background-color: #a00d24; }
+                        a.button:active { color: white !important; }
                         .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
                     </style>
                 </head>
