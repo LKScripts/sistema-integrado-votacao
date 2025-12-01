@@ -208,305 +208,19 @@ function getSortIcon($column, $current_sort, $current_order) {
     <link rel="stylesheet" href="../../assets/styles/fonts.css">
     <link rel="stylesheet" href="../../assets/styles/footer-site.css">
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
-    <style>
-        /* Filtros aprimorados */
-        .form-filters {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 25px;
-        }
-
-        .filters-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .filter-group label {
-            font-weight: 600;
-            color: #333;
-            font-size: 0.9em;
-        }
-
-        .filter-group input,
-        .filter-group select {
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 0.95em;
-            transition: border-color 0.2s;
-        }
-
-        .filter-group input:focus,
-        .filter-group select:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .filter-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .button {
-            padding: 6px 16px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            transition: all 0.2s;
-            font-size: 0.9em;
-            width: auto;
-            white-space: nowrap;
-            line-height: 1.4;
-        }
-
-        .button.primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .button.primary:hover {
-            background: #004654;
-        }
-
-        .button.secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .button.secondary:hover {
-            background: #5a6268;
-        }
-
-        /* Tabela com ordenação */
-        .list-applicants table {
-            width: 100%;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .list-applicants thead th {
-            background: #f8f9fa;
-            padding: 15px 12px;
-            text-align: left;
-            font-weight: 600;
-            color: #333;
-            border-bottom: 2px solid #dee2e6;
-            white-space: nowrap;
-        }
-
-        .list-applicants thead th.sortable {
-            cursor: pointer;
-            user-select: none;
-            transition: background 0.2s;
-        }
-
-        .list-applicants thead th.sortable:hover {
-            background: #e9ecef;
-            color: #333;
-        }
-
-        .list-applicants thead th.sortable.active {
-            background: #e8f4f8;
-            color: var(--primary);
-        }
-
-        .sort-icon {
-            font-size: 1.1em;
-            margin-left: 6px;
-            opacity: 0.4;
-            transition: opacity 0.2s;
-        }
-
-        .sort-icon.active {
-            opacity: 1;
-            color: var(--primary);
-        }
-
-        .list-applicants tbody td {
-            padding: 12px;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .list-applicants tbody tr:hover {
-            background: #f8f9fa;
-        }
-
-        /* Status badges */
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.85em;
-            font-weight: 600;
-        }
-
-        .status-pendente {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-deferido {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-indeferido {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        /* Ações da tabela */
-        .action-link {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-            padding: 6px 12px;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-
-        .action-link:hover {
-            background: #e8f4f8;
-            color: #004654;
-        }
-
-        /* Info box */
-        .info-box {
-            background: #e8f4f8;
-            border: 1px solid var(--primary);
-            border-radius: 8px;
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .info-box-icon {
-            font-size: 1.5em;
-            color: var(--primary);
-        }
-
-        .info-box-text {
-            flex: 1;
-            color: #004654;
-            font-size: 0.95em;
-        }
-
-        .info-box-text strong {
-            font-weight: 600;
-        }
-
-        /* Modal styles override */
-        .modal .content {
-            max-width: 600px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-group input[type="text"],
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 0.95em;
-        }
-
-        .form-group textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        /* Paginação melhorada */
-        .pagination {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .pagination .results {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .pagination ul {
-            display: flex;
-            gap: 5px;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .pagination ul li a,
-        .pagination ul li span {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 36px;
-            height: 36px;
-            padding: 0 10px;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            text-decoration: none;
-            color: #333;
-            transition: all 0.2s;
-        }
-
-        .pagination ul li a:hover {
-            background: #e9ecef;
-        }
-
-        .pagination ul li a[style*="background: #005f73"] {
-            background: var(--primary) !important;
-            color: white !important;
-            border-color: var(--primary) !important;
-        }
-    </style>
+    <link rel="stylesheet" href="../../assets/styles/modal.css">
+    <link rel="stylesheet" href="../../assets/styles/inscricoes.css">
 </head>
-
 <body>
     <?php require_once 'components/header.php'; ?>
 
     <?php if (!empty($mensagem)): ?>
         <div class="modal feedback" style="display:block;">
             <div class="content">
-                <a href="inscricoes.php" class="close">&times;</a>
                 <h3 class="title">Sucesso!</h3>
+                <a href="inscricoes.php" class="close">&times;</a>
                 <div class="text">
-                    <p><?= htmlspecialchars($mensagem) ?></p>
+                    <p style="margin: 0; font-size: 15px; color: #333;"><?= htmlspecialchars($mensagem) ?></p>
                 </div>
                 <div class="modal-buttons">
                     <a href="inscricoes.php" class="button primary">OK</a>
@@ -518,10 +232,10 @@ function getSortIcon($column, $current_sort, $current_order) {
     <?php if (!empty($erro)): ?>
         <div class="modal feedback" style="display:block;">
             <div class="content">
-                <a href="inscricoes.php" class="close">&times;</a>
                 <h3 class="title">Erro</h3>
+                <a href="inscricoes.php" class="close">&times;</a>
                 <div class="text">
-                    <p><?= htmlspecialchars($erro) ?></p>
+                    <p style="margin: 0; font-size: 15px; color: #333;"><?= htmlspecialchars($erro) ?></p>
                 </div>
                 <div class="modal-buttons">
                     <a href="inscricoes.php" class="button primary">OK</a>
@@ -533,91 +247,91 @@ function getSortIcon($column, $current_sort, $current_order) {
     <?php foreach ($candidaturas as $cand): ?>
     <div class="modal" id="edit-user-modal-<?= $cand['id_candidatura'] ?>">
         <div class="content">
+            <h3 class="title">Validar Candidatura</h3>
             <a href="#" class="close">&times;</a>
 
-            <h3 class="title">Validar Candidatura</h3>
-
-            <div class="form-group">
-                <label>Nome Completo</label>
-                <input type="text" value="<?= htmlspecialchars($cand['nome_completo']) ?>" readonly />
-            </div>
-
-            <div class="form-group">
-                <label>RA</label>
-                <input type="text" value="<?= htmlspecialchars($cand['ra']) ?>" readonly />
-            </div>
-
-            <div class="form-group">
-                <label>Email</label>
-                <input type="text" value="<?= htmlspecialchars($cand['email_institucional']) ?>" readonly />
-            </div>
-
-            <div class="form-group">
-                <label>Curso</label>
-                <input type="text" value="<?= htmlspecialchars($cand['curso']) ?>" readonly />
-            </div>
-
-            <div class="form-group">
-                <label>Semestre</label>
-                <input type="text" value="<?= $cand['semestre'] ?>º Semestre" readonly />
-            </div>
-
-            <div class="form-group">
-                <label>Proposta do Candidato</label>
-                <textarea readonly><?= htmlspecialchars($cand['proposta']) ?></textarea>
-            </div>
-
-            <?php if (!empty($cand['foto_candidato'])): ?>
-            <div class="form-group">
-                <label>Foto do Candidato</label>
-                <img src="../../../storage/uploads/candidatos/<?= htmlspecialchars($cand['foto_candidato']) ?>"
-                     alt="Foto do candidato"
-                     style="max-width: 300px; max-height: 300px; border-radius: 8px; display: block; margin-top: 10px;" />
-            </div>
-            <?php endif; ?>
-
-            <div class="form-group">
-                <label>Status Atual</label>
-                <input type="text" value="<?= ucfirst($cand['status_validacao']) ?>" readonly />
-            </div>
-
-            <?php if ($cand['status_validacao'] === 'pendente'): ?>
-            <form method="POST" id="form-deferir-<?= $cand['id_candidatura'] ?>">
-                <?= campoCSRF() ?>
-                <input type="hidden" name="id_candidatura" value="<?= $cand['id_candidatura'] ?>" />
-                <input type="hidden" name="acao" value="deferir" />
-            </form>
-
-            <form method="POST" id="form-indeferir-<?= $cand['id_candidatura'] ?>">
-                <?= campoCSRF() ?>
-                <input type="hidden" name="id_candidatura" value="<?= $cand['id_candidatura'] ?>" />
-                <input type="hidden" name="acao" value="indeferir" />
+            <div class="text">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" value="<?= htmlspecialchars($cand['nome_completo']) ?>" readonly />
+                </div>
 
                 <div class="form-group">
-                    <label for="justificativa-<?= $cand['id_candidatura'] ?>">Justificativa para Indeferimento</label>
+                    <label>RA</label>
+                    <input type="text" value="<?= htmlspecialchars($cand['ra']) ?>" readonly />
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="text" value="<?= htmlspecialchars($cand['email_institucional']) ?>" readonly />
+                </div>
+
+                <div class="form-group">
+                    <label>Curso</label>
+                    <input type="text" value="<?= htmlspecialchars($cand['curso']) ?>" readonly />
+                </div>
+
+                <div class="form-group">
+                    <label>Semestre</label>
+                    <input type="text" value="<?= $cand['semestre'] ?>º Semestre" readonly />
+                </div>
+
+                <div class="form-group">
+                    <label>Proposta do Candidato</label>
+                    <textarea readonly><?= htmlspecialchars($cand['proposta']) ?></textarea>
+                </div>
+
+                <?php if (!empty($cand['foto_candidato'])): ?>
+                <div class="form-group">
+                    <label>Foto do Candidato</label>
+                    <img src="../../../storage/uploads/candidatos/<?= htmlspecialchars($cand['foto_candidato']) ?>"
+                         alt="Foto do candidato"
+                         style="max-width: 300px; max-height: 300px; border-radius: 8px; display: block; margin-top: 10px;" />
+                </div>
+                <?php endif; ?>
+
+                <div class="form-group">
+                    <label>Status Atual</label>
+                    <input type="text" value="<?= ucfirst($cand['status_validacao']) ?>" readonly />
+                </div>
+
+                <?php if ($cand['status_validacao'] === 'pendente'): ?>
+                <form method="POST" id="form-deferir-<?= $cand['id_candidatura'] ?>" style="display: none;">
+                    <?= campoCSRF() ?>
+                    <input type="hidden" name="id_candidatura" value="<?= $cand['id_candidatura'] ?>" />
+                    <input type="hidden" name="acao" value="deferir" />
+                </form>
+
+                <form method="POST" id="form-indeferir-<?= $cand['id_candidatura'] ?>" style="display: none;">
+                    <?= campoCSRF() ?>
+                    <input type="hidden" name="id_candidatura" value="<?= $cand['id_candidatura'] ?>" />
+                    <input type="hidden" name="acao" value="indeferir" />
+                    <input type="hidden" id="justificativa-hidden-<?= $cand['id_candidatura'] ?>" name="justificativa" />
+                </form>
+
+                <div class="form-group">
+                    <label for="justificativa-<?= $cand['id_candidatura'] ?>">Justificativa para Indeferimento (opcional)</label>
                     <textarea
                         id="justificativa-<?= $cand['id_candidatura'] ?>"
-                        name="justificativa"
-                        placeholder="Digite o motivo do indeferimento..."></textarea>
+                        placeholder="Digite o motivo do indeferimento caso vá indeferir..."></textarea>
                 </div>
-            </form>
+                <?php elseif ($cand['status_validacao'] === 'indeferido' && !empty($cand['justificativa_indeferimento'])): ?>
+                <div class="form-group">
+                    <label>Justificativa do Indeferimento</label>
+                    <textarea readonly><?= htmlspecialchars($cand['justificativa_indeferimento']) ?></textarea>
+                </div>
+                <?php endif; ?>
+            </div>
 
             <div class="modal-buttons">
+                <?php if ($cand['status_validacao'] === 'pendente'): ?>
                 <a href="#" class="button secondary">Cancelar</a>
                 <button type="button" onclick="document.getElementById('form-deferir-<?= $cand['id_candidatura'] ?>').submit();" class="button primary" style="background-color: #28a745;">Deferir</button>
-                <button type="button" onclick="if(document.getElementById('justificativa-<?= $cand['id_candidatura'] ?>').value.trim() === '') { alert('Por favor, informe a justificativa para indeferir.'); return false; } document.getElementById('form-indeferir-<?= $cand['id_candidatura'] ?>').submit();" class="button primary" style="background-color: #dc3545;">Indeferir</button>
-            </div>
-            <?php else: ?>
-            <?php if ($cand['status_validacao'] === 'indeferido' && !empty($cand['justificativa_indeferimento'])): ?>
-            <div class="form-group">
-                <label>Justificativa do Indeferimento</label>
-                <textarea readonly><?= htmlspecialchars($cand['justificativa_indeferimento']) ?></textarea>
-            </div>
-            <?php endif; ?>
-            <div class="modal-buttons">
+                <button type="button" onclick="var textarea = document.getElementById('justificativa-<?= $cand['id_candidatura'] ?>'); if(textarea.value.trim() === '') { alert('Por favor, informe a justificativa para indeferir.'); return false; } document.getElementById('justificativa-hidden-<?= $cand['id_candidatura'] ?>').value = textarea.value; document.getElementById('form-indeferir-<?= $cand['id_candidatura'] ?>').submit();" class="button primary" style="background-color: #dc3545;">Indeferir</button>
+                <?php else: ?>
                 <a href="#" class="button secondary">Fechar</a>
+                <?php endif; ?>
             </div>
-            <?php endif; ?>
         </div>
     </div>
     <?php endforeach; ?>
@@ -625,8 +339,10 @@ function getSortIcon($column, $current_sort, $current_order) {
 
     <main class="manage-applicants">
         <div class="container">
-            <h1 style="font-size: 2em; color: #333; margin-bottom: 10px;">Gerenciar Inscrições</h1>
-            <p style="color: #666; margin-bottom: 25px;">Visualize e gerencie todas as candidaturas submetidas</p>
+            <div style="margin-bottom: 30px;">
+                <h1 style="font-size: 2rem; color: #333; margin: 0 0 8px 0; font-weight: 700;">Gerenciar Inscrições</h1>
+                <p style="color: #666; margin: 0; font-size: 15px;">Visualize e gerencie todas as candidaturas submetidas</p>
+            </div>
 
             <form class="form-filters" method="GET" action="">
                 <div class="filters-grid">
@@ -639,9 +355,9 @@ function getSortIcon($column, $current_sort, $current_order) {
                         <label for="curso">Curso</label>
                         <select id="curso" name="curso">
                             <option value="">Todos os Cursos</option>
-                            <option value="Desenvolvimento de Software Multiplataforma" <?= $filtro_curso === 'Desenvolvimento de Software Multiplataforma' ? 'selected' : '' ?>>DSM</option>
-                            <option value="Gestão Empresarial" <?= $filtro_curso === 'Gestão Empresarial' ? 'selected' : '' ?>>Gestão Empresarial</option>
-                            <option value="Gestão da Produção Industrial" <?= $filtro_curso === 'Gestão da Produção Industrial' ? 'selected' : '' ?>>Gestão Produção</option>
+                            <option value="DSM" <?= $filtro_curso === 'DSM' ? 'selected' : '' ?>>DSM - Desenvolvimento de Software Multiplataforma</option>
+                            <option value="GE" <?= $filtro_curso === 'GE' ? 'selected' : '' ?>>GE - Gestão Empresarial</option>
+                            <option value="GPI" <?= $filtro_curso === 'GPI' ? 'selected' : '' ?>>GPI - Gestão da Produção Industrial</option>
                         </select>
                     </div>
 
@@ -786,9 +502,13 @@ function getSortIcon($column, $current_sort, $current_order) {
                                         <!-- Botão Anterior -->
                                         <li>
                                             <?php if ($pagina_atual > 1): ?>
-                                                <a href="?pagina=<?= $pagina_atual - 1 ?><?= $query_string ?>">‹</a>
+                                                <a href="?pagina=<?= $pagina_atual - 1 ?><?= $query_string ?>" title="Página anterior">
+                                                    <i class="fas fa-chevron-left"></i>
+                                                </a>
                                             <?php else: ?>
-                                                <span style="opacity: 0.3; cursor: not-allowed;">‹</span>
+                                                <span title="Primeira página">
+                                                    <i class="fas fa-chevron-left"></i>
+                                                </span>
                                             <?php endif; ?>
                                         </li>
 
@@ -810,9 +530,13 @@ function getSortIcon($column, $current_sort, $current_order) {
                                         <!-- Botão Próximo -->
                                         <li>
                                             <?php if ($pagina_atual < $total_paginas): ?>
-                                                <a href="?pagina=<?= $pagina_atual + 1 ?><?= $query_string ?>">›</a>
+                                                <a href="?pagina=<?= $pagina_atual + 1 ?><?= $query_string ?>" title="Próxima página">
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </a>
                                             <?php else: ?>
-                                                <span style="opacity: 0.3; cursor: not-allowed;">›</span>
+                                                <span title="Última página">
+                                                    <i class="fas fa-chevron-right"></i>
+                                                </span>
                                             <?php endif; ?>
                                         </li>
                                     </ul>
