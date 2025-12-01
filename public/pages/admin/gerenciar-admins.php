@@ -390,383 +390,8 @@ while ($row = $stmt_aprovadores->fetch()) {
     <link rel="stylesheet" href="../../assets/styles/footer-site.css">
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .card-wrapper {
-            max-width: 100%;
-            padding: 20px;
-        }
-
-        .card {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .filters-bar {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: end;
-        }
-
-        .filter-group {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .filter-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #333;
-            font-size: 13px;
-        }
-
-        .filter-group input,
-        .filter-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 13px;
-        }
-
-        .btn-filter {
-            padding: 10px 20px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.3s;
-        }
-
-        .btn-filter:hover {
-            background: #004654;
-        }
-
-        .btn-add {
-            padding: 16px 20px;
-            background: var(--secondary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 10px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: auto;
-            max-width: fit-content;
-        }
-
-        .btn-add:hover {
-            background: #6d0000;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-add:active {
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .table-container {
-            overflow-x: auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background: var(--primary);
-            color: white;
-            padding: 12px 10px;
-            text-align: left;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            white-space: nowrap;
-            font-size: 13px;
-        }
-
-        td {
-            padding: 10px 8px;
-            border-bottom: 1px solid #eee;
-            font-size: 13px;
-        }
-
-        tr:hover {
-            background: #f8f9fa;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .badge.pendente {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .badge.ativo {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .badge.removido {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-
-        .btn-approve, .btn-reject, .btn-edit, .btn-remove, .btn-reactivate {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .btn-approve {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-approve:hover {
-            background: #218838;
-        }
-
-        .btn-reject {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-reject:hover {
-            background: #c82333;
-        }
-
-        .btn-edit {
-            background: #ffc107;
-            color: #333;
-        }
-
-        .btn-edit:hover {
-            background: #e0a800;
-        }
-
-        .btn-remove {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-remove:hover {
-            background: #5a6268;
-        }
-
-        .btn-reactivate {
-            background: #17a2b8;
-            color: white;
-        }
-
-        .btn-reactivate:hover {
-            background: #138496;
-        }
-
-        /* Modal */
-        .modal {
-            display: none !important;
-            position: fixed;
-            z-index: 9999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            overflow-y: auto;
-            pointer-events: none;
-        }
-
-        .modal.show {
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-            visibility: visible !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-
-        .modal.show .modal-content {
-            animation: modalFadeIn 0.3s;
-        }
-
-        @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-            z-index: 10000;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            pointer-events: auto !important;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #eee;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            color: var(--primary);
-        }
-
-        .btn-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-            line-height: 1;
-        }
-
-        .btn-close:hover {
-            color: #333;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
-
-        .empty-state i {
-            font-size: 64px;
-            color: #ddd;
-            margin-bottom: 20px;
-        }
-
-        /* Paginação */
-        .pagination {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-            padding: 15px 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .pagination .results {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .pagination ul {
-            list-style: none;
-            display: flex;
-            gap: 5px;
-            margin: 0;
-            padding: 0;
-        }
-
-        .pagination li {
-            display: inline-block;
-        }
-
-        .pagination a,
-        .pagination span {
-            display: inline-block;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            background: white;
-            color: #333;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: all 0.3s;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .pagination a:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .pagination a.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            font-weight: bold;
-        }
-
-        .pagination span {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .info-text {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .warning-box {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            color: #856404;
-        }
-
-        .warning-box i {
-            margin-right: 8px;
-        }
-    </style>
+    <link rel="stylesheet" href="../../assets/styles/modal.css">
+    <link rel="stylesheet" href="../../assets/styles/gerenciar.css">
 </head>
 <body>
     <?php require_once 'components/header.php'; ?>
@@ -970,37 +595,34 @@ while ($row = $stmt_aprovadores->fetch()) {
     <div id="modalCriar" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-user-plus"></i> Cadastrar Novo Administrador</h2>
+                <h2>Cadastrar Novo Administrador</h2>
                 <button class="btn-close" onclick="fecharModal('modalCriar')">&times;</button>
             </div>
 
-            <div class="warning-box">
-                <i class="fas fa-exclamation-triangle"></i>
-                <strong>Status inicial:</strong> Novo admin ficará com status "Pendente" até ser aprovado.
-            </div>
-
             <form method="POST" action="">
-                <?= campoCSRF() ?>
-                <input type="hidden" name="acao" value="criar">
+                <div class="modal-body">
+                    <?= campoCSRF() ?>
+                    <input type="hidden" name="acao" value="criar">
 
-                <div class="input-group">
-                    <label for="criar_nome">Nome Completo *</label>
-                    <input type="text" id="criar_nome" name="nome" required
-                           placeholder="Nome completo do administrador">
-                </div>
+                    <div class="input-group">
+                        <label for="criar_nome">Nome Completo *</label>
+                        <input type="text" id="criar_nome" name="nome" required
+                               placeholder="Nome completo do administrador">
+                    </div>
 
-                <div class="input-group">
-                    <label for="criar_email">Email Corporativo (@cps.sp.gov.br) *</label>
-                    <input type="email" id="criar_email" name="email" required
-                           placeholder="usuario@cps.sp.gov.br"
-                           pattern=".*@cps\.sp\.gov\.br$"
-                           title="O email deve ser do domínio @cps.sp.gov.br">
-                </div>
+                    <div class="input-group">
+                        <label for="criar_email">Email Corporativo (@cps.sp.gov.br) *</label>
+                        <input type="email" id="criar_email" name="email" required
+                               placeholder="usuario@cps.sp.gov.br"
+                               pattern=".*@cps\.sp\.gov\.br$"
+                               title="O email deve ser do domínio @cps.sp.gov.br">
+                    </div>
 
-                <div class="input-group">
-                    <label for="criar_senha">Senha *</label>
-                    <input type="password" id="criar_senha" name="senha" required
-                           minlength="6" placeholder="Mínimo 6 caracteres">
+                    <div class="input-group">
+                        <label for="criar_senha">Senha *</label>
+                        <input type="password" id="criar_senha" name="senha" required
+                               minlength="6" placeholder="Mínimo 6 caracteres">
+                    </div>
                 </div>
 
                 <div class="form-buttons">
@@ -1008,7 +630,7 @@ while ($row = $stmt_aprovadores->fetch()) {
                         Cancelar
                     </button>
                     <button type="submit" class="button primary">
-                        <i class="fas fa-save"></i> Cadastrar (Pendente)
+                        <i class="fas fa-save"></i> Cadastrar Administrador
                     </button>
                 </div>
             </form>
@@ -1019,35 +641,37 @@ while ($row = $stmt_aprovadores->fetch()) {
     <div id="modalEditar" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-user-edit"></i> Editar Administrador</h2>
+                <h2>Editar Administrador</h2>
                 <button class="btn-close" onclick="fecharModal('modalEditar')">&times;</button>
             </div>
 
             <form method="POST" action="">
-                <?= campoCSRF() ?>
-                <input type="hidden" name="acao" value="editar">
-                <input type="hidden" id="editar_id" name="id_admin">
+                <div class="modal-body">
+                    <?= campoCSRF() ?>
+                    <input type="hidden" name="acao" value="editar">
+                    <input type="hidden" id="editar_id" name="id_admin">
 
-                <div class="input-group">
-                    <label for="editar_nome">Nome Completo *</label>
-                    <input type="text" id="editar_nome" name="nome" required>
-                </div>
+                    <div class="input-group">
+                        <label for="editar_nome">Nome Completo *</label>
+                        <input type="text" id="editar_nome" name="nome" required>
+                    </div>
 
-                <div class="input-group">
-                    <label for="editar_email">Email Corporativo *</label>
-                    <input type="email" id="editar_email" name="email" required
-                           pattern=".*@cps\.sp\.gov\.br$"
-                           title="O email deve ser do domínio @cps.sp.gov.br">
-                </div>
+                    <div class="input-group">
+                        <label for="editar_email">Email Corporativo *</label>
+                        <input type="email" id="editar_email" name="email" required
+                               pattern=".*@cps\.sp\.gov\.br$"
+                               title="O email deve ser do domínio @cps.sp.gov.br">
+                    </div>
 
-                <div class="input-group">
-                    <label for="editar_senha">Nova Senha (deixe em branco para manter)</label>
-                    <input type="password" id="editar_senha" name="senha"
-                           minlength="6" placeholder="Deixe vazio para não alterar">
-                    <small class="info-text">
-                        <i class="fas fa-info-circle"></i>
-                        Preencha apenas se quiser alterar a senha
-                    </small>
+                    <div class="input-group">
+                        <label for="editar_senha">Nova Senha (opcional)</label>
+                        <input type="password" id="editar_senha" name="senha"
+                               minlength="6" placeholder="Deixe vazio para manter senha atual">
+                        <small class="info-text">
+                            <i class="fas fa-info-circle"></i>
+                            Preencha apenas se desejar alterar a senha
+                        </small>
+                    </div>
                 </div>
 
                 <div class="form-buttons">
@@ -1066,24 +690,21 @@ while ($row = $stmt_aprovadores->fetch()) {
     <div id="modalRejeitar" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-times-circle"></i> Rejeitar Administrador</h2>
+                <h2>Rejeitar Administrador</h2>
                 <button class="btn-close" onclick="fecharModal('modalRejeitar')">&times;</button>
             </div>
 
             <form method="POST" action="">
-                <?= campoCSRF() ?>
-                <input type="hidden" name="acao" value="rejeitar">
-                <input type="hidden" id="rejeitar_id" name="id_admin">
+                <div class="modal-body">
+                    <?= campoCSRF() ?>
+                    <input type="hidden" name="acao" value="rejeitar">
+                    <input type="hidden" id="rejeitar_id" name="id_admin">
 
-                <div class="warning-box">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Esta ação rejeitará a solicitação de cadastro deste administrador.
-                </div>
-
-                <div class="input-group">
-                    <label for="rejeitar_motivo">Motivo da Rejeição *</label>
-                    <textarea id="rejeitar_motivo" name="motivo" rows="4" required
-                              placeholder="Informe o motivo da rejeição..."></textarea>
+                    <div class="input-group">
+                        <label for="rejeitar_motivo">Motivo da Rejeição *</label>
+                        <textarea id="rejeitar_motivo" name="motivo" rows="4" required
+                                  placeholder="Descreva o motivo da rejeição desta solicitação..."></textarea>
+                    </div>
                 </div>
 
                 <div class="form-buttons">
@@ -1102,24 +723,21 @@ while ($row = $stmt_aprovadores->fetch()) {
     <div id="modalRemover" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-user-times"></i> Remover Administrador</h2>
+                <h2>Remover Administrador</h2>
                 <button class="btn-close" onclick="fecharModal('modalRemover')">&times;</button>
             </div>
 
             <form method="POST" action="">
-                <?= campoCSRF() ?>
-                <input type="hidden" name="acao" value="remover">
-                <input type="hidden" id="remover_id" name="id_admin">
+                <div class="modal-body">
+                    <?= campoCSRF() ?>
+                    <input type="hidden" name="acao" value="remover">
+                    <input type="hidden" id="remover_id" name="id_admin">
 
-                <div class="warning-box">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Esta ação removerá o acesso deste administrador ao sistema.
-                </div>
-
-                <div class="input-group">
-                    <label for="remover_motivo">Motivo da Remoção *</label>
-                    <textarea id="remover_motivo" name="motivo" rows="4" required
-                              placeholder="Informe o motivo da remoção..."></textarea>
+                    <div class="input-group">
+                        <label for="remover_motivo">Motivo da Remoção *</label>
+                        <textarea id="remover_motivo" name="motivo" rows="4" required
+                                  placeholder="Descreva o motivo da remoção deste administrador..."></textarea>
+                    </div>
                 </div>
 
                 <div class="form-buttons">
