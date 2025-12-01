@@ -304,21 +304,32 @@ $alunos = $stmt->fetchAll();
         }
 
         .btn-add {
-            padding: 12px 24px;
+            padding: 16px 20px;
             background: var(--secondary);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 14px;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            justify-content: flex-start;
+            gap: 10px;
             margin-bottom: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: auto;
+            max-width: fit-content;
         }
 
         .btn-add:hover {
-            background: #004654;
+            background: #6d0000;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-add:active {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .table-container {
@@ -554,28 +565,7 @@ $alunos = $stmt->fetchAll();
     </style>
 </head>
 <body>
-    <header class="site">
-        <nav class="navbar">
-            <div class="logo">
-                <img src="../../assets/images/fatec-ogari.png" alt="Logo Fatec Itapira">
-                <img src="../../assets/images/logo-cps.png" alt="Logo CPS">
-            </div>
-
-            <ul class="links">
-                <li><a href="../../pages/admin/index.php">Home</a></li>
-                <li><a href="../../pages/admin/inscricoes.php">Inscrições</a></li>
-                <li><a href="../../pages/admin/prazos.php">Prazos</a></li>
-                <li><a href="../../pages/admin/relatorios.php">Relatórios</a></li>
-                <li><a href="../../pages/admin/cadastro-admin.php">Cadastro Admin</a></li>
-                <li><a href="../../pages/admin/gerenciar-alunos.php" class="active">Gerenciar Alunos</a></li>
-            </ul>
-
-            <div class="actions">
-                <img src="../../assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
-                <a href="../../logout.php">Sair da Conta</a>
-            </div>
-        </nav>
-    </header>
+    <?php require_once 'components/header.php'; ?>
 
     <main class="manage-admin-registration">
         <div class="card-wrapper">
