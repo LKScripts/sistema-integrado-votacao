@@ -35,7 +35,7 @@ function validarDominioEmail($email, $tipo = 'aluno') {
     if (isDevMode()) {
         return [
             'valido' => true,
-            'mensagem' => '✅ [DEV MODE] Email aceito: ' . $email,
+            'mensagem' => '[DEV MODE] Email aceito: ' . $email,
             'dev_mode' => true
         ];
     }
@@ -103,33 +103,20 @@ function exibirMensagemDevMode($token, $email) {
         font-family: monospace;
     ">
         <h3 style="margin: 0 0 10px 0; color: #856404;">
-            🔧 DEV MODE ATIVO
+            DEV MODE ATIVO
         </h3>
         <p style="margin: 5px 0; font-size: 14px;">
             <strong>Email:</strong> ' . htmlspecialchars($email) . '
         </p>
         <p style="margin: 5px 0; font-size: 14px;">
-            <strong>Token:</strong> <code>' . htmlspecialchars($token) . '</code>
+            <strong>Token:</strong><br>
+            <code style="word-break: break-all; display: block; margin-top: 5px;">' . htmlspecialchars($token) . '</code>
         </p>
         <p style="margin: 10px 0 5px 0; font-size: 14px;">
             <strong>Link de confirmação:</strong>
         </p>
-        <a href="' . htmlspecialchars($link) . '"
-           style="
-               display: inline-block;
-               padding: 10px 15px;
-               background: #28a745;
-               color: white;
-               text-decoration: none;
-               border-radius: 4px;
-               font-size: 12px;
-               word-break: break-all;
-           "
-           target="_blank">
-            ✅ Confirmar Email (Clique aqui)
-        </a>
-        <p style="margin: 10px 0 0 0; font-size: 11px; color: #856404;">
-            💡 Em produção, este link seria enviado por email
+        <p style="margin: 5px 0; font-size: 12px; word-break: break-all; background: #f8f9fa; padding: 8px; border-radius: 4px;">
+            ' . htmlspecialchars($link) . '
         </p>
     </div>
     ';

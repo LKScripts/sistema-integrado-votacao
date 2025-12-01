@@ -103,7 +103,7 @@ if (empty($token)) {
             <div class="callout" style="background-color: <?= $tipo === 'success' ? '#d4edda' : '#f8d7da' ?>; border-color: <?= $tipo === 'success' ? '#c3e6cb' : '#f5c6cb' ?>;">
                 <div class="content">
                     <span style="color: <?= $tipo === 'success' ? '#155724' : '#721c24' ?>;">
-                        <strong><?= $tipo === 'success' ? '✅' : '❌' ?> <?= htmlspecialchars($mensagem) ?></strong>
+                        <strong><?= htmlspecialchars($mensagem) ?></strong>
                     </span>
                 </div>
             </div>

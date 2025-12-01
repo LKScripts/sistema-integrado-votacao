@@ -134,16 +134,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] === UPLOAD_ERR_OK) {
                 $arquivo = $_FILES['foto_perfil'];
                 $extensao = strtolower(pathinfo($arquivo['name'], PATHINFO_EXTENSION));
-                $extensoes_permitidas = ['jpg', 'jpeg', 'png', 'gif'];
+                $extensoes_permitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
                 $tamanho_maximo = 5 * 1024 * 1024; // 5MB
 
                 if (!in_array($extensao, $extensoes_permitidas)) {
-                    $erro = "Formato de imagem inválido. Use JPG, PNG ou GIF.";
+                    $erro = "Formato de imagem inválido. Use JPG, PNG, GIF ou WebP.";
                 } elseif ($arquivo['size'] > $tamanho_maximo) {
                     $erro = "A imagem deve ter no máximo 5MB.";
                 } else {
-                    // Criar diretório se não existir
-                    $diretorio_upload = '../../../uploads/fotos_perfil/';
+                    // Diretório de upload (mesmo padrão de mudar_foto.php)
+                    $diretorio_upload = __DIR__ . '/../../storage/uploads/perfil/';
                     if (!is_dir($diretorio_upload)) {
                         mkdir($diretorio_upload, 0755, true);
                     }
@@ -153,7 +153,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $caminho_completo = $diretorio_upload . $nome_arquivo;
 
                     if (move_uploaded_file($arquivo['tmp_name'], $caminho_completo)) {
-                        $foto_perfil = '/uploads/fotos_perfil/' . $nome_arquivo;
+                        // Caminho relativo (mesmo padrão de mudar_foto.php)
+                        // Funciona em qualquer página pois é relativo ao HTML renderizado
+                        $foto_perfil = '../../storage/uploads/perfil/' . $nome_arquivo;
                         $foto_perfil_original = $arquivo['name'];
                     } else {
                         $erro = "Erro ao fazer upload da foto.";
@@ -285,7 +287,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <div class="callout" style="background-color: #d4edda; border-color: #c3e6cb;">
                     <div class="content">
                         <span style="color: #155724;">
-                            <strong>✅ Cadastro realizado com sucesso!</strong><br>
+                            <strong>Cadastro realizado com sucesso!</strong><br>
                             Um e-mail de confirmação foi enviado para sua caixa de entrada. Verifique sua caixa de e-mail e clique no link para ativar sua conta.
                         </span>
                     </div>
