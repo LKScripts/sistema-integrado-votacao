@@ -422,12 +422,10 @@ main.manage-admin-registration .message-box {
     padding: 1rem;
     border-radius: 8px;
     margin-bottom: 1.5rem;
-    border-left: 4px solid;
 }
 
 main.manage-admin-registration .message-box.success {
     background: #d4edda;
-    border-color: #28a745;
     color: #155724;
 }
 
