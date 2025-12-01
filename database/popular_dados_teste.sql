@@ -421,6 +421,431 @@ LEFT JOIN VOTO v ON e.id_eleicao = v.id_eleicao
 GROUP BY e.id_eleicao, e.curso, e.semestre, e.status
 ORDER BY e.id_eleicao;
 
+-- =====================================================
+-- ALUNOS PARA NOVOS SEMESTRES (para teste de apuração)
+-- =====================================================
+
+-- GE - Semestre 1 (12 alunos para teste aguardando_finalizacao)
+INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre, ativo) VALUES
+('2024GE101', 'Alberto Souza Martins', 'alberto.martins.ge1@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 1, 1),
+('2024GE102', 'Bruna Lima Santos', 'bruna.santos.ge1@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 1, 1),
+('2024GE103', 'Carlos Eduardo Silva', 'carlos.silva.ge1@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 1, 1),
+('2024GE104', 'Diana Oliveira Costa', 'diana.costa.ge1@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 1, 1),
+('2024GE105', 'Eduardo Pereira Lima', 'eduardo.lima.ge1@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 1, 1),
+('2024GE106', 'Fernanda Rocha Alves', 'fernanda.alves.ge1@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 1, 1),
+('2024GE107', 'Gustavo Mendes Freitas', 'gustavo.freitas.ge1@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 1, 1),
+('2024GE108', 'Helena Castro Ribeiro', 'helena.ribeiro.ge1@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 1, 1),
+('2024GE109', 'Igor Carvalho Sousa', 'igor.sousa.ge1@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 1, 1),
+('2024GE110', 'Juliana Barbosa Dias', 'juliana.dias.ge1@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 1, 1),
+('2024GE111', 'Kevin Almeida Teixeira', 'kevin.teixeira.ge1@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 1, 1),
+('2024GE112', 'Larissa Campos Moraes', 'larissa.moraes.ge1@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 1, 1);
+
+-- DSM - Semestre 4 (15 alunos para teste aguardando_finalizacao)
+INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre, ativo) VALUES
+('2022DSM401', 'Marcos Vinícius Santos', 'marcos.santos.dsm4@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 4, 1),
+('2022DSM402', 'Natália Rodrigues Lima', 'natalia.lima.dsm4@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 4, 1),
+('2022DSM403', 'Otávio Costa Ferreira', 'otavio.ferreira.dsm4@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 4, 1),
+('2022DSM404', 'Paula Martins Nunes', 'paula.nunes.dsm4@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 4, 1),
+('2022DSM405', 'Quintino Barbosa Lopes', 'quintino.lopes.dsm4@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 4, 1),
+('2022DSM406', 'Rafaela Alves Cruz', 'rafaela.cruz.dsm4@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 4, 1),
+('2022DSM407', 'Samuel Gomes Moraes', 'samuel.moraes.dsm4@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 4, 1),
+('2022DSM408', 'Tatiana Silva Pinto', 'tatiana.pinto.dsm4@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 4, 1),
+('2022DSM409', 'Ulisses Pereira Ramos', 'ulisses.ramos.dsm4@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 4, 1),
+('2022DSM410', 'Vanessa Oliveira Cunha', 'vanessa.cunha.dsm4@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 4, 1),
+('2022DSM411', 'Wagner Santos Rezende', 'wagner.rezende.dsm4@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 4, 1),
+('2022DSM412', 'Ximena Lima Monteiro', 'ximena.monteiro.dsm4@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 4, 1),
+('2022DSM413', 'Yuri Carvalho Borges', 'yuri.borges.dsm4@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 4, 1),
+('2022DSM414', 'Zilda Rocha Miranda', 'zilda.miranda.dsm4@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 4, 1),
+('2022DSM415', 'André Souza Tavares', 'andre.tavares.dsm4@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 4, 1);
+
+-- GPI - Semestre 2 (18 alunos para teste encerrada)
+INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre, ativo) VALUES
+('2023GPI201', 'Adriano Ferreira Costa', 'adriano.costa.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI202', 'Beatriz Mendes Lima', 'beatriz.lima.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI203', 'Caio Almeida Santos', 'caio.santos.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI204', 'Débora Rodrigues Silva', 'debora.silva.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI205', 'Elias Barbosa Nunes', 'elias.nunes.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI206', 'Flávia Carvalho Moraes', 'flavia.moraes.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI207', 'Guilherme Gomes Freitas', 'guilherme.freitas.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI208', 'Heloísa Martins Cruz', 'heloisa.cruz.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI209', 'Ivan Oliveira Lopes', 'ivan.lopes.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI210', 'Jéssica Pereira Dias', 'jessica.dias.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI211', 'Kleber Santos Castro', 'kleber.castro.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI212', 'Lívia Rocha Ribeiro', 'livia.ribeiro.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI213', 'Mauro Costa Souza', 'mauro.souza.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI214', 'Nadia Lima Alves', 'nadia.alves.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI215', 'Oscar Ferreira Pinto', 'oscar.pinto.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI216', 'Priscila Mendes Ramos', 'priscila.ramos.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI217', 'Quênia Silva Monteiro', 'quenia.monteiro.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1),
+('2023GPI218', 'Ricardo Alves Borges', 'ricardo.borges.gpi2@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GPI', 2, 1);
+
+-- DSM - Semestre 5 (16 alunos para teste encerrada)
+INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre, ativo) VALUES
+('2021DSM501', 'Alexandre Costa Santos', 'alexandre.santos.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1),
+('2021DSM502', 'Bianca Oliveira Lima', 'bianca.lima.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1),
+('2021DSM503', 'Cristiano Pereira Silva', 'cristiano.silva.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1),
+('2021DSM504', 'Daniela Rodrigues Costa', 'daniela.costa.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1),
+('2021DSM505', 'Éderson Almeida Nunes', 'ederson.nunes.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1),
+('2021DSM506', 'Fabiana Santos Moraes', 'fabiana.moraes.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1),
+('2021DSM507', 'Giovani Carvalho Freitas', 'giovani.freitas.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1),
+('2021DSM508', 'Heloísa Mendes Cruz', 'heloisa.cruz.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1),
+('2021DSM509', 'Ícaro Barbosa Lopes', 'icaro.lopes.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1),
+('2021DSM510', 'Jaqueline Gomes Dias', 'jaqueline.dias.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1),
+('2021DSM511', 'Kauê Silva Castro', 'kaue.castro.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1),
+('2021DSM512', 'Letícia Rocha Ribeiro', 'leticia.ribeiro.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1),
+('2021DSM513', 'Murilo Costa Souza', 'murilo.souza.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1),
+('2021DSM514', 'Nathalia Lima Alves', 'nathalia.alves.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1),
+('2021DSM515', 'Osvaldo Ferreira Pinto', 'osvaldo.pinto.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1),
+('2021DSM516', 'Patrícia Mendes Ramos', 'patricia.ramos.dsm5@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'DSM', 5, 1);
+
+-- =====================================================
+-- ELEIÇÕES PARA TESTE DE APURAÇÃO
+-- =====================================================
+-- IMPORTANTE: Criar com status 'votacao_aberta' primeiro para permitir inserção de votos
+-- Depois atualizar para o status correto (aguardando_finalizacao ou encerrada)
+
+-- ELEIÇÃO 7: GE - Semestre 1 (será AGUARDANDO_FINALIZACAO)
+-- Votação já terminou (ontem), aguarda apuração manual
+INSERT INTO ELEICAO (curso, semestre, data_inicio_candidatura, data_fim_candidatura, data_inicio_votacao, data_fim_votacao, status, criado_por)
+VALUES ('GE', 1,
+        DATE_SUB(CURDATE(), INTERVAL 15 DAY), -- 15 dias atrás (início candidatura)
+        DATE_SUB(CURDATE(), INTERVAL 8 DAY),  -- 8 dias atrás (fim candidatura)
+        DATE_SUB(CURDATE(), INTERVAL 7 DAY),  -- 7 dias atrás (início votação)
+        DATE_SUB(CURDATE(), INTERVAL 1 DAY),  -- 1 dia atrás (fim votação)
+        'votacao_aberta',  -- Temporariamente aberta para inserir votos
+        1);
+
+-- ELEIÇÃO 8: DSM - Semestre 4 (será AGUARDANDO_FINALIZACAO)
+-- Votação terminou há 2 dias, aguarda apuração
+INSERT INTO ELEICAO (curso, semestre, data_inicio_candidatura, data_fim_candidatura, data_inicio_votacao, data_fim_votacao, status, criado_por)
+VALUES ('DSM', 4,
+        DATE_SUB(CURDATE(), INTERVAL 20 DAY), -- 20 dias atrás (início candidatura)
+        DATE_SUB(CURDATE(), INTERVAL 10 DAY), -- 10 dias atrás (fim candidatura)
+        DATE_SUB(CURDATE(), INTERVAL 9 DAY),  -- 9 dias atrás (início votação)
+        DATE_SUB(CURDATE(), INTERVAL 2 DAY),  -- 2 dias atrás (fim votação)
+        'votacao_aberta',  -- Temporariamente aberta para inserir votos
+        1);
+
+-- ELEIÇÃO 9: GPI - Semestre 2 (será ENCERRADA)
+-- Votação terminou há 5 dias, já foi apurada
+INSERT INTO ELEICAO (curso, semestre, data_inicio_candidatura, data_fim_candidatura, data_inicio_votacao, data_fim_votacao, status, criado_por)
+VALUES ('GPI', 2,
+        DATE_SUB(CURDATE(), INTERVAL 25 DAY), -- 25 dias atrás (início candidatura)
+        DATE_SUB(CURDATE(), INTERVAL 12 DAY), -- 12 dias atrás (fim candidatura)
+        DATE_SUB(CURDATE(), INTERVAL 11 DAY), -- 11 dias atrás (início votação)
+        DATE_SUB(CURDATE(), INTERVAL 5 DAY),  -- 5 dias atrás (fim votação)
+        'votacao_aberta',  -- Temporariamente aberta para inserir votos
+        1);
+
+-- ELEIÇÃO 10: DSM - Semestre 5 (será ENCERRADA)
+-- Votação terminou há 3 dias, já foi apurada
+INSERT INTO ELEICAO (curso, semestre, data_inicio_candidatura, data_fim_candidatura, data_inicio_votacao, data_fim_votacao, status, criado_por)
+VALUES ('DSM', 5,
+        DATE_SUB(CURDATE(), INTERVAL 22 DAY), -- 22 dias atrás (início candidatura)
+        DATE_SUB(CURDATE(), INTERVAL 10 DAY), -- 10 dias atrás (fim candidatura)
+        DATE_SUB(CURDATE(), INTERVAL 9 DAY),  -- 9 dias atrás (início votação)
+        DATE_SUB(CURDATE(), INTERVAL 3 DAY),  -- 3 dias atrás (fim votação)
+        'votacao_aberta',  -- Temporariamente aberta para inserir votos
+        1);
+
+-- =====================================================
+-- CANDIDATURAS PARA ELEIÇÕES DE TESTE
+-- =====================================================
+
+-- Eleição 7: GE-1 (aguardando_finalizacao) - 3 candidatos deferidos
+INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, status_validacao, validado_por, data_validacao)
+SELECT 7, id_aluno, proposta, 'deferido', 1, DATE_SUB(NOW(), INTERVAL 9 DAY)
+FROM (
+    SELECT
+        (SELECT id_aluno FROM ALUNO WHERE ra = '2024GE101') as id_aluno,
+        'Implementar programa de visitas técnicas a empresas de diferentes portes e setores.' as proposta
+    UNION ALL
+    SELECT
+        (SELECT id_aluno FROM ALUNO WHERE ra = '2024GE103'),
+        'Criar laboratório de simulação empresarial com software de gestão integrado.'
+    UNION ALL
+    SELECT
+        (SELECT id_aluno FROM ALUNO WHERE ra = '2024GE105'),
+        'Desenvolver parceria com incubadoras de empresas para projetos práticos.'
+) as candidatos;
+
+-- Eleição 8: DSM-4 (aguardando_finalizacao) - 4 candidatos deferidos
+INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, status_validacao, validado_por, data_validacao)
+SELECT 8, id_aluno, proposta, 'deferido', 1, DATE_SUB(NOW(), INTERVAL 11 DAY)
+FROM (
+    SELECT
+        (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM401') as id_aluno,
+        'Criar hackathon semestral com premiações e participação de empresas parceiras.' as proposta
+    UNION ALL
+    SELECT
+        (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM403'),
+        'Implementar laboratório de DevOps com ferramentas de CI/CD e cloud computing.'
+    UNION ALL
+    SELECT
+        (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM405'),
+        'Desenvolver programa de mentoria com profissionais seniores da área de tecnologia.'
+    UNION ALL
+    SELECT
+        (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM407'),
+        'Organizar maratona de programação e competições de algoritmos semanais.'
+) as candidatos;
+
+-- Eleição 9: GPI-2 (encerrada) - 3 candidatos deferidos
+INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, status_validacao, validado_por, data_validacao)
+SELECT 9, id_aluno, proposta, 'deferido', 1, DATE_SUB(NOW(), INTERVAL 13 DAY)
+FROM (
+    SELECT
+        (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI201') as id_aluno,
+        'Criar laboratório de automação industrial com PLCs e sistemas supervisórios.' as proposta
+    UNION ALL
+    SELECT
+        (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI203'),
+        'Implementar programa de visitas a plantas industriais da região.'
+    UNION ALL
+    SELECT
+        (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI205'),
+        'Desenvolver projetos de melhoria contínua aplicando metodologias Lean e Six Sigma.'
+) as candidatos;
+
+-- Eleição 10: DSM-5 (encerrada) - 3 candidatos deferidos
+INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, status_validacao, validado_por, data_validacao)
+SELECT 10, id_aluno, proposta, 'deferido', 1, DATE_SUB(NOW(), INTERVAL 11 DAY)
+FROM (
+    SELECT
+        (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM501') as id_aluno,
+        'Criar núcleo de desenvolvimento de aplicações mobile com foco em projetos reais.' as proposta
+    UNION ALL
+    SELECT
+        (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM503'),
+        'Implementar programa de certificações em cloud e desenvolvimento full-stack.'
+    UNION ALL
+    SELECT
+        (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM505'),
+        'Organizar semana de tecnologia com palestras, workshops e feira de projetos.'
+) as candidatos;
+
+-- =====================================================
+-- VOTOS PARA ELEIÇÕES AGUARDANDO_FINALIZACAO
+-- =====================================================
+
+-- Votos Eleição 7: GE-1 (12 alunos, 10 votaram)
+-- Distribuição: Candidato 1=5 votos, Candidato 2=3 votos, Candidato 3=2 votos
+INSERT INTO VOTO (id_eleicao, id_candidatura, id_aluno, data_hora_voto)
+SELECT 7, id_candidatura, id_aluno, data_voto
+FROM (
+    -- Votos para candidato 1 (5 votos)
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 7 ORDER BY id_candidatura LIMIT 1) as id_candidatura,
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2024GE101') as id_aluno,
+           DATE_SUB(NOW(), INTERVAL 6 DAY) as data_voto
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 7 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2024GE102'),
+           DATE_SUB(NOW(), INTERVAL 5 DAY)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 7 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2024GE104'),
+           DATE_SUB(NOW(), INTERVAL 4 DAY)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 7 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2024GE106'),
+           DATE_SUB(NOW(), INTERVAL 3 DAY)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 7 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2024GE108'),
+           DATE_SUB(NOW(), INTERVAL 2 DAY)
+    -- Votos para candidato 2 (3 votos)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 7 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2024GE103'),
+           DATE_SUB(NOW(), INTERVAL 5 DAY)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 7 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2024GE107'),
+           DATE_SUB(NOW(), INTERVAL 3 DAY)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 7 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2024GE109'),
+           DATE_SUB(NOW(), INTERVAL 2 DAY)
+    -- Votos para candidato 3 (2 votos)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 7 ORDER BY id_candidatura LIMIT 2,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2024GE105'),
+           DATE_SUB(NOW(), INTERVAL 4 DAY)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 7 ORDER BY id_candidatura LIMIT 2,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2024GE110'),
+           DATE_SUB(NOW(), INTERVAL 2 DAY)
+) as votos;
+
+-- Votos Eleição 8: DSM-4 (15 alunos, 13 votaram, incluindo 2 votos em branco)
+-- Distribuição: Candidato 1=5 votos, Candidato 2=4 votos, Candidato 3=2 votos, Voto branco=2
+INSERT INTO VOTO (id_eleicao, id_candidatura, id_aluno, data_hora_voto)
+SELECT 8, id_candidatura, id_aluno, data_voto
+FROM (
+    -- Votos para candidato 1 (5 votos)
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 8 ORDER BY id_candidatura LIMIT 1) as id_candidatura,
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM401') as id_aluno,
+           DATE_SUB(NOW(), INTERVAL 8 DAY) as data_voto
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 8 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM402'),
+           DATE_SUB(NOW(), INTERVAL 7 DAY)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 8 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM404'),
+           DATE_SUB(NOW(), INTERVAL 6 DAY)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 8 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM406'),
+           DATE_SUB(NOW(), INTERVAL 5 DAY)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 8 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM408'),
+           DATE_SUB(NOW(), INTERVAL 4 DAY)
+    -- Votos para candidato 2 (4 votos)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 8 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM403'),
+           DATE_SUB(NOW(), INTERVAL 7 DAY)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 8 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM407'),
+           DATE_SUB(NOW(), INTERVAL 5 DAY)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 8 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM409'),
+           DATE_SUB(NOW(), INTERVAL 4 DAY)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 8 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM411'),
+           DATE_SUB(NOW(), INTERVAL 3 DAY)
+    -- Votos para candidato 3 (2 votos)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 8 ORDER BY id_candidatura LIMIT 2,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM405'),
+           DATE_SUB(NOW(), INTERVAL 6 DAY)
+    UNION ALL
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 8 ORDER BY id_candidatura LIMIT 2,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM413'),
+           DATE_SUB(NOW(), INTERVAL 3 DAY)
+    -- Votos em branco (2 votos)
+    UNION ALL
+    SELECT NULL,
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM410'),
+           DATE_SUB(NOW(), INTERVAL 5 DAY)
+    UNION ALL
+    SELECT NULL,
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2022DSM412'),
+           DATE_SUB(NOW(), INTERVAL 3 DAY)
+) as votos;
+
+-- =====================================================
+-- VOTOS PARA ELEIÇÕES ENCERRADAS
+-- =====================================================
+
+-- Votos Eleição 9: GPI-2 (18 alunos, 15 votaram)
+-- Distribuição: Candidato 1=7 votos, Candidato 2=5 votos, Candidato 3=3 votos
+INSERT INTO VOTO (id_eleicao, id_candidatura, id_aluno, data_hora_voto)
+SELECT 9, id_candidatura, id_aluno, data_voto
+FROM (
+    -- Votos para candidato 1 (7 votos)
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 9 ORDER BY id_candidatura LIMIT 1) as id_candidatura,
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI201') as id_aluno,
+           DATE_SUB(NOW(), INTERVAL 10 DAY) as data_voto
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 9 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI202'), DATE_SUB(NOW(), INTERVAL 9 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 9 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI204'), DATE_SUB(NOW(), INTERVAL 8 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 9 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI206'), DATE_SUB(NOW(), INTERVAL 7 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 9 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI208'), DATE_SUB(NOW(), INTERVAL 6 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 9 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI210'), DATE_SUB(NOW(), INTERVAL 6 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 9 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI212'), DATE_SUB(NOW(), INTERVAL 5 DAY)
+    -- Votos para candidato 2 (5 votos)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 9 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI203'), DATE_SUB(NOW(), INTERVAL 9 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 9 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI207'), DATE_SUB(NOW(), INTERVAL 7 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 9 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI209'), DATE_SUB(NOW(), INTERVAL 6 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 9 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI213'), DATE_SUB(NOW(), INTERVAL 6 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 9 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI215'), DATE_SUB(NOW(), INTERVAL 5 DAY)
+    -- Votos para candidato 3 (3 votos)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 9 ORDER BY id_candidatura LIMIT 2,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI205'), DATE_SUB(NOW(), INTERVAL 8 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 9 ORDER BY id_candidatura LIMIT 2,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI211'), DATE_SUB(NOW(), INTERVAL 6 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 9 ORDER BY id_candidatura LIMIT 2,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2023GPI214'), DATE_SUB(NOW(), INTERVAL 5 DAY)
+) as votos;
+
+-- Votos Eleição 10: DSM-5 (16 alunos, 14 votaram, incluindo 1 voto em branco)
+-- Distribuição: Candidato 1=6 votos, Candidato 2=4 votos, Candidato 3=3 votos, Voto branco=1
+INSERT INTO VOTO (id_eleicao, id_candidatura, id_aluno, data_hora_voto)
+SELECT 10, id_candidatura, id_aluno, data_voto
+FROM (
+    -- Votos para candidato 1 (6 votos)
+    SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 10 ORDER BY id_candidatura LIMIT 1) as id_candidatura,
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM501') as id_aluno,
+           DATE_SUB(NOW(), INTERVAL 8 DAY) as data_voto
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 10 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM502'), DATE_SUB(NOW(), INTERVAL 7 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 10 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM504'), DATE_SUB(NOW(), INTERVAL 6 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 10 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM506'), DATE_SUB(NOW(), INTERVAL 5 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 10 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM508'), DATE_SUB(NOW(), INTERVAL 4 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 10 ORDER BY id_candidatura LIMIT 1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM510'), DATE_SUB(NOW(), INTERVAL 4 DAY)
+    -- Votos para candidato 2 (4 votos)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 10 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM503'), DATE_SUB(NOW(), INTERVAL 7 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 10 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM507'), DATE_SUB(NOW(), INTERVAL 5 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 10 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM509'), DATE_SUB(NOW(), INTERVAL 4 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 10 ORDER BY id_candidatura LIMIT 1,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM513'), DATE_SUB(NOW(), INTERVAL 4 DAY)
+    -- Votos para candidato 3 (3 votos)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 10 ORDER BY id_candidatura LIMIT 2,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM505'), DATE_SUB(NOW(), INTERVAL 6 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 10 ORDER BY id_candidatura LIMIT 2,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM511'), DATE_SUB(NOW(), INTERVAL 5 DAY)
+    UNION ALL SELECT (SELECT id_candidatura FROM CANDIDATURA WHERE id_eleicao = 10 ORDER BY id_candidatura LIMIT 2,1),
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM514'), DATE_SUB(NOW(), INTERVAL 4 DAY)
+    -- Voto em branco (1 voto)
+    UNION ALL SELECT NULL,
+           (SELECT id_aluno FROM ALUNO WHERE ra = '2021DSM512'), DATE_SUB(NOW(), INTERVAL 5 DAY)
+) as votos;
+
+-- =====================================================
+-- ATUALIZAR STATUS DAS ELEIÇÕES
+-- =====================================================
+-- Agora que os votos foram inseridos, atualizar para os status corretos
+
+-- Eleições 7 e 8: Atualizar para aguardando_finalizacao
+UPDATE ELEICAO SET status = 'aguardando_finalizacao' WHERE id_eleicao IN (7, 8);
+
+-- =====================================================
+-- APURAÇÃO DAS ELEIÇÕES ENCERRADAS
+-- =====================================================
+
+-- Apurar Eleição 9: GPI-2
+CALL sp_finalizar_eleicao(9, 1);
+
+-- Apurar Eleição 10: DSM-5
+CALL sp_finalizar_eleicao(10, 1);
+
+-- =====================================================
+-- VERIFICAÇÃO E RESUMO FINAL
+-- =====================================================
+
 -- Verificação de datas das eleições
 SELECT '' as '';
 SELECT 'VERIFICAÇÃO DE DATAS DAS ELEIÇÕES:' as '';
