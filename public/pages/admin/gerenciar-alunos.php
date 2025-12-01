@@ -243,326 +243,8 @@ $alunos = $stmt->fetchAll();
     <link rel="stylesheet" href="../../assets/styles/footer-site.css">
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Override para maior largura */
-        .card-wrapper {
-            max-width: 100%;
-            padding: 20px;
-        }
-
-        .card {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .filters-bar {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: end;
-        }
-
-        .filter-group {
-            flex: 1;
-            min-width: 180px;
-        }
-
-        .filter-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #333;
-            font-size: 13px;
-        }
-
-        .filter-group input,
-        .filter-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 13px;
-        }
-
-        .btn-filter {
-            padding: 10px 20px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.3s;
-        }
-
-        .btn-filter:hover {
-            background: #004654;
-        }
-
-        .btn-add {
-            padding: 16px 20px;
-            background: var(--secondary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 10px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: auto;
-            max-width: fit-content;
-        }
-
-        .btn-add:hover {
-            background: #6d0000;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .btn-add:active {
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .table-container {
-            overflow-x: auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: auto;
-        }
-
-        th {
-            background: var(--primary);
-            color: white;
-            padding: 12px 10px;
-            text-align: left;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            white-space: nowrap;
-            font-size: 13px;
-        }
-
-        td {
-            padding: 10px 8px;
-            border-bottom: 1px solid #eee;
-            font-size: 13px;
-        }
-
-        /* Ajuste de largura das colunas */
-        th:nth-child(1), td:nth-child(1) { width: 18%; } /* Nome */
-        th:nth-child(2), td:nth-child(2) { width: 12%; } /* RA */
-        th:nth-child(3), td:nth-child(3) { width: 22%; } /* Email */
-        th:nth-child(4), td:nth-child(4) { width: 8%; } /* Curso */
-        th:nth-child(5), td:nth-child(5) { width: 10%; } /* Semestre */
-        th:nth-child(6), td:nth-child(6) { width: 8%; } /* Status */
-        th:nth-child(7), td:nth-child(7) { width: 10%; } /* Cadastro */
-        th:nth-child(8), td:nth-child(8) { width: 12%; } /* Ações */
-
-        tr:hover {
-            background: #f8f9fa;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .badge.active {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .badge.inactive {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .btn-edit {
-            padding: 6px 12px;
-            background: #ffc107;
-            color: #333;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .btn-edit:hover {
-            background: #e0a800;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none !important;
-            position: fixed;
-            z-index: 9999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            overflow-y: auto;
-            pointer-events: none;
-        }
-
-        .modal.show {
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-            visibility: visible !important;
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-
-        /* Animação do modal */
-        .modal.show .modal-content {
-            animation: modalFadeIn 0.3s;
-        }
-
-        @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-            z-index: 10000;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            pointer-events: auto !important;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #eee;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            color: var(--primary);
-        }
-
-        .btn-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-            line-height: 1;
-        }
-
-        .btn-close:hover {
-            color: #333;
-        }
-
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
-
-        .empty-state i {
-            font-size: 64px;
-            color: #ddd;
-            margin-bottom: 20px;
-        }
-
-        /* Paginação */
-        .pagination {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-            padding: 15px 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .pagination .results {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .pagination ul {
-            list-style: none;
-            display: flex;
-            gap: 5px;
-            margin: 0;
-            padding: 0;
-        }
-
-        .pagination li {
-            display: inline-block;
-        }
-
-        .pagination a,
-        .pagination span {
-            display: inline-block;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            background: white;
-            color: #333;
-            text-decoration: none;
-            border-radius: 4px;
-            transition: all 0.3s;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .pagination a:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .pagination a.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            font-weight: bold;
-        }
-
-        .pagination span {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-    </style>
+    <link rel="stylesheet" href="../../assets/styles/modal.css">
+    <link rel="stylesheet" href="../../assets/styles/gerenciar.css">
 </head>
 <body>
     <?php require_once 'components/header.php'; ?>
@@ -746,58 +428,60 @@ $alunos = $stmt->fetchAll();
     <div id="modalCriar" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-user-plus"></i> Cadastrar Novo Aluno</h2>
+                <h2>Cadastrar Novo Aluno</h2>
                 <button class="btn-close" onclick="fecharModal('modalCriar')">&times;</button>
             </div>
 
             <form method="POST" action="">
-                <?= campoCSRF() ?>
-                <input type="hidden" name="acao" value="criar">
+                <div class="modal-body">
+                    <?= campoCSRF() ?>
+                    <input type="hidden" name="acao" value="criar">
 
-                <div class="input-group">
-                    <label for="criar_nome">Nome Completo *</label>
-                    <input type="text" id="criar_nome" name="nome" required
-                           placeholder="Nome completo do aluno">
-                </div>
+                    <div class="input-group">
+                        <label for="criar_nome">Nome Completo *</label>
+                        <input type="text" id="criar_nome" name="nome" required
+                               placeholder="Nome completo do aluno">
+                    </div>
 
-                <div class="input-group">
-                    <label for="criar_email">Email Institucional *</label>
-                    <input type="email" id="criar_email" name="email" required
-                           placeholder="aluno@fatec.sp.gov.br"
-                           pattern=".*@fatec\.sp\.gov\.br$"
-                           title="O email deve ser do domínio @fatec.sp.gov.br">
-                </div>
+                    <div class="input-group">
+                        <label for="criar_email">Email Institucional *</label>
+                        <input type="email" id="criar_email" name="email" required
+                               placeholder="aluno@fatec.sp.gov.br"
+                               pattern=".*@fatec\.sp\.gov\.br$"
+                               title="O email deve ser do domínio @fatec.sp.gov.br">
+                    </div>
 
-                <div class="input-group">
-                    <label for="criar_ra">RA *</label>
-                    <input type="text" id="criar_ra" name="ra" required
-                           placeholder="Ex: 1234567890123">
-                </div>
+                    <div class="input-group">
+                        <label for="criar_ra">RA *</label>
+                        <input type="text" id="criar_ra" name="ra" required
+                               placeholder="Ex: 1234567890123">
+                    </div>
 
-                <div class="input-group">
-                    <label for="criar_curso">Curso *</label>
-                    <select id="criar_curso" name="curso" required>
-                        <option value="">Selecione...</option>
-                        <option value="DSM">DSM - Desenvolvimento de Software Multiplataforma</option>
-                        <option value="GE">GE - Gestão Empresarial</option>
-                        <option value="GPI">GPI - Gestão da Produção Industrial</option>
-                    </select>
-                </div>
+                    <div class="input-group">
+                        <label for="criar_curso">Curso *</label>
+                        <select id="criar_curso" name="curso" required>
+                            <option value="">Selecione...</option>
+                            <option value="DSM">DSM - Desenvolvimento de Software Multiplataforma</option>
+                            <option value="GE">GE - Gestão Empresarial</option>
+                            <option value="GPI">GPI - Gestão da Produção Industrial</option>
+                        </select>
+                    </div>
 
-                <div class="input-group">
-                    <label for="criar_semestre">Semestre *</label>
-                    <select id="criar_semestre" name="semestre" required>
-                        <option value="">Selecione...</option>
-                        <?php for ($i = 1; $i <= 6; $i++): ?>
-                            <option value="<?= $i ?>"><?= $i ?>º Semestre</option>
-                        <?php endfor; ?>
-                    </select>
-                </div>
+                    <div class="input-group">
+                        <label for="criar_semestre">Semestre *</label>
+                        <select id="criar_semestre" name="semestre" required>
+                            <option value="">Selecione...</option>
+                            <?php for ($i = 1; $i <= 6; $i++): ?>
+                                <option value="<?= $i ?>"><?= $i ?>º Semestre</option>
+                            <?php endfor; ?>
+                        </select>
+                    </div>
 
-                <div class="input-group">
-                    <label for="criar_senha">Senha *</label>
-                    <input type="password" id="criar_senha" name="senha" required
-                           minlength="6" placeholder="Mínimo 6 caracteres">
+                    <div class="input-group">
+                        <label for="criar_senha">Senha *</label>
+                        <input type="password" id="criar_senha" name="senha" required
+                               minlength="6" placeholder="Mínimo 6 caracteres">
+                    </div>
                 </div>
 
                 <div class="form-buttons">
@@ -816,58 +500,60 @@ $alunos = $stmt->fetchAll();
     <div id="modalEditar" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-user-edit"></i> Editar Aluno</h2>
+                <h2>Editar Aluno</h2>
                 <button class="btn-close" onclick="fecharModal('modalEditar')">&times;</button>
             </div>
 
             <form method="POST" action="">
-                <?= campoCSRF() ?>
-                <input type="hidden" name="acao" value="editar">
-                <input type="hidden" id="editar_id" name="id_aluno">
+                <div class="modal-body">
+                    <?= campoCSRF() ?>
+                    <input type="hidden" name="acao" value="editar">
+                    <input type="hidden" id="editar_id" name="id_aluno">
 
-                <div class="input-group">
-                    <label for="editar_nome">Nome Completo *</label>
-                    <input type="text" id="editar_nome" name="nome" required>
-                </div>
+                    <div class="input-group">
+                        <label for="editar_nome">Nome Completo *</label>
+                        <input type="text" id="editar_nome" name="nome" required>
+                    </div>
 
-                <div class="input-group">
-                    <label for="editar_email">Email Institucional *</label>
-                    <input type="email" id="editar_email" name="email" required
-                           pattern=".*@fatec\.sp\.gov\.br$"
-                           title="O email deve ser do domínio @fatec.sp.gov.br">
-                </div>
+                    <div class="input-group">
+                        <label for="editar_email">Email Institucional *</label>
+                        <input type="email" id="editar_email" name="email" required
+                               pattern=".*@fatec\.sp\.gov\.br$"
+                               title="O email deve ser do domínio @fatec.sp.gov.br">
+                    </div>
 
-                <div class="input-group">
-                    <label for="editar_ra">RA *</label>
-                    <input type="text" id="editar_ra" name="ra" required>
-                </div>
+                    <div class="input-group">
+                        <label for="editar_ra">RA *</label>
+                        <input type="text" id="editar_ra" name="ra" required>
+                    </div>
 
-                <div class="input-group">
-                    <label for="editar_curso">Curso *</label>
-                    <select id="editar_curso" name="curso" required>
-                        <option value="DSM">DSM - Desenvolvimento de Software Multiplataforma</option>
-                        <option value="GE">GE - Gestão Empresarial</option>
-                        <option value="GPI">GPI - Gestão da Produção Industrial</option>
-                    </select>
-                </div>
+                    <div class="input-group">
+                        <label for="editar_curso">Curso *</label>
+                        <select id="editar_curso" name="curso" required>
+                            <option value="DSM">DSM - Desenvolvimento de Software Multiplataforma</option>
+                            <option value="GE">GE - Gestão Empresarial</option>
+                            <option value="GPI">GPI - Gestão da Produção Industrial</option>
+                        </select>
+                    </div>
 
-                <div class="input-group">
-                    <label for="editar_semestre">Semestre *</label>
-                    <select id="editar_semestre" name="semestre" required>
-                        <?php for ($i = 1; $i <= 6; $i++): ?>
-                            <option value="<?= $i ?>"><?= $i ?>º Semestre</option>
-                        <?php endfor; ?>
-                    </select>
-                </div>
+                    <div class="input-group">
+                        <label for="editar_semestre">Semestre *</label>
+                        <select id="editar_semestre" name="semestre" required>
+                            <?php for ($i = 1; $i <= 6; $i++): ?>
+                                <option value="<?= $i ?>"><?= $i ?>º Semestre</option>
+                            <?php endfor; ?>
+                        </select>
+                    </div>
 
-                <div class="input-group">
-                    <label for="editar_senha">Nova Senha (deixe em branco para manter)</label>
-                    <input type="password" id="editar_senha" name="senha"
-                           minlength="6" placeholder="Deixe vazio para não alterar">
-                    <small style="color: #666; font-size: 13px;">
-                        <i class="fas fa-info-circle"></i>
-                        Preencha apenas se quiser alterar a senha do aluno
-                    </small>
+                    <div class="input-group">
+                        <label for="editar_senha">Nova Senha (opcional)</label>
+                        <input type="password" id="editar_senha" name="senha"
+                               minlength="6" placeholder="Deixe vazio para manter senha atual">
+                        <small>
+                            <i class="fas fa-info-circle"></i>
+                            Preencha apenas se desejar alterar a senha do aluno
+                        </small>
+                    </div>
                 </div>
 
                 <div class="form-buttons">
@@ -947,7 +633,11 @@ $alunos = $stmt->fetchAll();
         }
 
         function fecharModal(modalId) {
-            document.getElementById(modalId).classList.remove('show');
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+                console.log('Modal fechado:', modalId);
+            }
         }
 
         // Fechar modal ao clicar fora
