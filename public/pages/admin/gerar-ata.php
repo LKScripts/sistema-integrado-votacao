@@ -111,24 +111,23 @@ function obterNomeCurso($sigla) {
 // Função para obter período por extenso
 function getPeriodoExtenso($semestre) {
     $periodos = [
-        1 => 'PRIMEIRO PERÍODO',
-        2 => 'SEGUNDO PERÍODO',
-        3 => 'TERCEIRO PERÍODO',
-        4 => 'QUARTO PERÍODO',
-        5 => 'QUINTO PERÍODO',
-        6 => 'SEXTO PERÍODO'
+        1 => 'primeiro período',
+        2 => 'segundo período',
+        3 => 'terceiro período',
+        4 => 'quarto período',
+        5 => 'quinto período',
+        6 => 'sexto período'
     ];
-    return $periodos[$semestre] ?? "{$semestre}º PERÍODO";
+    return $periodos[$semestre] ?? "{$semestre}º período";
 }
 
-// Função para obter semestre por extenso
-function getSemestreExtenso() {
-    $mes_atual = (int)date('n');
-    $ano_atual = date('Y');
+// Função para obter semestre por extenso baseado na data da votação
+function getSemestreExtenso($data_votacao) {
+    $mes_votacao = (int)date('n', strtotime($data_votacao));
 
     // Janeiro a Junho = Primeiro Semestre, Julho a Dezembro = Segundo Semestre
-    $semestre_num = ($mes_atual <= 6) ? 1 : 2;
-    $semestre_texto = $semestre_num == 1 ? 'PRIMEIRO' : 'SEGUNDO';
+    $semestre_num = ($mes_votacao <= 6) ? 1 : 2;
+    $semestre_texto = $semestre_num == 1 ? 'primeiro' : 'segundo';
 
     return $semestre_texto;
 }
@@ -136,7 +135,7 @@ function getSemestreExtenso() {
 $data_apuracao = dataExtenso($resultado['data_apuracao']);
 $nome_curso = obterNomeCurso($resultado['curso']);
 $periodo = getPeriodoExtenso($resultado['semestre']);
-$semestre_ano = getSemestreExtenso();
+$semestre_ano = getSemestreExtenso($resultado['data_apuracao']);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -153,7 +152,22 @@ $semestre_ano = getSemestreExtenso();
 
         @page {
             size: A4;
-            margin: 2cm 2cm 2cm 2cm;
+            margin: 2cm 2cm 3cm 2cm;
+        }
+
+        @media print {
+            .footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                text-align: center;
+                font-size: 9pt;
+                color: #666;
+                border-top: 1px solid #8b0000;
+                padding-top: 5px;
+                background: white;
+            }
         }
 
         body {
@@ -210,13 +224,13 @@ $semestre_ano = getSemestreExtenso();
             margin: 10px 0;
         }
 
-        .footer-info {
+        .footer {
             text-align: center;
             font-size: 9pt;
             color: #666;
             border-top: 1px solid #8b0000;
             padding-top: 5px;
-            margin-top: 10px;
+            margin-top: 20px;
         }
 
         .content {
@@ -328,28 +342,25 @@ $semestre_ano = getSemestreExtenso();
     <div class="container">
         <div class="header">
             <div class="header-logos">
-                <img src="../../assets/images/logo-cps.png" alt="Logo CPS">
-                <img src="../../assets/images/logo-governo-do-estado-sp.png" alt="Logo Governo SP">
+                <img src="../../assets/images/Logo.png" alt="Logo CPS">
+                <img src="../../assets/images/mceclip0.png" alt="Logo Fatec Itapira">
+                <img src="../../assets/images/sp_gov.png" alt="Governo do Estado de SP">
             </div>
             <h1>Faculdade de Tecnologia de Itapira – "Ogari de Castro Pacheco"</h1>
             <h2>Diretoria Acadêmica</h2>
             <div class="header-divider"></div>
-            <div class="footer-info">
-                www.fatecitapira.edu.br<br>
-                Rua Tereza Lera Paoletti, 590 • Jardim Bela Vista • 13974-080 • Itapira • SP • Tel.: (19) 3843-7537
-            </div>
         </div>
 
         <div class="content">
             <div class="title">
-                ATA DE ELEIÇÃO DE REPRESENTANTES DE TURMA DO <?= $periodo ?> DO <?= $semestre_ano ?>
+                ATA DE ELEIÇÃO DE REPRESENTANTES DE TURMA DO <?= strtoupper($periodo) ?> DO <?= strtoupper($semestre_ano) ?>
                 SEMESTRE DE <?= strtoupper($data_apuracao['ano']) ?>, DO CURSO DE TECNOLOGIA EM
                 <?= $nome_curso ?> DA FACULDADE DE TECNOLOGIA DE ITAPIRA "OGARI DE CASTRO PACHECO".
             </div>
 
             <div class="paragraph">
                 Ao <?= $data_apuracao['completa'] ?>, foram apurados os votos dos alunos regularmente
-                matriculados no <?= strtolower($periodo) ?> do <?= strtolower($semestre_ano) ?> semestre de
+                matriculados no <?= $periodo ?> do <?= $semestre_ano ?> semestre de
                 <?= $data_apuracao['ano'] ?> do Curso Superior de Tecnologia em <?= $nome_curso ?>
                 para eleição de novos representantes de turma. Os representantes eleitos fazem a
                 representação dos alunos nos órgãos colegiados da Faculdade, com direito a voz e voto,
@@ -394,8 +405,8 @@ $semestre_ano = getSemestreExtenso();
                     <?php endforeach; ?>
 
                     <?php
-                    // Adicionar linhas vazias se houver menos de 24 alunos
-                    while ($numero <= 24):
+                    // Adicionar linhas vazias se houver menos de 48 alunos
+                    while ($numero <= 48):
                     ?>
                         <tr>
                             <td class="col-num"><?= $numero++ ?>.</td>
@@ -408,60 +419,10 @@ $semestre_ano = getSemestreExtenso();
             </table>
         </div>
 
-        <?php if (count($alunos) > 24): ?>
-            <div class="page-break"></div>
-            <div class="header">
-                <div class="header-logos">
-                    <img src="../../assets/images/logo-cps.png" alt="Logo CPS">
-                    <img src="../../assets/images/logo-governo-do-estado-sp.png" alt="Logo Governo SP">
-                </div>
-                <h1>Faculdade de Tecnologia de Itapira – "Ogari de Castro Pacheco"</h1>
-                <h2>Diretoria Acadêmica</h2>
-                <div class="header-divider"></div>
-                <div class="footer-info">
-                    www.fatecitapira.edu.br<br>
-                    Rua Tereza Lera Paoletti, 590 • Jardim Bela Vista • 13974-080 • Itapira • SP • Tel.: (19) 3843-7537
-                </div>
-            </div>
-
-            <table class="signature-table">
-                <thead>
-                    <tr>
-                        <th class="col-num">Nº</th>
-                        <th class="col-nome">NOME</th>
-                        <th class="col-ra">R.A. COMPLETO</th>
-                        <th class="col-assinatura">ASSINATURA</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    $numero = 25;
-                    $total = count($alunos);
-                    for ($i = 24; $i < $total; $i++):
-                        $aluno = $alunos[$i];
-                    ?>
-                        <tr>
-                            <td class="col-num"><?= $numero++ ?>.</td>
-                            <td class="col-nome"><?= htmlspecialchars($aluno['nome_completo']) ?></td>
-                            <td class="col-ra"><?= htmlspecialchars($aluno['ra']) ?></td>
-                            <td class="col-assinatura"></td>
-                        </tr>
-                    <?php endfor; ?>
-
-                    <?php
-                    // Adicionar linhas vazias até completar a segunda página
-                    while ($numero <= 48):
-                    ?>
-                        <tr>
-                            <td class="col-num"><?= $numero++ ?>.</td>
-                            <td class="col-nome"></td>
-                            <td class="col-ra"></td>
-                            <td class="col-assinatura"></td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        <?php endif; ?>
+        <div class="footer">
+            www.fatecitapira.edu.br<br>
+            Rua Tereza Lera Paoletti, 590 • Jardim Bela Vista • 13974-080 • Itapira • SP • Tel.: (19) 3843-7537
+        </div>
     </div>
 </body>
 </html>
