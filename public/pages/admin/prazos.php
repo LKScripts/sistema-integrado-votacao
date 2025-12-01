@@ -12,6 +12,26 @@ $id_admin = $usuario['id'];
 $mensagem = "";
 $tipo_mensagem = ""; // success | error
 
+// Buscar eleições existentes (ativas e futuras)
+$sql_eleicoes = "SELECT
+    id_eleicao,
+    curso,
+    semestre,
+    data_inicio_candidatura,
+    data_fim_candidatura,
+    data_inicio_votacao,
+    data_fim_votacao,
+    status
+FROM ELEICAO
+WHERE status IN ('candidatura_aberta', 'votacao_aberta', 'aguardando_finalizacao')
+   OR data_inicio_candidatura >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+ORDER BY data_inicio_candidatura DESC
+LIMIT 50";
+
+$stmt_eleicoes = $conn->prepare($sql_eleicoes);
+$stmt_eleicoes->execute();
+$eleicoes_existentes = $stmt_eleicoes->fetchAll();
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // VALIDAR CSRF PRIMEIRO
     validarCSRFOuMorrer("Token de segurança inválido. Recarregue a página e tente criar a eleição novamente.");
@@ -30,16 +50,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // ============================
 
     if ($inscricao_inicio < $hoje) {
-        $mensagem = "⚠ A data de <b>início das inscrições</b> não pode ser anterior a hoje.";
+        $mensagem = "A data de <b>início das inscrições</b> não pode ser anterior a hoje.";
         $tipo_mensagem = "error";
     } elseif ($inscricao_fim < $inscricao_inicio) {
-        $mensagem = "⚠ A data de <b>término das inscrições</b> deve ser maior ou igual ao início.";
+        $mensagem = "A data de <b>término das inscrições</b> deve ser maior ou igual ao início.";
         $tipo_mensagem = "error";
     } elseif ($votacao_inicio <= $inscricao_fim) {
-        $mensagem = "⚠ A data de <b>início da votação</b> deve ser posterior ao fim das inscrições.";
+        $mensagem = "A data de <b>início da votação</b> deve ser posterior ao fim das inscrições.";
         $tipo_mensagem = "error";
     } elseif ($votacao_fim < $votacao_inicio) {
-        $mensagem = "⚠ A data de <b>término da votação</b> deve ser maior ou igual que o início da votação.";
+        $mensagem = "A data de <b>término da votação</b> deve ser maior ou igual que o início da votação.";
         $tipo_mensagem = "error";
     }
 
@@ -91,8 +111,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $descricao = "Nova eleição criada para $curso - {$semestre}º semestre";
             $stmtAudit->execute([$id_admin, $descricao]);
 
-            $mensagem = "Prazo cadastrado com sucesso!";
+            $mensagem = "Eleição cadastrada com sucesso!";
             $tipo_mensagem = "success";
+
+            // Limpar localStorage após sucesso
+            echo "<script>localStorage.removeItem('prazos_rascunho');</script>";
         } catch (PDOException $e) {
             // Logar erro completo para debug
             error_log("Erro ao cadastrar eleição/prazo: " . $e->getMessage());
@@ -108,6 +131,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 }
+
+// Mapear siglas para nomes completos
+function obterNomeCurso($sigla) {
+    $cursos = [
+        'DSM' => 'Desenvolvimento de Software Multiplataforma',
+        'Desenvolvimento de Software Multiplataforma' => 'DSM',
+        'GE' => 'Gestão Empresarial',
+        'Gestão Empresarial' => 'Gestão Empresarial',
+        'GPI' => 'Gestão da Produção Industrial',
+        'Gestão da Produção Industrial' => 'Gestão Produção'
+    ];
+    return $cursos[$sigla] ?? $sigla;
+}
+
+// Mapear status
+function obterStatusLegivel($status) {
+    $status_map = [
+        'candidatura_aberta' => 'Inscrições Abertas',
+        'votacao_aberta' => 'Votação Aberta',
+        'aguardando_finalizacao' => 'Aguardando Apuração',
+        'encerrada' => 'Encerrada'
+    ];
+    return $status_map[$status] ?? $status;
+}
 ?>
 
 <!DOCTYPE html>
@@ -116,7 +163,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIV - Sistema Integrado de Votações</title>
+    <title>SIV - Gerenciar Prazos de Eleições</title>
 
     <link rel="stylesheet" href="../../assets/styles/guest.css">
     <link rel="stylesheet" href="../../assets/styles/admin.css">
@@ -126,8 +173,463 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
 
     <style>
-        /* Modal fix */
-        .custom-modal-bg {
+        /* Layout principal */
+        .manage-deadlines {
+            padding: 30px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            color: #666;
+            font-size: 1.05em;
+        }
+
+        /* Grid de 2 colunas */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Eleições Existentes */
+        .eleicoes-card {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 600px;
+        }
+
+        .eleicoes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .eleicoes-title {
+            font-size: 1.3em;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .eleicoes-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .eleicoes-list {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .eleicao-item {
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+
+        .eleicao-item:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .eleicao-header-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .eleicao-titulo {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .eleicao-status {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .status-candidatura_aberta {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-votacao_aberta {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-aguardando_finalizacao {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .eleicao-datas {
+            font-size: 0.8em;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        /* Card do Formulário */
+        .form-card {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        /* Inputs com validação visual */
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .input-group input[type="date"],
+        .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95em;
+            transition: all 0.2s;
+        }
+
+        .input-group input[type="date"]:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .input-group input.valid {
+            border-color: #28a745;
+        }
+
+        .input-group input.invalid {
+            border-color: #dc3545;
+        }
+
+        .input-feedback {
+            font-size: 0.85em;
+            margin-top: 5px;
+            min-height: 18px;
+        }
+
+        .feedback-success {
+            color: #28a745;
+        }
+
+        .feedback-error {
+            color: #dc3545;
+        }
+
+        .feedback-info {
+            color: #666;
+        }
+
+        /* Timeline Visual */
+        .timeline-preview {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #e0e0e0;
+        }
+
+        .timeline-title {
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .timeline-bar {
+            position: relative;
+            height: 60px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .timeline-segment {
+            position: absolute;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .timeline-inscricao {
+            background: #28a745;
+            left: 0;
+        }
+
+        .timeline-votacao {
+            background: var(--primary);
+        }
+
+        .timeline-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        /* Aviso sobre "Todos os Cursos" */
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 12px 15px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .warning-box.show {
+            display: block;
+        }
+
+        .warning-box-title {
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .warning-box-text {
+            color: #856404;
+            font-size: 0.85em;
+        }
+
+        /* Botões do formulário */
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #004654;
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-clear {
+            background: #dc3545;
+            color: white;
+            border: none;
+            transition: background 0.3s ease;
+        }
+
+        .btn-clear:hover {
+            background: #c82333;
+        }
+
+        /* Modal de Confirmação */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+            animation: fadeIn 0.2s;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .modal-subtitle {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .modal-body {
+            margin-bottom: 25px;
+        }
+
+        .preview-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .preview-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .preview-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .preview-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+
+        .preview-list li {
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Modal de Feedback */
+        .feedback-modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -138,17 +640,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             align-items: center;
             justify-content: center;
             z-index: 5000;
+            animation: fadeIn 0.2s;
         }
-        .custom-modal {
+
+        .feedback-modal-content {
             background: #fff;
             width: 420px;
             padding: 25px;
             border-radius: 12px;
-            animation: fade .3s ease;
             text-align: center;
             box-shadow: 0 0 20px rgba(0,0,0,.2);
+            animation: slideUp 0.3s;
         }
-        .custom-modal button {
+
+        .feedback-modal h3 {
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .feedback-modal button {
             margin-top: 15px;
             background: #b20000;
             color: #fff;
@@ -156,122 +666,585 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             padding: 10px 18px;
             border-radius: 8px;
             cursor: pointer;
+            font-weight: 600;
         }
-        @keyframes fade { from {opacity:0; margin-top:-20px;} to {opacity:1; margin-top:0;} }
+
+        .feedback-modal button:hover {
+            background: #8b0000;
+        }
     </style>
 </head>
 
 <body>
 
 <?php if (!empty($mensagem)): ?>
-<div class="custom-modal-bg" id="modalErro">
-    <div class="custom-modal">
-        <h3><?= $tipo_mensagem === "error" ? " Erro" : "Sucesso" ?></h3>
+<div class="feedback-modal" id="feedbackModal">
+    <div class="feedback-modal-content">
+        <h3><?= $tipo_mensagem === "error" ? "Erro" : "Sucesso" ?></h3>
         <p><?= $mensagem ?></p>
-        <button onclick="document.getElementById('modalErro').remove()">OK</button>
+        <button onclick="closeFeedbackModal()">OK</button>
     </div>
 </div>
 <?php endif; ?>
 
-<header class="site">
-    <nav class="navbar">
-        <div class="logo">
-            <img src="../../assets/images/fatec-ogari.png">
-            <img src="../../assets/images/logo-cps.png">
-        </div>
-
-        <ul class="links">
-            <li><a href="index.php">Home</a></li>
-            <li><a href="inscricoes.php">Inscrições</a></li>
-            <li><a href="prazos.php" class="active">Prazos</a></li>
-            <li><a href="relatorios.php">Relatórios</a></li>
-            <li><a href="cadastro-admin.php">Cadastro Admin</a></li>
-            <li><a href="gerenciar-alunos.php">Gerenciar Alunos</a></li>
-        </ul>
-
-        <div class="actions">
-            <img src="../../assets/images/user-icon.png" class="user-icon">
-            <a href="../../logout.php">Sair da Conta</a>
-        </div>
-    </nav>
-</header>
+<?php require_once 'components/header.php'; ?>
 
 <main class="manage-deadlines">
-    <div class="card-wrapper">
-        <div class="card">
-            <h1 class="title">Gerenciar Prazos</h1>
+    <div class="page-header">
+        <h1 class="page-title">Gerenciar Eleições</h1>
+        <p class="page-subtitle">Crie novas eleições e visualize as existentes</p>
+    </div>
 
-            <form class="form-deadline" method="POST">
+    <div class="content-grid">
+        <!-- Lista de Eleições Existentes -->
+        <div class="eleicoes-card">
+            <div class="eleicoes-header">
+                <h2 class="eleicoes-title">Eleições Existentes</h2>
+                <span style="font-size: 0.85em; color: #666;"><?= count($eleicoes_existentes) ?> eleições</span>
+            </div>
+
+            <div class="eleicoes-filters">
+                <button class="filter-btn active" data-filter="all">Todas</button>
+                <button class="filter-btn" data-filter="candidatura_aberta">Inscrições</button>
+                <button class="filter-btn" data-filter="votacao_aberta">Votação</button>
+                <button class="filter-btn" data-filter="aguardando_finalizacao">Aguardando</button>
+            </div>
+
+            <div class="eleicoes-list" id="eleicoesList">
+                <?php if (count($eleicoes_existentes) > 0): ?>
+                    <?php foreach($eleicoes_existentes as $eleicao): ?>
+                        <div class="eleicao-item" data-status="<?= $eleicao['status'] ?>">
+                            <div class="eleicao-header-item">
+                                <div class="eleicao-titulo">
+                                    <?= obterNomeCurso($eleicao['curso']) ?> - <?= $eleicao['semestre'] ?>º Semestre
+                                </div>
+                                <span class="eleicao-status status-<?= $eleicao['status'] ?>">
+                                    <?= obterStatusLegivel($eleicao['status']) ?>
+                                </span>
+                            </div>
+                            <div class="eleicao-datas">
+                                <div>Inscrições: <?= date('d/m/Y', strtotime($eleicao['data_inicio_candidatura'])) ?> - <?= date('d/m/Y', strtotime($eleicao['data_fim_candidatura'])) ?></div>
+                                <div>Votação: <?= date('d/m/Y', strtotime($eleicao['data_inicio_votacao'])) ?> - <?= date('d/m/Y', strtotime($eleicao['data_fim_votacao'])) ?></div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="empty-state">
+                        <p>Nenhuma eleição cadastrada ainda</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Formulário de Nova Eleição -->
+        <div class="form-card">
+            <h2 class="form-title">Criar Nova Eleição</h2>
+
+            <form id="formPrazos" method="POST" novalidate>
                 <?= campoCSRF() ?>
 
                 <div class="input-group">
-                    <label>Curso</label>
-                    <div class="wrapper-select">
-                        <select name="curso" required>
-                            <option value="">Selecione</option>
-                            <option value="Desenvolvimento de Software Multiplataforma">DSM</option>
-                            <option value="Gestão Empresarial">Gestão Empresarial</option>
-                            <option value="Gestão da Produção Industrial">Gestão Produção</option>
-                            <option value="Todos os Cursos">Todos os Cursos</option>
-                        </select>
+                    <label for="curso">Curso *</label>
+                    <select name="curso" id="curso" required>
+                        <option value="">Selecione o curso</option>
+                        <option value="Desenvolvimento de Software Multiplataforma">DSM - Desenvolvimento de Software Multiplataforma</option>
+                        <option value="Gestão Empresarial">GE - Gestão Empresarial</option>
+                        <option value="Gestão da Produção Industrial">GPI - Gestão da Produção Industrial</option>
+                        <option value="Todos os Cursos">Todos os Cursos</option>
+                    </select>
+                </div>
+
+                <div class="warning-box" id="warningAllCourses">
+                    <div class="warning-box-title">Atenção!</div>
+                    <div class="warning-box-text">
+                        Ao selecionar "Todos os Cursos", serão criadas <strong>3 eleições simultâneas</strong> (DSM, GE e GPI) com os mesmos prazos.
                     </div>
                 </div>
 
                 <div class="input-group">
-                    <label>Semestre</label>
-                    <div class="wrapper-select">
-                        <select name="semestre" required>
-                            <option value="">Selecione</option>
-                            <option value="1">1º Semestre</option>
-                            <option value="2">2º Semestre</option>
-                            <option value="3">3º Semestre</option>
-                            <option value="4">4º Semestre</option>
-                            <option value="5">5º Semestre</option>
-                            <option value="6">6º Semestre</option>
-                            <option value="7">Todos Semestres</option>
-                        </select>
+                    <label for="semestre">Semestre *</label>
+                    <select name="semestre" id="semestre" required>
+                        <option value="">Selecione o semestre</option>
+                        <option value="1">1º Semestre</option>
+                        <option value="2">2º Semestre</option>
+                        <option value="3">3º Semestre</option>
+                        <option value="4">4º Semestre</option>
+                        <option value="5">5º Semestre</option>
+                        <option value="6">6º Semestre</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="inscricao_inicio">Início das Inscrições *</label>
+                    <input type="date" name="inscricao_inicio" id="inscricao_inicio" required>
+                    <div class="input-feedback" id="feedback-inscricao-inicio"></div>
+                </div>
+
+                <div class="input-group">
+                    <label for="inscricao_fim">Fim das Inscrições *</label>
+                    <input type="date" name="inscricao_fim" id="inscricao_fim" required>
+                    <div class="input-feedback" id="feedback-inscricao-fim"></div>
+                </div>
+
+                <div class="input-group">
+                    <label for="votacao_inicio">Início da Votação *</label>
+                    <input type="date" name="votacao_inicio" id="votacao_inicio" required>
+                    <div class="input-feedback" id="feedback-votacao-inicio"></div>
+                </div>
+
+                <div class="input-group">
+                    <label for="votacao_fim">Fim da Votação *</label>
+                    <input type="date" name="votacao_fim" id="votacao_fim" required>
+                    <div class="input-feedback" id="feedback-votacao-fim"></div>
+                </div>
+
+                <!-- Timeline Visual -->
+                <div class="timeline-preview" id="timelinePreview" style="display: none;">
+                    <div class="timeline-title">Visualização da Linha do Tempo</div>
+                    <div class="timeline-bar">
+                        <div class="timeline-segment timeline-inscricao" id="timelineInscricao"></div>
+                        <div class="timeline-segment timeline-votacao" id="timelineVotacao"></div>
+                    </div>
+                    <div class="timeline-info">
+                        <span id="duracao-inscricao"></span>
+                        <span id="duracao-votacao"></span>
                     </div>
                 </div>
 
-                <div class="date-interval-group">
-                    <h3 class="title">Período de Inscrição</h3>
-                    <div class="row">
-                        <div class="input-group">
-                            <label>Data inicial</label>
-                            <input type="date" name="inscricao_inicio" required>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Data final</label>
-                            <input type="date" name="inscricao_fim" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="date-interval-group">
-                    <h3 class="title">Período de Votação</h3>
-                    <div class="row">
-                        <div class="input-group">
-                            <label>Data inicial</label>
-                            <input type="date" name="votacao_inicio" required>
-                        </div>
-
-                        <div class="input-group">
-                            <label>Data final</label>
-                            <input type="date" name="votacao_fim" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-buttons">
-                    <a href="index.php" class="button secondary">Voltar</a>
-                    <button type="submit" class="button primary">Confirmar</button>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-clear" onclick="limparFormulario()">Limpar</button>
+                    <a href="index.php" class="btn btn-secondary">Cancelar</a>
+                    <button type="button" class="btn btn-primary" id="btnSubmit" onclick="mostrarPreview()">Criar Eleição</button>
                 </div>
             </form>
-
         </div>
     </div>
 </main>
+
+<!-- Modal de Confirmação -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Confirmar Criação de Eleição</h3>
+            <p class="modal-subtitle">Revise os dados antes de confirmar</p>
+        </div>
+        <div class="modal-body" id="modalPreviewContent">
+            <!-- Conteúdo será preenchido via JavaScript -->
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="confirmarCriacao()">Confirmar Criação</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ====================================
+// CONFIGURAÇÃO INICIAL
+// ====================================
+
+const hoje = new Date().toISOString().split('T')[0];
+let formData = {};
+
+// Definir data mínima para os inputs
+document.getElementById('inscricao_inicio').min = hoje;
+
+// ====================================
+// PERSISTÊNCIA COM LOCALSTORAGE
+// ====================================
+
+function salvarRascunho() {
+    const dados = {
+        curso: document.getElementById('curso').value,
+        semestre: document.getElementById('semestre').value,
+        inscricao_inicio: document.getElementById('inscricao_inicio').value,
+        inscricao_fim: document.getElementById('inscricao_fim').value,
+        votacao_inicio: document.getElementById('votacao_inicio').value,
+        votacao_fim: document.getElementById('votacao_fim').value,
+        timestamp: new Date().getTime()
+    };
+    localStorage.setItem('prazos_rascunho', JSON.stringify(dados));
+}
+
+function carregarRascunho() {
+    const rascunho = localStorage.getItem('prazos_rascunho');
+    if (rascunho) {
+        const dados = JSON.parse(rascunho);
+        // Verificar se não é muito antigo (> 24h)
+        const umDia = 24 * 60 * 60 * 1000;
+        if (new Date().getTime() - dados.timestamp < umDia) {
+            document.getElementById('curso').value = dados.curso || '';
+            document.getElementById('semestre').value = dados.semestre || '';
+            document.getElementById('inscricao_inicio').value = dados.inscricao_inicio || '';
+            document.getElementById('inscricao_fim').value = dados.inscricao_fim || '';
+            document.getElementById('votacao_inicio').value = dados.votacao_inicio || '';
+            document.getElementById('votacao_fim').value = dados.votacao_fim || '';
+
+            // Trigger validações
+            validarTudo();
+        }
+    }
+}
+
+// ====================================
+// VALIDAÇÕES EM TEMPO REAL
+// ====================================
+
+function calcularDias(dataInicio, dataFim) {
+    const inicio = new Date(dataInicio);
+    const fim = new Date(dataFim);
+    const diff = fim - inicio;
+    return Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1; // +1 para incluir o dia final
+}
+
+function validarInscricaoInicio() {
+    const input = document.getElementById('inscricao_inicio');
+    const feedback = document.getElementById('feedback-inscricao-inicio');
+    const valor = input.value;
+
+    if (!valor) {
+        input.className = '';
+        feedback.textContent = '';
+        return false;
+    }
+
+    if (valor < hoje) {
+        input.className = 'invalid';
+        feedback.className = 'input-feedback feedback-error';
+        feedback.textContent = 'A data não pode ser anterior a hoje';
+        return false;
+    }
+
+    input.className = 'valid';
+    feedback.className = 'input-feedback feedback-success';
+    const dias = calcularDias(hoje, valor);
+    feedback.textContent = dias === 1 ? 'Começa hoje' : `Começa em ${dias - 1} dias`;
+    return true;
+}
+
+function validarInscricaoFim() {
+    const inputInicio = document.getElementById('inscricao_inicio');
+    const input = document.getElementById('inscricao_fim');
+    const feedback = document.getElementById('feedback-inscricao-fim');
+    const valor = input.value;
+
+    if (!valor) {
+        input.className = '';
+        feedback.textContent = '';
+        return false;
+    }
+
+    if (!inputInicio.value) {
+        input.className = '';
+        feedback.className = 'input-feedback feedback-info';
+        feedback.textContent = 'Preencha a data de início primeiro';
+        return false;
+    }
+
+    if (valor < inputInicio.value) {
+        input.className = 'invalid';
+        feedback.className = 'input-feedback feedback-error';
+        feedback.textContent = 'Deve ser maior ou igual ao início';
+        return false;
+    }
+
+    input.className = 'valid';
+    feedback.className = 'input-feedback feedback-success';
+    const dias = calcularDias(inputInicio.value, valor);
+    feedback.textContent = `Período de ${dias} dias`;
+    return true;
+}
+
+function validarVotacaoInicio() {
+    const inputInscricaoFim = document.getElementById('inscricao_fim');
+    const input = document.getElementById('votacao_inicio');
+    const feedback = document.getElementById('feedback-votacao-inicio');
+    const valor = input.value;
+
+    if (!valor) {
+        input.className = '';
+        feedback.textContent = '';
+        return false;
+    }
+
+    if (!inputInscricaoFim.value) {
+        input.className = '';
+        feedback.className = 'input-feedback feedback-info';
+        feedback.textContent = 'Preencha o fim das inscrições primeiro';
+        return false;
+    }
+
+    if (valor <= inputInscricaoFim.value) {
+        input.className = 'invalid';
+        feedback.className = 'input-feedback feedback-error';
+        feedback.textContent = 'Deve ser posterior ao fim das inscrições';
+        return false;
+    }
+
+    input.className = 'valid';
+    feedback.className = 'input-feedback feedback-success';
+    const intervalo = calcularDias(inputInscricaoFim.value, valor);
+    feedback.textContent = `${intervalo - 1} dias após o fim das inscrições`;
+    return true;
+}
+
+function validarVotacaoFim() {
+    const inputInicio = document.getElementById('votacao_inicio');
+    const input = document.getElementById('votacao_fim');
+    const feedback = document.getElementById('feedback-votacao-fim');
+    const valor = input.value;
+
+    if (!valor) {
+        input.className = '';
+        feedback.textContent = '';
+        return false;
+    }
+
+    if (!inputInicio.value) {
+        input.className = '';
+        feedback.className = 'input-feedback feedback-info';
+        feedback.textContent = 'Preencha a data de início primeiro';
+        return false;
+    }
+
+    if (valor < inputInicio.value) {
+        input.className = 'invalid';
+        feedback.className = 'input-feedback feedback-error';
+        feedback.textContent = 'Deve ser maior ou igual ao início';
+        return false;
+    }
+
+    input.className = 'valid';
+    feedback.className = 'input-feedback feedback-success';
+    const dias = calcularDias(inputInicio.value, valor);
+    feedback.textContent = `Período de ${dias} dias`;
+    return true;
+}
+
+function validarTudo() {
+    const v1 = validarInscricaoInicio();
+    const v2 = validarInscricaoFim();
+    const v3 = validarVotacaoInicio();
+    const v4 = validarVotacaoFim();
+
+    atualizarTimeline();
+
+    // Habilitar/desabilitar botão submit
+    const btnSubmit = document.getElementById('btnSubmit');
+    const curso = document.getElementById('curso').value;
+    const semestre = document.getElementById('semestre').value;
+
+    if (v1 && v2 && v3 && v4 && curso && semestre) {
+        btnSubmit.disabled = false;
+    } else {
+        btnSubmit.disabled = true;
+    }
+}
+
+// ====================================
+// TIMELINE VISUAL
+// ====================================
+
+function atualizarTimeline() {
+    const inscricaoInicio = document.getElementById('inscricao_inicio').value;
+    const inscricaoFim = document.getElementById('inscricao_fim').value;
+    const votacaoInicio = document.getElementById('votacao_inicio').value;
+    const votacaoFim = document.getElementById('votacao_fim').value;
+
+    if (!inscricaoInicio || !inscricaoFim || !votacaoInicio || !votacaoFim) {
+        document.getElementById('timelinePreview').style.display = 'none';
+        return;
+    }
+
+    document.getElementById('timelinePreview').style.display = 'block';
+
+    const totalDias = calcularDias(inscricaoInicio, votacaoFim);
+    const diasInscricao = calcularDias(inscricaoInicio, inscricaoFim);
+    const diasVotacao = calcularDias(votacaoInicio, votacaoFim);
+
+    const percentInscricao = (diasInscricao / totalDias) * 100;
+    const percentVotacao = (diasVotacao / totalDias) * 100;
+
+    const timelineInscricao = document.getElementById('timelineInscricao');
+    const timelineVotacao = document.getElementById('timelineVotacao');
+
+    timelineInscricao.style.width = percentInscricao + '%';
+    timelineInscricao.textContent = `Inscrições (${diasInscricao}d)`;
+
+    timelineVotacao.style.width = percentVotacao + '%';
+    timelineVotacao.style.left = percentInscricao + '%';
+    timelineVotacao.textContent = `Votação (${diasVotacao}d)`;
+
+    document.getElementById('duracao-inscricao').textContent = `${diasInscricao} dias de inscrição`;
+    document.getElementById('duracao-votacao').textContent = `${diasVotacao} dias de votação`;
+}
+
+// ====================================
+// AVISO "TODOS OS CURSOS"
+// ====================================
+
+document.getElementById('curso').addEventListener('change', function() {
+    const warning = document.getElementById('warningAllCourses');
+    if (this.value === 'Todos os Cursos') {
+        warning.classList.add('show');
+    } else {
+        warning.classList.remove('show');
+    }
+    salvarRascunho();
+    validarTudo();
+});
+
+// ====================================
+// EVENT LISTENERS
+// ====================================
+
+document.getElementById('inscricao_inicio').addEventListener('change', function() {
+    validarInscricaoInicio();
+    validarInscricaoFim();
+    validarVotacaoInicio();
+    validarVotacaoFim();
+    salvarRascunho();
+});
+
+document.getElementById('inscricao_fim').addEventListener('change', function() {
+    validarInscricaoFim();
+    validarVotacaoInicio();
+    validarVotacaoFim();
+    salvarRascunho();
+});
+
+document.getElementById('votacao_inicio').addEventListener('change', function() {
+    validarVotacaoInicio();
+    validarVotacaoFim();
+    salvarRascunho();
+});
+
+document.getElementById('votacao_fim').addEventListener('change', function() {
+    validarVotacaoFim();
+    salvarRascunho();
+});
+
+document.getElementById('semestre').addEventListener('change', function() {
+    salvarRascunho();
+    validarTudo();
+});
+
+// ====================================
+// FILTROS DE ELEIÇÕES
+// ====================================
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Atualizar botão ativo
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+
+        const filtro = this.dataset.filter;
+        const items = document.querySelectorAll('.eleicao-item');
+
+        items.forEach(item => {
+            if (filtro === 'all' || item.dataset.status === filtro) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+});
+
+// ====================================
+// MODAL DE CONFIRMAÇÃO
+// ====================================
+
+function mostrarPreview() {
+    const curso = document.getElementById('curso');
+    const semestre = document.getElementById('semestre');
+    const inscricaoInicio = document.getElementById('inscricao_inicio').value;
+    const inscricaoFim = document.getElementById('inscricao_fim').value;
+    const votacaoInicio = document.getElementById('votacao_inicio').value;
+    const votacaoFim = document.getElementById('votacao_fim').value;
+
+    const cursoTexto = curso.options[curso.selectedIndex].text;
+    const semestreTexto = semestre.options[semestre.selectedIndex].text;
+
+    let html = '<div class="preview-item">';
+    html += '<div class="preview-label">Curso(s)</div>';
+
+    if (curso.value === 'Todos os Cursos') {
+        html += '<div class="preview-value">Serão criadas 3 eleições:</div>';
+        html += '<ul class="preview-list">';
+        html += '<li>DSM - Desenvolvimento de Software Multiplataforma</li>';
+        html += '<li>GE - Gestão Empresarial</li>';
+        html += '<li>GPI - Gestão da Produção Industrial</li>';
+        html += '</ul>';
+    } else {
+        html += '<div class="preview-value">' + cursoTexto + '</div>';
+    }
+    html += '</div>';
+
+    html += '<div class="preview-item">';
+    html += '<div class="preview-label">Semestre</div>';
+    html += '<div class="preview-value">' + semestreTexto + '</div>';
+    html += '</div>';
+
+    html += '<div class="preview-item">';
+    html += '<div class="preview-label">Período de Inscrições</div>';
+    html += '<div class="preview-value">' + formatarData(inscricaoInicio) + ' até ' + formatarData(inscricaoFim);
+    html += ' (' + calcularDias(inscricaoInicio, inscricaoFim) + ' dias)</div>';
+    html += '</div>';
+
+    html += '<div class="preview-item">';
+    html += '<div class="preview-label">Período de Votação</div>';
+    html += '<div class="preview-value">' + formatarData(votacaoInicio) + ' até ' + formatarData(votacaoFim);
+    html += ' (' + calcularDias(votacaoInicio, votacaoFim) + ' dias)</div>';
+    html += '</div>';
+
+    document.getElementById('modalPreviewContent').innerHTML = html;
+    document.getElementById('confirmModal').classList.add('show');
+}
+
+function fecharModal() {
+    document.getElementById('confirmModal').classList.remove('show');
+}
+
+function confirmarCriacao() {
+    document.getElementById('formPrazos').submit();
+}
+
+function formatarData(data) {
+    const partes = data.split('-');
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+// ====================================
+// FUNÇÕES AUXILIARES
+// ====================================
+
+function limparFormulario() {
+    if (confirm('Tem certeza que deseja limpar todos os campos?')) {
+        document.getElementById('formPrazos').reset();
+        document.querySelectorAll('.input-feedback').forEach(el => el.textContent = '');
+        document.querySelectorAll('input[type="date"]').forEach(el => el.className = '');
+        document.getElementById('timelinePreview').style.display = 'none';
+        document.getElementById('warningAllCourses').classList.remove('show');
+        document.getElementById('btnSubmit').disabled = true;
+        localStorage.removeItem('prazos_rascunho');
+    }
+}
+
+function closeFeedbackModal() {
+    document.getElementById('feedbackModal').remove();
+}
+
+// ====================================
+// INICIALIZAÇÃO
+// ====================================
+
+window.addEventListener('DOMContentLoaded', function() {
+    carregarRascunho();
+    validarTudo();
+});
+</script>
 
 </body>
 </html>

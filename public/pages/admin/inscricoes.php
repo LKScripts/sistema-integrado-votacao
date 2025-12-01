@@ -50,10 +50,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_candidatura'])) {
     }
 }
 
-// Buscar candidaturas com filtros e paginação
+// Filtros avançados
 $filtro_curso = $_GET['curso'] ?? '';
 $filtro_semestre = $_GET['semestre'] ?? '';
 $filtro_nome = $_GET['nome'] ?? '';
+$filtro_status = $_GET['status'] ?? '';
+
+// Ordenação
+$sort_column = $_GET['sort'] ?? 'data_inscricao';
+$sort_order = $_GET['order'] ?? 'DESC';
+
+// Validar coluna de ordenação permitida
+$allowed_columns = ['data_inscricao', 'nome_completo', 'curso', 'semestre', 'status_validacao'];
+if (!in_array($sort_column, $allowed_columns)) {
+    $sort_column = 'data_inscricao';
+}
+
+// Validar ordem
+if (!in_array(strtoupper($sort_order), ['ASC', 'DESC'])) {
+    $sort_order = 'DESC';
+}
 
 // Paginação
 $registros_por_pagina = 20;
@@ -91,13 +107,14 @@ $sql = "
 
 $params = [];
 
-if (!empty($filtro_curso) && $filtro_curso !== 'Todos os Cursos') {
+// Aplicar filtros
+if (!empty($filtro_curso)) {
     $sql .= " AND e.curso = ?";
     $sql_count .= " AND e.curso = ?";
     $params[] = $filtro_curso;
 }
 
-if (!empty($filtro_semestre) && $filtro_semestre !== 'Todos Semestres') {
+if (!empty($filtro_semestre)) {
     $sql .= " AND e.semestre = ?";
     $sql_count .= " AND e.semestre = ?";
     $params[] = intval($filtro_semestre);
@@ -109,14 +126,29 @@ if (!empty($filtro_nome)) {
     $params[] = "%$filtro_nome%";
 }
 
+if (!empty($filtro_status)) {
+    $sql .= " AND c.status_validacao = ?";
+    $sql_count .= " AND c.status_validacao = ?";
+    $params[] = $filtro_status;
+}
+
 // Contar total de registros
 $stmt_count = $conn->prepare($sql_count);
 $stmt_count->execute($params);
 $total_registros = $stmt_count->fetch()['total'];
 $total_paginas = ceil($total_registros / $registros_por_pagina);
 
-// Buscar registros da página atual
-$sql .= " ORDER BY c.data_inscricao DESC LIMIT ? OFFSET ?";
+// Mapear colunas para query SQL
+$column_map = [
+    'data_inscricao' => 'c.data_inscricao',
+    'nome_completo' => 'a.nome_completo',
+    'curso' => 'e.curso',
+    'semestre' => 'e.semestre',
+    'status_validacao' => 'c.status_validacao'
+];
+
+// Buscar registros da página atual com ordenação
+$sql .= " ORDER BY {$column_map[$sort_column]} $sort_order LIMIT ? OFFSET ?";
 $params[] = $registros_por_pagina;
 $params[] = $offset;
 
@@ -127,6 +159,40 @@ $candidaturas = $stmt->fetchAll();
 // Calcular range de registros exibidos
 $primeiro_registro = $total_registros > 0 ? $offset + 1 : 0;
 $ultimo_registro = min($offset + $registros_por_pagina, $total_registros);
+
+// Função para gerar link de ordenação
+function getSortLink($column, $current_sort, $current_order) {
+    global $filtro_curso, $filtro_semestre, $filtro_nome, $filtro_status;
+
+    $query_params = [];
+    if (!empty($filtro_nome)) $query_params[] = 'nome=' . urlencode($filtro_nome);
+    if (!empty($filtro_curso)) $query_params[] = 'curso=' . urlencode($filtro_curso);
+    if (!empty($filtro_semestre)) $query_params[] = 'semestre=' . urlencode($filtro_semestre);
+    if (!empty($filtro_status)) $query_params[] = 'status=' . urlencode($filtro_status);
+
+    // Se já está ordenando por esta coluna, inverte a ordem
+    if ($column === $current_sort) {
+        $new_order = $current_order === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+        // Nova coluna: ordem padrão
+        $new_order = 'DESC';
+    }
+
+    $query_params[] = 'sort=' . $column;
+    $query_params[] = 'order=' . $new_order;
+
+    return 'inscricoes.php?' . implode('&', $query_params);
+}
+
+// Função para obter ícone de ordenação
+function getSortIcon($column, $current_sort, $current_order) {
+    if ($column !== $current_sort) {
+        return '<span class="sort-icon">⇅</span>';
+    }
+    return $current_order === 'ASC'
+        ? '<span class="sort-icon active">↑</span>'
+        : '<span class="sort-icon active">↓</span>';
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -134,11 +200,8 @@ $ultimo_registro = min($offset + $registros_por_pagina, $total_registros);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIV - Sistema Integrado de Votações</title>
+    <title>SIV - Gerenciar Inscrições</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="../../assets/styles/admin.css">
-
-    <link rel="stylesheet" href="../../assets/styles/guest.css">
     <link rel="stylesheet" href="../../assets/styles/guest.css">
     <link rel="stylesheet" href="../../assets/styles/admin.css">
     <link rel="stylesheet" href="../../assets/styles/base.css">
@@ -146,38 +209,296 @@ $ultimo_registro = min($offset + $registros_por_pagina, $total_registros);
     <link rel="stylesheet" href="../../assets/styles/footer-site.css">
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
     <style>
-        .form-filters .button.primary:hover {
-            background: #004654 !important;
+        /* Filtros aprimorados */
+        .form-filters {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
         }
-        .form-filters .button.secondary:hover {
-            background: #5a6268 !important;
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9em;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95em;
+            transition: border-color 0.2s;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .button {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: all 0.2s;
+            font-size: 0.9em;
+            width: auto;
+            white-space: nowrap;
+            line-height: 1.4;
+        }
+
+        .button.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .button.primary:hover {
+            background: #004654;
+        }
+
+        .button.secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .button.secondary:hover {
+            background: #5a6268;
+        }
+
+        /* Tabela com ordenação */
+        .list-applicants table {
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .list-applicants thead th {
+            background: #f8f9fa;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
+        }
+
+        .list-applicants thead th.sortable {
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .list-applicants thead th.sortable:hover {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .list-applicants thead th.sortable.active {
+            background: #e8f4f8;
+            color: var(--primary);
+        }
+
+        .sort-icon {
+            font-size: 1.1em;
+            margin-left: 6px;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+        }
+
+        .sort-icon.active {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        .list-applicants tbody td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .list-applicants tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-deferido {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-indeferido {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Ações da tabela */
+        .action-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .action-link:hover {
+            background: #e8f4f8;
+            color: #004654;
+        }
+
+        /* Info box */
+        .info-box {
+            background: #e8f4f8;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-box-icon {
+            font-size: 1.5em;
+            color: var(--primary);
+        }
+
+        .info-box-text {
+            flex: 1;
+            color: #004654;
+            font-size: 0.95em;
+        }
+
+        .info-box-text strong {
+            font-weight: 600;
+        }
+
+        /* Modal styles override */
+        .modal .content {
+            max-width: 600px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95em;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Paginação melhorada */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .pagination .results {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .pagination ul {
+            display: flex;
+            gap: 5px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .pagination ul li a,
+        .pagination ul li span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+            padding: 0 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.2s;
+        }
+
+        .pagination ul li a:hover {
+            background: #e9ecef;
+        }
+
+        .pagination ul li a[style*="background: #005f73"] {
+            background: var(--primary) !important;
+            color: white !important;
+            border-color: var(--primary) !important;
         }
     </style>
 </head>
 
 <body>
-    <header class="site">
-        <nav class="navbar">
-            <div class="logo">
-                <img src="../../assets/images/fatec-ogari.png" alt="Logo Fatec Itapira">
-                <img src="../../assets/images/logo-cps.png" alt="Logo CPS">
-            </div>
-
-            <ul class="links">
-            <li><a href="../../pages/admin/index.php">Home</a></li>
-            <li><a href="../../pages/admin/inscricoes.php" class="active">Inscrições</a></li>
-            <li><a href="../../pages/admin/prazos.php">Prazos</a></li>
-            <li><a href="../../pages/admin/relatorios.php">Relatórios</a></li>
-            <li><a href="../../pages/admin/cadastro-admin.php">Cadastro Admin</a></li>
-            <li><a href="../../pages/admin/gerenciar-alunos.php">Gerenciar Alunos</a></li>
-            </ul>
-
-            <div class="actions">
-                <img src="../../assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
-                <a href="../../logout.php">Sair da Conta</a>
-            </div>
-        </nav>
-    </header>
+    <?php require_once 'components/header.php'; ?>
 
     <?php if (!empty($mensagem)): ?>
         <div class="modal feedback" style="display:block;">
@@ -304,65 +625,90 @@ $ultimo_registro = min($offset + $registros_por_pagina, $total_registros);
 
     <main class="manage-applicants">
         <div class="container">
-            <h1>Gerenciar Inscrições</h1>
+            <h1 style="font-size: 2em; color: #333; margin-bottom: 10px;">Gerenciar Inscrições</h1>
+            <p style="color: #666; margin-bottom: 25px;">Visualize e gerencie todas as candidaturas submetidas</p>
+
             <form class="form-filters" method="GET" action="">
-                <div class="column">
-                    <label for="nome">Nome do aluno</label>
-                    <input id="nome" name="nome" type="text" value="<?= htmlspecialchars($filtro_nome) ?>" placeholder="Digite o nome do aluno" />
-                </div>
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="nome">Nome do Aluno</label>
+                        <input id="nome" name="nome" type="text" value="<?= htmlspecialchars($filtro_nome) ?>" placeholder="Digite o nome..." />
+                    </div>
 
-                <div class="column half">
-                    <div class="input-group">
+                    <div class="filter-group">
                         <label for="curso">Curso</label>
-                        <div class="wrapper-select">
-                            <select id="curso" name="curso">
-                                <option value="">Todos os Cursos</option>
-                                <option value="DSM" <?= $filtro_curso === 'DSM' ? 'selected' : '' ?>>DSM - Desenvolvimento de Software Multiplataforma</option>
-                                <option value="GE" <?= $filtro_curso === 'GE' ? 'selected' : '' ?>>GE - Gestão Empresarial</option>
-                                <option value="GPI" <?= $filtro_curso === 'GPI' ? 'selected' : '' ?>>GPI - Gestão da Produção Industrial</option>
-                            </select>
-                        </div>
+                        <select id="curso" name="curso">
+                            <option value="">Todos os Cursos</option>
+                            <option value="Desenvolvimento de Software Multiplataforma" <?= $filtro_curso === 'Desenvolvimento de Software Multiplataforma' ? 'selected' : '' ?>>DSM</option>
+                            <option value="Gestão Empresarial" <?= $filtro_curso === 'Gestão Empresarial' ? 'selected' : '' ?>>Gestão Empresarial</option>
+                            <option value="Gestão da Produção Industrial" <?= $filtro_curso === 'Gestão da Produção Industrial' ? 'selected' : '' ?>>Gestão Produção</option>
+                        </select>
                     </div>
-                </div>
 
-                <div class="column half">
-                    <div class="input-group">
+                    <div class="filter-group">
                         <label for="semestre">Semestre</label>
-                        <div class="wrapper-select">
-                            <select id="semestre" name="semestre">
-                                <option value="">Todos os Semestres</option>
-                                <option value="1" <?= $filtro_semestre === '1' ? 'selected' : '' ?>>1º Semestre</option>
-                                <option value="2" <?= $filtro_semestre === '2' ? 'selected' : '' ?>>2º Semestre</option>
-                                <option value="3" <?= $filtro_semestre === '3' ? 'selected' : '' ?>>3º Semestre</option>
-                                <option value="4" <?= $filtro_semestre === '4' ? 'selected' : '' ?>>4º Semestre</option>
-                                <option value="5" <?= $filtro_semestre === '5' ? 'selected' : '' ?>>5º Semestre</option>
-                                <option value="6" <?= $filtro_semestre === '6' ? 'selected' : '' ?>>6º Semestre</option>
-                            </select>
-                        </div>
+                        <select id="semestre" name="semestre">
+                            <option value="">Todos os Semestres</option>
+                            <option value="1" <?= $filtro_semestre === '1' ? 'selected' : '' ?>>1º Semestre</option>
+                            <option value="2" <?= $filtro_semestre === '2' ? 'selected' : '' ?>>2º Semestre</option>
+                            <option value="3" <?= $filtro_semestre === '3' ? 'selected' : '' ?>>3º Semestre</option>
+                            <option value="4" <?= $filtro_semestre === '4' ? 'selected' : '' ?>>4º Semestre</option>
+                            <option value="5" <?= $filtro_semestre === '5' ? 'selected' : '' ?>>5º Semestre</option>
+                            <option value="6" <?= $filtro_semestre === '6' ? 'selected' : '' ?>>6º Semestre</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="status">Status</label>
+                        <select id="status" name="status">
+                            <option value="">Todos os Status</option>
+                            <option value="pendente" <?= $filtro_status === 'pendente' ? 'selected' : '' ?>>Pendente</option>
+                            <option value="deferido" <?= $filtro_status === 'deferido' ? 'selected' : '' ?>>Deferido</option>
+                            <option value="indeferido" <?= $filtro_status === 'indeferido' ? 'selected' : '' ?>>Indeferido</option>
+                        </select>
                     </div>
                 </div>
 
-                <div style="display: flex; flex-direction: row; gap: 10px; align-items: flex-end; margin-top: 15px;">
-                    <button type="submit" class="button primary" style="padding: 12px 30px; background: #005f73; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.3s;">
-                        Aplicar Filtros
-                    </button>
-                    <a href="inscricoes.php" class="button secondary" style="padding: 12px 30px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-block; transition: background 0.3s;">
-                        Limpar
-                    </a>
+                <div class="filter-actions">
+                    <button type="submit" class="button primary">Aplicar Filtros</button>
+                    <a href="inscricoes.php" class="button secondary">Limpar Filtros</a>
                 </div>
             </form>
-
-            <div style="width: 100%; height: 2px; background-color: #999; margin: 25px 0;"></div>
 
             <section class="list-applicants">
                 <table>
                     <thead>
                         <tr>
-                            <th scope="col">Data inscrição</th>
-                            <th scope="col">Nome</th>
-                            <th scope="col">Curso</th>
-                            <th scope="col">Semestre</th>
-                            <th scope="col">Status</th>
+                            <th scope="col" class="sortable <?= $sort_column === 'data_inscricao' ? 'active' : '' ?>">
+                                <a href="<?= getSortLink('data_inscricao', $sort_column, $sort_order) ?>" style="color: inherit; text-decoration: none; display: flex; align-items: center;">
+                                    Data Inscrição
+                                    <?= getSortIcon('data_inscricao', $sort_column, $sort_order) ?>
+                                </a>
+                            </th>
+                            <th scope="col" class="sortable <?= $sort_column === 'nome_completo' ? 'active' : '' ?>">
+                                <a href="<?= getSortLink('nome_completo', $sort_column, $sort_order) ?>" style="color: inherit; text-decoration: none; display: flex; align-items: center;">
+                                    Nome
+                                    <?= getSortIcon('nome_completo', $sort_column, $sort_order) ?>
+                                </a>
+                            </th>
+                            <th scope="col" class="sortable <?= $sort_column === 'curso' ? 'active' : '' ?>">
+                                <a href="<?= getSortLink('curso', $sort_column, $sort_order) ?>" style="color: inherit; text-decoration: none; display: flex; align-items: center;">
+                                    Curso
+                                    <?= getSortIcon('curso', $sort_column, $sort_order) ?>
+                                </a>
+                            </th>
+                            <th scope="col" class="sortable <?= $sort_column === 'semestre' ? 'active' : '' ?>">
+                                <a href="<?= getSortLink('semestre', $sort_column, $sort_order) ?>" style="color: inherit; text-decoration: none; display: flex; align-items: center;">
+                                    Semestre
+                                    <?= getSortIcon('semestre', $sort_column, $sort_order) ?>
+                                </a>
+                            </th>
+                            <th scope="col" class="sortable <?= $sort_column === 'status_validacao' ? 'active' : '' ?>">
+                                <a href="<?= getSortLink('status_validacao', $sort_column, $sort_order) ?>" style="color: inherit; text-decoration: none; display: flex; align-items: center;">
+                                    Status
+                                    <?= getSortIcon('status_validacao', $sort_column, $sort_order) ?>
+                                </a>
+                            </th>
                             <th scope="col">Ações</th>
                         </tr>
                     </thead>
@@ -371,13 +717,13 @@ $ultimo_registro = min($offset + $registros_por_pagina, $total_registros);
                         <?php if (count($candidaturas) > 0): ?>
                             <?php foreach ($candidaturas as $cand): ?>
                                 <?php
-                                $status_class = 'text-warning';
-                                $status_texto = 'Aguardando análise';
+                                $status_class = 'status-pendente';
+                                $status_texto = 'Pendente';
                                 if ($cand['status_validacao'] === 'deferido') {
-                                    $status_class = 'text-success';
+                                    $status_class = 'status-deferido';
                                     $status_texto = 'Deferido';
                                 } elseif ($cand['status_validacao'] === 'indeferido') {
-                                    $status_class = 'text-danger';
+                                    $status_class = 'status-indeferido';
                                     $status_texto = 'Indeferido';
                                 }
                                 $data_formatada = date('d/m/Y H:i', strtotime($cand['data_inscricao']));
@@ -387,9 +733,13 @@ $ultimo_registro = min($offset + $registros_por_pagina, $total_registros);
                                     <th scope="row"><?= htmlspecialchars($cand['nome_completo']) ?></th>
                                     <td><?= htmlspecialchars($cand['curso']) ?></td>
                                     <td><?= $cand['semestre'] ?>º Semestre</td>
-                                    <td class="<?= $status_class ?>"><?= $status_texto ?></td>
                                     <td>
-                                        <a href="#edit-user-modal-<?= $cand['id_candidatura'] ?>">Editar</a>
+                                        <span class="status-badge <?= $status_class ?>">
+                                            <?= $status_texto ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="#edit-user-modal-<?= $cand['id_candidatura'] ?>" class="action-link">Visualizar</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -397,13 +747,12 @@ $ultimo_registro = min($offset + $registros_por_pagina, $total_registros);
                             <tr>
                                 <td colspan="6" style="text-align: center; padding: 40px 20px;">
                                     <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 20px; display: inline-block;">
-                                        <i class="fa-solid fa-info-circle" style="color: #856404; font-size: 1.5rem; margin-bottom: 10px;"></i>
                                         <p style="color: #856404; margin: 10px 0 0 0; font-weight: 500;">
                                             Nenhuma candidatura encontrada.
                                         </p>
-                                        <?php if (!empty($filtro_curso) || !empty($filtro_semestre) || !empty($filtro_nome)): ?>
+                                        <?php if (!empty($filtro_curso) || !empty($filtro_semestre) || !empty($filtro_nome) || !empty($filtro_status)): ?>
                                         <p style="color: #856404; margin: 15px 0 0 0; font-size: 0.9rem;">
-                                            Tente ajustar os filtros ou <a href="inscricoes.php" style="display: inline-block; background: #005f73; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; margin-top: 5px; transition: background 0.3s;">limpar a busca</a>.
+                                            Tente ajustar os filtros ou <a href="inscricoes.php" class="button primary" style="display: inline-block; padding: 8px 16px; margin-top: 10px;">limpar a busca</a>.
                                         </p>
                                         <?php endif; ?>
                                     </div>
@@ -423,24 +772,23 @@ $ultimo_registro = min($offset + $registros_por_pagina, $total_registros);
                                     <?php if ($total_paginas > 1): ?>
                                     <ul>
                                         <?php
-                                        // Construir query string com filtros
+                                        // Construir query string com filtros e ordenação
                                         $query_params = [];
                                         if (!empty($filtro_nome)) $query_params[] = 'nome=' . urlencode($filtro_nome);
                                         if (!empty($filtro_curso)) $query_params[] = 'curso=' . urlencode($filtro_curso);
                                         if (!empty($filtro_semestre)) $query_params[] = 'semestre=' . urlencode($filtro_semestre);
+                                        if (!empty($filtro_status)) $query_params[] = 'status=' . urlencode($filtro_status);
+                                        if (!empty($sort_column)) $query_params[] = 'sort=' . urlencode($sort_column);
+                                        if (!empty($sort_order)) $query_params[] = 'order=' . urlencode($sort_order);
                                         $query_string = !empty($query_params) ? '&' . implode('&', $query_params) : '';
                                         ?>
 
                                         <!-- Botão Anterior -->
                                         <li>
                                             <?php if ($pagina_atual > 1): ?>
-                                                <a href="?pagina=<?= $pagina_atual - 1 ?><?= $query_string ?>">
-                                                    <i class="fa-solid fa-chevron-left"></i>
-                                                </a>
+                                                <a href="?pagina=<?= $pagina_atual - 1 ?><?= $query_string ?>">‹</a>
                                             <?php else: ?>
-                                                <span style="opacity: 0.3; cursor: not-allowed;">
-                                                    <i class="fa-solid fa-chevron-left"></i>
-                                                </span>
+                                                <span style="opacity: 0.3; cursor: not-allowed;">‹</span>
                                             <?php endif; ?>
                                         </li>
 
@@ -462,13 +810,9 @@ $ultimo_registro = min($offset + $registros_por_pagina, $total_registros);
                                         <!-- Botão Próximo -->
                                         <li>
                                             <?php if ($pagina_atual < $total_paginas): ?>
-                                                <a href="?pagina=<?= $pagina_atual + 1 ?><?= $query_string ?>">
-                                                    <i class="fa-solid fa-chevron-right"></i>
-                                                </a>
+                                                <a href="?pagina=<?= $pagina_atual + 1 ?><?= $query_string ?>">›</a>
                                             <?php else: ?>
-                                                <span style="opacity: 0.3; cursor: not-allowed;">
-                                                    <i class="fa-solid fa-chevron-right"></i>
-                                                </span>
+                                                <span style="opacity: 0.3; cursor: not-allowed;">›</span>
                                             <?php endif; ?>
                                         </li>
                                     </ul>
@@ -486,9 +830,7 @@ $ultimo_registro = min($offset + $registros_por_pagina, $total_registros);
     <footer class="site">
         <div class="content">
             <img src="../../assets/images/logo-governo-do-estado-sp.png" alt="Logo Governo SP" class="logo-governo">
-
             <a href="../../pages/guest/sobre.html" class="btn-about">SOBRE O SISTEMA</a>
-
             <p>Sistema Integrado de Votação - FATEC/CPS</p>
             <p>Versão 0.1 (11/06/2025)</p>
         </div>
@@ -504,7 +846,6 @@ $ultimo_registro = min($offset + $registros_por_pagina, $total_registros);
                 // Se clicou no backdrop (fora do .content), fecha o modal
                 if (e.target === modal) {
                     window.location.hash = '';
-                    // Alternativa: history.pushState("", document.title, window.location.pathname);
                 }
             });
         });
