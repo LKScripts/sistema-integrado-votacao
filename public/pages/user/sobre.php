@@ -1,6 +1,15 @@
 <?php
 require_once '../../../config/session.php';
+require_once '../../../config/conexao.php';
+require_once '../../../config/automacao_eleicoes.php';
+
 verificarAluno();
+
+// Verificar se há eleição em fase de candidatura (para mostrar/ocultar link Inscrição)
+$usuario = obterUsuarioLogado();
+$curso = $usuario['curso'];
+$semestre = $usuario['semestre'];
+$eleicaoCandidatura = buscarEleicaoAtivaComVerificacao($curso, $semestre, 'candidatura');
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -27,7 +36,9 @@ verificarAluno();
 
             <ul class="links">
                 <li><a href="../../pages/user/index.php">Home</a></li>
-                <li><a href="../../pages/user/inscricao.php">Inscrição</a></li>
+                <?php if ($eleicaoCandidatura): ?>
+                    <li><a href="../../pages/user/inscricao.php">Inscrição</a></li>
+                <?php endif; ?>
                 <li><a href="../../pages/user/votacao.php">Votação</a></li>
                 <li><a href="../../pages/user/sobre.php" class="active">Sobre</a></li>
             </ul>

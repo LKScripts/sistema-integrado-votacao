@@ -18,9 +18,12 @@ $inscricao_sucesso = isset($_GET['sucesso']) && $_GET['sucesso'] == '1';
 
 // Buscar eleição ativa para candidatura (COM VERIFICAÇÃO AUTOMÁTICA)
 $eleicao = buscarEleicaoAtivaComVerificacao($curso, $semestre, 'candidatura');
+$eleicaoCandidatura = $eleicao; // Para uso no header
 
 if (!$eleicao) {
-    $erro = "Não há eleição aberta para candidatura no momento para seu curso e semestre.";
+    // Redirecionar para home se não houver eleição aberta para candidatura
+    header('Location: ../../pages/user/index.php');
+    exit;
 }
 
 $id_eleicao = $eleicao['id_eleicao'] ?? null;
@@ -205,7 +208,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $id_eleicao) {
             </div>
             <ul class="links">
                 <li><a href="../../pages/user/index.php">Home</a></li>
-                <li><a href="../../pages/user/inscricao.php" class="active">Inscrição</a></li>
+                <?php if ($eleicaoCandidatura): ?>
+                    <li><a href="../../pages/user/inscricao.php" class="active">Inscrição</a></li>
+                <?php endif; ?>
                 <li><a href="../../pages/user/votacao.php">Votação</a></li>
                 <li><a href="../../pages/user/sobre.php">Sobre</a></li>
             </ul>

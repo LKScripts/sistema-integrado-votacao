@@ -1,3 +1,12 @@
+<?php
+// Verificar se há eleição em fase de candidatura (para mostrar/ocultar link Inscrição)
+if (!isset($eleicaoCandidatura)) {
+    $usuario = obterUsuarioLogado();
+    $curso = $usuario['curso'];
+    $semestre = $usuario['semestre'];
+    $eleicaoCandidatura = buscarEleicaoAtivaComVerificacao($curso, $semestre, 'candidatura');
+}
+?>
 <header class="site">
     <nav class="navbar">
         <div class="logo">
@@ -7,7 +16,9 @@
 
         <ul class="links">
             <li><a href="../../pages/user/index.php" <?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'class="active"' : '' ?>>Home</a></li>
-            <li><a href="../../pages/user/inscricao.php" <?= basename($_SERVER['PHP_SELF']) == 'inscricao.php' ? 'class="active"' : '' ?>>Inscrição</a></li>
+            <?php if ($eleicaoCandidatura): ?>
+                <li><a href="../../pages/user/inscricao.php" <?= basename($_SERVER['PHP_SELF']) == 'inscricao.php' ? 'class="active"' : '' ?>>Inscrição</a></li>
+            <?php endif; ?>
             <li><a href="../../pages/user/votacao.php" <?= basename($_SERVER['PHP_SELF']) == 'votacao.php' ? 'class="active"' : '' ?>>Votação</a></li>
             <li><a href="../../pages/user/sobre.php" <?= basename($_SERVER['PHP_SELF']) == 'sobre.php' ? 'class="active"' : '' ?>>Sobre</a></li>
         </ul>
