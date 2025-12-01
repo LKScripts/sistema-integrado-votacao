@@ -103,28 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
 </head>
 <body>
-    <header class="site">
-        <nav class="navbar">
-            <div class="logo">
-                <img src="../../assets/images/fatec-ogari.png" alt="Logo Fatec Itapira">
-                <img src="../../assets/images/logo-cps.png" alt="Logo CPS">
-            </div>
-
-            <ul class="links">
-                <li><a href="../../pages/admin/index.php">Home</a></li>
-                <li><a href="../../pages/admin/inscricoes.php">Inscrições</a></li>
-                <li><a href="../../pages/admin/prazos.php">Prazos</a></li>
-                <li><a href="../../pages/admin/relatorios.php">Relatórios</a></li>
-                <li><a href="../../pages/admin/cadastro-admin.php" class="active">Cadastro Admin</a></li>
-                <li><a href="../../pages/admin/gerenciar-alunos.php">Gerenciar Alunos</a></li>
-            </ul>
-
-            <div class="actions">
-                <img src="../../assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
-                <a href="../../logout.php">Sair da Conta</a>
-            </div>
-        </nav>
-    </header>
+    <?php require_once 'components/header.php'; ?>
 
     <main class="manage-admin-registration">
         <div class="card-wrapper">
