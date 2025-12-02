@@ -1,6 +1,7 @@
 <?php
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
+require_once '../../../config/helpers.php';
 require_once '../../../config/automacao_eleicoes.php';
 require_once '../../../config/csrf.php';
 
@@ -30,18 +31,11 @@ $id_eleicao = $eleicao['id_eleicao'] ?? null;
 
 // Verificar se aluno já está cadastrado ANTES de mostrar o formulário
 $ja_inscrito = false;
-if ($id_eleicao) {
-    $stmtVerifica = $conn->prepare("
-        SELECT id_candidatura, status_validacao, data_inscricao
-        FROM CANDIDATURA
-        WHERE id_eleicao = ? AND id_aluno = ?
-    ");
-    $stmtVerifica->execute([$id_eleicao, $id_aluno]);
-    $candidatura_existente = $stmtVerifica->fetch();
+$candidatura_existente = null;
 
-    if ($candidatura_existente) {
-        $ja_inscrito = true;
-    }
+if ($id_eleicao) {
+    $candidatura_existente = alunoCandidatouNaEleicao($conn, $id_eleicao, $id_aluno);
+    $ja_inscrito = ($candidatura_existente !== false);
 }
 
 // Verifica se o formulário foi enviado
@@ -59,15 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $id_eleicao) {
         $erro = $verificacao['mensagem'];
     } else {
         // Verificar se já se candidatou nesta eleição
-        $stmtVerifica = $conn->prepare("
-            SELECT id_candidatura
-            FROM CANDIDATURA
-            WHERE id_eleicao = ? AND id_aluno = ?
-        ");
-        $stmtVerifica->execute([$id_eleicao, $id_aluno]);
-        $candidaturaExistente = $stmtVerifica->fetch();
-
-        if ($candidaturaExistente) {
+        if (alunoCandidatouNaEleicao($conn, $id_eleicao, $id_aluno)) {
             $erro = "Você já está inscrito nesta eleição!";
         } else {
             // Processar foto do candidato
