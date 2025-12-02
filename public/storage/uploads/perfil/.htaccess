@@ -1,0 +1,7 @@
+# Permitir acesso apenas a imagens
+Allow from all
+
+# Bloquear arquivos executáveis e scripts
+<FilesMatch "\.(php|php3|php4|php5|phtml|pl|py|jsp|asp|sh|cgi|exe|bat)$">
+    Deny from all
+</FilesMatch>
