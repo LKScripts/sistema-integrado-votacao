@@ -147,6 +147,61 @@ function obterNomeCurso($sigla) {
     ];
     return $cursos[$sigla] ?? $sigla;
 }
+// ======== RECEBENDO FILTROS =========
+$busca = $_GET['busca'] ?? '';
+$filtro_operacao = $_GET['operacao'] ?? '';
+$filtro_tabela = $_GET['tabela'] ?? '';
+$filtro_admin = $_GET['admin'] ?? '';
+$filtro_ip = $_GET['ip'] ?? '';
+
+// ======== PAGINAÇÃO =========
+$limite = 10;
+$pagina = isset($_GET['pagina']) ? intval($_GET['pagina']) : 1;
+$offset = ($pagina - 1) * $limite;
+
+// ======== MONTANDO WHERE =========
+$where = "WHERE 1=1";
+$params = [];
+$types = "";
+
+if (!empty($busca)) {
+    $where .= " AND (descricao LIKE ? OR dados_anteriores LIKE ? OR dados_novos LIKE ?)";
+    $params[] = "%$busca%";
+    $params[] = "%$busca%";
+    $params[] = "%$busca%";
+}
+
+if (!empty($filtro_operacao)) {
+    $where .= " AND operacao = ?";
+    $params[] = $filtro_operacao;
+}
+
+if (!empty($filtro_tabela)) {
+    $where .= " AND tabela = ?";
+    $params[] = $filtro_tabela;
+}
+
+if (!empty($filtro_admin)) {
+    $where .= " AND id_admin = ?";
+    $params[] = $filtro_admin;
+}
+
+if (!empty($filtro_ip)) {
+    $where .= " AND ip_origem = ?";
+    $params[] = $filtro_ip;
+}
+
+// ======== TOTAL DE REGISTROS =========
+$stmtTotal = $conn->prepare("SELECT COUNT(*) FROM auditoria $where");
+$stmtTotal->execute($params);
+$total_registros = $stmtTotal->fetchColumn();
+$total_paginas = ceil($total_registros / $limite);
+
+// ======== BUSCA PAGINADA =========
+$sql = "SELECT * FROM auditoria $where ORDER BY data_hora DESC LIMIT $limite OFFSET $offset";
+$stmt = $conn->prepare($sql);
+$stmt->execute($params);
+$resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -163,6 +218,7 @@ function obterNomeCurso($sigla) {
     <link rel="stylesheet" href="../../assets/styles/fonts.css">
     <link rel="stylesheet" href="../../assets/styles/footer-site.css">
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
+    <link rel="stylesheet" href="../../assets/styles/inscricoes.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .dashboard {
@@ -554,6 +610,141 @@ function obterNomeCurso($sigla) {
                 </p>
             <?php endif; ?>
         </div>
+<!-- ==================== AUDITORIA (ESTILO INSCRICOES.PHP) ==================== -->
+<section class="list-applicants" style="margin-top: 40px;">
+    
+    <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; color: #333;">
+        Registro de Auditoria
+    </h2>
+    <p style="color: #666; margin-bottom: 25px; font-size: 14px;">
+        Acompanhe todas as modificações feitas no sistema
+    </p>
+
+    <!-- FILTROS -->
+    <form method="GET" class="form-filters">
+        <div class="filters-grid">
+
+            <div class="filter-group">
+                <label for="busca">Buscar</label>
+                <input id="busca" name="busca" type="text"
+                       placeholder="Buscar descrição ou dados..."
+                       value="<?= htmlspecialchars($busca) ?>">
+            </div>
+
+            <div class="filter-group">
+                <label for="tabela">Tabela</label>
+                <input id="tabela" name="tabela" type="text"
+                       placeholder="Ex: usuarios, eleicoes..."
+                       value="<?= htmlspecialchars($filtro_tabela) ?>">
+            </div>
+
+            <div class="filter-group">
+                <label for="operacao">Operação</label>
+                <input id="operacao" name="operacao" type="text"
+                       placeholder="INSERT, UPDATE, DELETE"
+                       value="<?= htmlspecialchars($filtro_operacao) ?>">
+            </div>
+
+            <div class="filter-group">
+                <label for="admin">ID Admin</label>
+                <input id="admin" name="admin" type="text"
+                       placeholder="ID do administrador"
+                       value="<?= htmlspecialchars($filtro_admin) ?>">
+            </div>
+
+            <div class="filter-group">
+                <label for="ip">IP</label>
+                <input id="ip" name="ip" type="text"
+                       placeholder="IP de origem"
+                       value="<?= htmlspecialchars($filtro_ip) ?>">
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="button primary">Aplicar Filtros</button>
+            <a href="dashboard.php" class="button secondary">Limpar</a>
+        </div>
+    </form>
+
+    <!-- TABELA -->
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Admin</th>
+                <th>Eleição</th>
+                <th>Tabela</th>
+                <th>Operação</th>
+                <th>Descrição</th>
+                <th>Dados Anteriores</th>
+                <th>Dados Novos</th>
+                <th>IP</th>
+                <th>Data/Hora</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        <?php if (count($resultados) > 0): ?>
+            <?php foreach ($resultados as $audit): ?>
+                <tr>
+                    <td><?= $audit['id_auditoria'] ?></td>
+                    <td><?= $audit['id_admin'] ?></td>
+                    <td><?= $audit['id_eleicao'] ?></td>
+                    <td><?= $audit['tabela'] ?></td>
+                    <td><?= $audit['operacao'] ?></td>
+                    <td><?= htmlspecialchars($audit['descricao']) ?></td>
+
+                    <td style="max-width:200px; word-break:break-word;">
+                        <?= $audit['dados_anteriores'] ?: '<i>N/A</i>' ?>
+                    </td>
+
+                    <td style="max-width:200px; word-break:break-word;">
+                        <?= $audit['dados_novos'] ?: '<i>N/A</i>' ?>
+                    </td>
+
+                    <td><?= $audit['ip_origem'] ?></td>
+                    <td><?= $audit['data_hora'] ?></td>
+                </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="10" style="text-align:center; padding:25px;">
+                    <div style="background:#fff3cd; padding:20px; border-radius:8px; border:1px solid #ffc107;">
+                        <p style="color:#856404; margin:0;">Nenhum registro encontrado.</p>
+                    </div>
+                </td>
+            </tr>
+        <?php endif; ?>
+        </tbody>
+
+        <!-- PAGINAÇÃO -->
+        <?php if ($total_paginas > 1): ?>
+        <tfoot>
+        <tr>
+            <td colspan="10">
+                <div class="pagination">
+
+                    <ul>
+                        <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
+                            <li>
+                                <a href="?pagina=<?= $i ?>"
+                                   <?= $i == $pagina ? 'style="background:#005f73; color:white; font-weight:bold;"' : '' ?>>
+                                    <?= $i ?>
+                                </a>
+                            </li>
+                        <?php endfor; ?>
+                    </ul>
+
+                </div>
+            </td>
+        </tr>
+        </tfoot>
+        <?php endif; ?>
+
+    </table>
+</section>
+<!-- ==================== FIM AUDITORIA ==================== -->
+
     </main>
 
     <footer class="site">
