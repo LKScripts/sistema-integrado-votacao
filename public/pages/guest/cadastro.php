@@ -186,11 +186,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
 
                             $stmtInsert = $conn->prepare("
-                                INSERT INTO ALUNO (ra, nome_completo, email_institucional, foto_perfil, foto_perfil_original, senha_hash, curso, semestre, ativo)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
+                                INSERT INTO ALUNO (ra, nome_completo, email_institucional, foto_perfil, senha_hash, curso, semestre, ativo)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, 0)
                             ");
 
-                            if ($stmtInsert->execute([$ra, $nome, $email, $foto_perfil, $foto_perfil_original, $senha_hash, $curso, $semestre])) {
+                            if ($stmtInsert->execute([$ra, $nome, $email, $foto_perfil, $senha_hash, $curso, $semestre])) {
                                 $id_aluno = $conn->lastInsertId();
 
                                 // Gerar token de confirmação
