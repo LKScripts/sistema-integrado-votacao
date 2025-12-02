@@ -116,7 +116,7 @@ INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, se
 
 -- GE - Semestre 4 (20 alunos - 13 já votaram, 7 disponíveis para teste)
 INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre, ativo) VALUES
-('2023GE001', 'Marcos Vinícius Correia', 'Veja', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
+('2023GE001', 'Marcos Vinícius Correia', 'marcos.correia@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
 ('2023GE002', 'Bianca Rocha Teixeira', 'bianca.teixeira@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
 ('2023GE003', 'Alexandre Campos Neves', 'alexandre.neves@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
 ('2023GE004', 'Juliana Costa Ramos', 'juliana.ramos@fatec.sp.gov.br', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'GE', 4, 1),
