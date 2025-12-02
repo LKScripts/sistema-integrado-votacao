@@ -116,7 +116,7 @@ $pode_acompanhar = $tem_candidatura;
                 <?php if (!$pode_inscrever && !$pode_votar && !$pode_acompanhar): ?>
                     <div class="callout warning" style="margin-top: 20px;">
                         <div class="content">
-                            <span>⏳ <strong>Nenhuma eleição ativa no momento</strong> para seu curso e semestre. Aguarde a abertura de novos editais.</span>
+                            <span><strong>Nenhuma eleição ativa no momento</strong> para seu curso e semestre. Aguarde a abertura de novos editais.</span>
                         </div>
                     </div>
                 <?php endif; ?>

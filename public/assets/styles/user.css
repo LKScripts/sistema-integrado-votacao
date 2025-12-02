@@ -99,6 +99,15 @@ main.user-home .card-wrapper .button-group {
     width: 100%;
 }
 
+main.user-home .callout.warning {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+main.user-home .callout.warning > div {
+    color: #fff;
+}
+
 /* Fim estilização página inicial para usuários (/pages/user/index.html) */
 
 /* Início estilização página de inscrição (/pages/user/inscricao.html) */
