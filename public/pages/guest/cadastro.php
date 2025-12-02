@@ -1,6 +1,7 @@
 <?php
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
+require_once '../../../config/helpers.php';
 require_once '../../../config/csrf.php';
 require_once '../../../config/email.php';
 require_once '../../../config/dev_mode.php';
@@ -43,26 +44,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Validações básicas comuns
     if (empty($nome) || empty($email) || empty($senha) || empty($confirma_senha)) {
         $erro = "Preencha os campos obrigatórios: nome, e-mail e senha.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $erro = "E-mail inválido! Verifique o formato do endereço de e-mail.";
     } elseif ($senha !== $confirma_senha) {
         $erro = "As senhas não coincidem!";
-    } elseif (strlen($senha) < 6) {
-        $erro = "A senha deve ter pelo menos 6 caracteres!";
-    } elseif (!$is_admin && !$is_aluno) {
-        $erro = "Dados incompatíveis: para ALUNO use @fatec.sp.gov.br com RA/curso/semestre preenchidos; para ADMIN deixe RA/curso/semestre vazios e use @cps.sp.gov.br.";
     } else {
+        $validacao_senha = validarSenha($senha);
+        if (!$validacao_senha['valido']) {
+            $erro = $validacao_senha['erro'];
+        }
+    }
+
+    if (empty($erro) && !($is_admin || $is_aluno)) {
+        $erro = "Dados incompatíveis: para ALUNO use @fatec.sp.gov.br com RA/curso/semestre preenchidos; para ADMIN deixe RA/curso/semestre vazios e use @cps.sp.gov.br.";
+    }
+
+    if (empty($erro)) {
         // --------------------------------------------------
         // CADASTRAR ADMINISTRADOR
         // --------------------------------------------------
         if ($is_admin) {
             try {
                 // Verificar email duplicado na tabela ADMINISTRADOR
-                $stmtEmail = $conn->prepare("SELECT id_admin FROM ADMINISTRADOR WHERE email_corporativo = ?");
-                $stmtEmail->execute([$email]);
-
-                if ($stmtEmail->fetch()) {
+                if (emailAdminExiste($conn, $email)) {
                     $erro = "Este e-mail já está cadastrado como administrador!";
                 } else {
-                    $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
+                    $senha_hash = hashearSenha($senha);
 
                     $stmtInsert = $conn->prepare("
                         INSERT INTO ADMINISTRADOR (nome_completo, email_corporativo, senha_hash, ativo)
@@ -171,67 +178,59 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             if (empty($erro)) {
                 try {
                     // Verificar RA duplicado
-                    $stmtCheckRA = $conn->prepare("SELECT id_aluno FROM ALUNO WHERE ra = ?");
-                    $stmtCheckRA->execute([$ra]);
-                    if ($stmtCheckRA->fetch()) {
+                    if (raExiste($conn, $ra)) {
                         $erro = "Este RA já está cadastrado!";
+                    } elseif (emailAlunoExiste($conn, $email)) {
+                        $erro = "Este e-mail já está cadastrado!";
                     } else {
-                        // Verificar email duplicado na tabela ALUNO
-                        $stmtCheckEmail = $conn->prepare("SELECT id_aluno FROM ALUNO WHERE email_institucional = ?");
-                        $stmtCheckEmail->execute([$email]);
+                        $senha_hash = hashearSenha($senha);
 
-                        if ($stmtCheckEmail->fetch()) {
-                            $erro = "Este e-mail já está cadastrado!";
-                        } else {
-                            $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
+                        $stmtInsert = $conn->prepare("
+                            INSERT INTO ALUNO (ra, nome_completo, email_institucional, foto_perfil, senha_hash, curso, semestre, ativo)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+                        ");
 
-                            $stmtInsert = $conn->prepare("
-                                INSERT INTO ALUNO (ra, nome_completo, email_institucional, foto_perfil, senha_hash, curso, semestre, ativo)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+                        if ($stmtInsert->execute([$ra, $nome, $email, $foto_perfil, $senha_hash, $curso, $semestre])) {
+                            $id_aluno = $conn->lastInsertId();
+
+                            // Gerar token de confirmação
+                            $token = bin2hex(random_bytes(32));
+                            $dataExpiracao = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+                            $stmtToken = $conn->prepare("
+                                INSERT INTO email_confirmacao (token, tipo_usuario, id_usuario, email, data_expiracao)
+                                VALUES (?, 'aluno', ?, ?, ?)
                             ");
 
-                            if ($stmtInsert->execute([$ra, $nome, $email, $foto_perfil, $senha_hash, $curso, $semestre])) {
-                                $id_aluno = $conn->lastInsertId();
+                            if ($stmtToken->execute([$token, $id_aluno, $email, $dataExpiracao])) {
+                                // Enviar email (produção ou hybrid mode)
+                                if (shouldSendRealEmail()) {
+                                    try {
+                                        $emailService = new EmailService();
+                                        $emailEnviado = $emailService->enviarConfirmacaoCadastro($email, $nome, $token, 'aluno');
 
-                                // Gerar token de confirmação
-                                $token = bin2hex(random_bytes(32));
-                                $dataExpiracao = date('Y-m-d H:i:s', strtotime('+24 hours'));
-
-                                $stmtToken = $conn->prepare("
-                                    INSERT INTO email_confirmacao (token, tipo_usuario, id_usuario, email, data_expiracao)
-                                    VALUES (?, 'aluno', ?, ?, ?)
-                                ");
-
-                                if ($stmtToken->execute([$token, $id_aluno, $email, $dataExpiracao])) {
-                                    // Enviar email (produção ou hybrid mode)
-                                    if (shouldSendRealEmail()) {
-                                        try {
-                                            $emailService = new EmailService();
-                                            $emailEnviado = $emailService->enviarConfirmacaoCadastro($email, $nome, $token, 'aluno');
-
-                                            if ($emailEnviado) {
-                                                $sucesso = true;
-                                                // Modo hybrid: mostra popup E envia email
-                                                if (isDevMode()) {
-                                                    $dev_mode_html = exibirMensagemDevMode($token, $email);
-                                                }
-                                            } else {
-                                                $erro = "Cadastro realizado, mas houve erro ao enviar o e-mail de confirmação. Entre em contato com o suporte.";
+                                        if ($emailEnviado) {
+                                            $sucesso = true;
+                                            // Modo hybrid: mostra popup E envia email
+                                            if (isDevMode()) {
+                                                $dev_mode_html = exibirMensagemDevMode($token, $email);
                                             }
-                                        } catch (Exception $e) {
-                                            $erro = "Cadastro realizado, mas o serviço de e-mail não está configurado. Entre em contato com o suporte.";
+                                        } else {
+                                            $erro = "Cadastro realizado, mas houve erro ao enviar o e-mail de confirmação. Entre em contato com o suporte.";
                                         }
-                                    } else {
-                                        // Modo dev puro: só mostra popup
-                                        $sucesso = true;
-                                        $dev_mode_html = exibirMensagemDevMode($token, $email);
+                                    } catch (Exception $e) {
+                                        $erro = "Cadastro realizado, mas o serviço de e-mail não está configurado. Entre em contato com o suporte.";
                                     }
                                 } else {
-                                    $erro = "Erro ao gerar token de confirmação.";
+                                    // Modo dev puro: só mostra popup
+                                    $sucesso = true;
+                                    $dev_mode_html = exibirMensagemDevMode($token, $email);
                                 }
                             } else {
-                                $erro = "Erro ao cadastrar aluno.";
+                                $erro = "Erro ao gerar token de confirmação.";
                             }
+                        } else {
+                            $erro = "Erro ao cadastrar aluno.";
                         }
                     }
                 } catch (PDOException $e) {
