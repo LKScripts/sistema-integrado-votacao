@@ -2,6 +2,7 @@
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
 require_once '../../../config/csrf.php';
+require_once '../../../config/helpers.php';
 
 verificarAdmin();
 
@@ -51,23 +52,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     ");
 
                     if ($stmtInsert->execute([$nome, $email, $ra, $curso, $semestre, $senha_hash])) {
-                        // Tentar registrar auditoria (não crítico)
-                        try {
-                            $stmtAudit = $conn->prepare("
-                                INSERT INTO AUDITORIA (id_admin, tabela, operacao, descricao, ip_origem)
-                                VALUES (?, ?, ?, ?, ?)
-                            ");
-                            $stmtAudit->execute([
-                                $id_admin,
-                                'ALUNO',
-                                'INSERT',
-                                "Cadastrou aluno: $ra - $nome",
-                                $_SERVER['REMOTE_ADDR']
-                            ]);
-                        } catch (PDOException $e) {
-                            // Log do erro mas não interrompe o fluxo
-                            error_log("Erro ao registrar auditoria: " . $e->getMessage());
-                        }
+                        $id_novo_aluno = $conn->lastInsertId();
+
+                        // Registrar auditoria com dados completos
+                        registrarAuditoria(
+                            $conn,
+                            $id_admin,
+                            'ALUNO',
+                            'INSERT',
+                            "Cadastrou aluno: $ra - $nome",
+                            null,  // IP detectado automaticamente
+                            null,  // Não relacionado a eleição específica
+                            null,  // Sem dados anteriores (é INSERT)
+                            json_encode([
+                                'id_aluno' => $id_novo_aluno,
+                                'nome' => $nome,
+                                'email' => $email,
+                                'ra' => $ra,
+                                'curso' => $curso,
+                                'semestre' => $semestre
+                            ])
+                        );
 
                         $mensagem = "Aluno cadastrado com sucesso!";
                         $tipo_mensagem = "success";
@@ -106,6 +111,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $mensagem = "Email ou RA já cadastrado para outro aluno.";
                     $tipo_mensagem = "error";
                 } else {
+                    // Buscar dados ANTES da alteração para auditoria
+                    $stmtAntes = $conn->prepare("
+                        SELECT nome_completo, email_institucional, ra, curso, semestre
+                        FROM ALUNO WHERE id_aluno = ?
+                    ");
+                    $stmtAntes->execute([$id_aluno]);
+                    $dados_antes = $stmtAntes->fetch();
+
                     // Atualizar com ou sem senha
                     if (!empty($senha)) {
                         if (strlen($senha) < 6) {
@@ -130,23 +143,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     }
 
                     if (isset($stmtUpdate) && $stmtUpdate->rowCount() > 0 || empty($senha)) {
-                        // Tentar registrar auditoria (não crítico)
-                        try {
-                            $stmtAudit = $conn->prepare("
-                                INSERT INTO AUDITORIA (id_admin, tabela, operacao, descricao, ip_origem)
-                                VALUES (?, ?, ?, ?, ?)
-                            ");
-                            $stmtAudit->execute([
-                                $id_admin,
-                                'ALUNO',
-                                'UPDATE',
-                                "Editou dados do aluno: $ra - $nome",
-                                $_SERVER['REMOTE_ADDR']
-                            ]);
-                        } catch (PDOException $e) {
-                            // Log do erro mas não interrompe o fluxo
-                            error_log("Erro ao registrar auditoria de edição: " . $e->getMessage());
-                        }
+                        // Registrar auditoria com before/after
+                        registrarAuditoria(
+                            $conn,
+                            $id_admin,
+                            'ALUNO',
+                            'UPDATE',
+                            "Editou dados do aluno: $ra - $nome",
+                            null,  // IP detectado automaticamente
+                            null,  // Não relacionado a eleição específica
+                            json_encode([
+                                'id_aluno' => $id_aluno,
+                                'nome' => $dados_antes['nome_completo'],
+                                'email' => $dados_antes['email_institucional'],
+                                'ra' => $dados_antes['ra'],
+                                'curso' => $dados_antes['curso'],
+                                'semestre' => $dados_antes['semestre']
+                            ]),
+                            json_encode([
+                                'id_aluno' => $id_aluno,
+                                'nome' => $nome,
+                                'email' => $email,
+                                'ra' => $ra,
+                                'curso' => $dados_antes['curso'],  // Curso não pode ser alterado
+                                'semestre' => $dados_antes['semestre'],  // Semestre não pode ser alterado
+                                'senha_alterada' => !empty($senha)
+                            ])
+                        );
 
                         $mensagem = "Dados do aluno atualizados com sucesso!";
                         $tipo_mensagem = "success";

@@ -2,6 +2,7 @@
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
 require_once '../../../config/csrf.php';
+require_once '../../../config/helpers.php';
 
 verificarAdmin();
 
@@ -86,6 +87,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $id_admin = $_POST["id_admin"] ?? 0;
 
         try {
+            // Buscar dados do admin ANTES da aprovação
+            $stmtAntes = $conn->prepare("
+                SELECT nome_completo, email_corporativo, ativo, data_cadastro
+                FROM ADMINISTRADOR WHERE id_admin = ?
+            ");
+            $stmtAntes->execute([$id_admin]);
+            $dados_antes = $stmtAntes->fetch();
+
             $stmtUpdate = $conn->prepare("
                 UPDATE ADMINISTRADOR
                 SET ativo = 1, aprovado_por = ?, data_aprovacao = NOW(), motivo_rejeicao = NULL
@@ -93,22 +102,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             ");
 
             if ($stmtUpdate->execute([$id_admin_logado, $id_admin])) {
-                // Auditoria
-                try {
-                    $stmtAudit = $conn->prepare("
-                        INSERT INTO AUDITORIA (id_admin, tabela, operacao, descricao, ip_origem)
-                        VALUES (?, ?, ?, ?, ?)
-                    ");
-                    $stmtAudit->execute([
-                        $id_admin_logado,
-                        'ADMINISTRADOR',
-                        'UPDATE',
-                        "Aprovou admin ID: $id_admin",
-                        $_SERVER['REMOTE_ADDR']
-                    ]);
-                } catch (PDOException $e) {
-                    error_log("Erro ao registrar auditoria: " . $e->getMessage());
-                }
+                // Registrar auditoria com before/after
+                registrarAuditoria(
+                    $conn,
+                    $id_admin_logado,
+                    'ADMINISTRADOR',
+                    'UPDATE',
+                    "Aprovou administrador: {$dados_antes['email_corporativo']}",
+                    null,
+                    null,
+                    json_encode([
+                        'id_admin' => $id_admin,
+                        'nome' => $dados_antes['nome_completo'],
+                        'email' => $dados_antes['email_corporativo'],
+                        'status' => 'pendente',
+                        'data_cadastro' => $dados_antes['data_cadastro']
+                    ]),
+                    json_encode([
+                        'id_admin' => $id_admin,
+                        'nome' => $dados_antes['nome_completo'],
+                        'email' => $dados_antes['email_corporativo'],
+                        'status' => 'aprovado',
+                        'aprovado_por' => $id_admin_logado,
+                        'data_aprovacao' => date('Y-m-d H:i:s')
+                    ])
+                );
 
                 $mensagem = "Administrador aprovado com sucesso!";
                 $tipo_mensagem = "success";
@@ -123,6 +141,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $motivo = trim($_POST["motivo"] ?? "");
 
         try {
+            // Buscar dados do admin ANTES da rejeição
+            $stmtAntes = $conn->prepare("
+                SELECT nome_completo, email_corporativo, ativo, data_cadastro
+                FROM ADMINISTRADOR WHERE id_admin = ?
+            ");
+            $stmtAntes->execute([$id_admin]);
+            $dados_antes = $stmtAntes->fetch();
+
             $stmtUpdate = $conn->prepare("
                 UPDATE ADMINISTRADOR
                 SET ativo = 2, aprovado_por = ?, data_aprovacao = NOW(), motivo_rejeicao = ?
@@ -130,22 +156,31 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             ");
 
             if ($stmtUpdate->execute([$id_admin_logado, $motivo, $id_admin])) {
-                // Auditoria
-                try {
-                    $stmtAudit = $conn->prepare("
-                        INSERT INTO AUDITORIA (id_admin, tabela, operacao, descricao, ip_origem)
-                        VALUES (?, ?, ?, ?, ?)
-                    ");
-                    $stmtAudit->execute([
-                        $id_admin_logado,
-                        'ADMINISTRADOR',
-                        'UPDATE',
-                        "Rejeitou admin ID: $id_admin. Motivo: $motivo",
-                        $_SERVER['REMOTE_ADDR']
-                    ]);
-                } catch (PDOException $e) {
-                    error_log("Erro ao registrar auditoria: " . $e->getMessage());
-                }
+                // Registrar auditoria com before/after e motivo
+                registrarAuditoria(
+                    $conn,
+                    $id_admin_logado,
+                    'ADMINISTRADOR',
+                    'UPDATE',
+                    "Rejeitou administrador: {$dados_antes['email_corporativo']}",
+                    null,
+                    null,
+                    json_encode([
+                        'id_admin' => $id_admin,
+                        'nome' => $dados_antes['nome_completo'],
+                        'email' => $dados_antes['email_corporativo'],
+                        'status' => 'pendente'
+                    ]),
+                    json_encode([
+                        'id_admin' => $id_admin,
+                        'nome' => $dados_antes['nome_completo'],
+                        'email' => $dados_antes['email_corporativo'],
+                        'status' => 'rejeitado',
+                        'rejeitado_por' => $id_admin_logado,
+                        'motivo_rejeicao' => $motivo,
+                        'data_rejeicao' => date('Y-m-d H:i:s')
+                    ])
+                );
 
                 $mensagem = "Administrador rejeitado.";
                 $tipo_mensagem = "success";

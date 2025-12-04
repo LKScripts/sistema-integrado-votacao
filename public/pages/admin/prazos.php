@@ -2,6 +2,7 @@
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
 require_once '../../../config/csrf.php';
+require_once '../../../config/helpers.php';
 
 // Verificar se é administrador
 verificarAdmin();
@@ -92,6 +93,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         ");
 
         try {
+            $eleicoes_criadas = [];
+
             foreach ($lista_cursos as $c) {
                 $stmt->execute([
                     $c,
@@ -103,15 +106,38 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $status,
                     $id_admin
                 ]);
+
+                $id_eleicao_criada = $conn->lastInsertId();
+                $eleicoes_criadas[] = [
+                    'id_eleicao' => $id_eleicao_criada,
+                    'curso' => $c
+                ];
             }
 
-            // Registrar na auditoria
-            $stmtAudit = $conn->prepare("
-                INSERT INTO AUDITORIA (id_admin, tabela, operacao, descricao)
-                VALUES (?, 'ELEICAO', 'INSERT', ?)
-            ");
-            $descricao = "Nova eleição criada para $curso - {$semestre}º semestre";
-            $stmtAudit->execute([$id_admin, $descricao]);
+            // Registrar auditoria com dados completos
+            foreach ($eleicoes_criadas as $eleicao) {
+                registrarAuditoria(
+                    $conn,
+                    $id_admin,
+                    'ELEICAO',
+                    'INSERT',
+                    "Criou eleição #{$eleicao['id_eleicao']} para {$eleicao['curso']} {$semestre}º semestre",
+                    null,  // IP detectado automaticamente
+                    $eleicao['id_eleicao'],  // ID da eleição criada
+                    null,  // Sem dados anteriores (é INSERT)
+                    json_encode([
+                        'id_eleicao' => $eleicao['id_eleicao'],
+                        'curso' => $eleicao['curso'],
+                        'semestre' => $semestre,
+                        'data_inicio_candidatura' => $inscricao_inicio,
+                        'data_fim_candidatura' => $inscricao_fim,
+                        'data_inicio_votacao' => $votacao_inicio,
+                        'data_fim_votacao' => $votacao_fim,
+                        'status' => $status,
+                        'criado_por' => $id_admin
+                    ])
+                );
+            }
 
             // Redirecionar para evitar resubmissão do formulário (padrão PRG: Post-Redirect-Get)
             header("Location: prazos.php?success=1");

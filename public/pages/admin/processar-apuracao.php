@@ -1,6 +1,7 @@
 <?php
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
+require_once '../../../config/helpers.php';
 
 // Verificar se é administrador
 verificarAdmin();
@@ -32,10 +33,46 @@ try {
         exit;
     }
 
+    // Capturar dados ANTES da finalização
+    $dados_antes = [
+        'id_eleicao' => $eleicao['id_eleicao'],
+        'curso' => $eleicao['curso'],
+        'semestre' => $eleicao['semestre'],
+        'status' => $eleicao['status'],
+        'data_inicio_votacao' => $eleicao['data_inicio_votacao'],
+        'data_fim_votacao' => $eleicao['data_fim_votacao']
+    ];
+
+    // Buscar total de votos para incluir na auditoria
+    $stmtVotos = $conn->prepare("SELECT COUNT(*) as total_votos FROM VOTO WHERE id_eleicao = ?");
+    $stmtVotos->execute([$id_eleicao]);
+    $total_votos = $stmtVotos->fetch()['total_votos'];
+
     // Chamar stored procedure para finalizar eleição
     $sql = "CALL sp_finalizar_eleicao(?, ?)";
     $stmt = $conn->prepare($sql);
     $stmt->execute([$id_eleicao, $id_admin]);
+
+    // Registrar auditoria da finalização
+    registrarAuditoria(
+        $conn,
+        $id_admin,
+        'ELEICAO',
+        'UPDATE',
+        "Finalizou eleição #{$id_eleicao} - {$eleicao['curso']} {$eleicao['semestre']}º sem - {$total_votos} votos",
+        null,  // IP detectado automaticamente
+        $id_eleicao,
+        json_encode($dados_antes),
+        json_encode([
+            'id_eleicao' => $eleicao['id_eleicao'],
+            'curso' => $eleicao['curso'],
+            'semestre' => $eleicao['semestre'],
+            'status' => 'encerrada',
+            'finalizado_por' => $id_admin,
+            'data_finalizacao' => date('Y-m-d H:i:s'),
+            'total_votos' => $total_votos
+        ])
+    );
 
     $_SESSION['sucesso'] = 'Eleição apurada com sucesso!';
     header('Location: apuracao.php');
