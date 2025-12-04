@@ -179,6 +179,21 @@ if ($eleicao) {
             <p>Vote para o candidato que você quer que represente você durante esse semestre na sua sala.</p>
         </header>
 
+        <div class="callout info">
+            <div class="content">
+                <div class="instructions">
+                    <p class="title">Como votar</p>
+                    <ol>
+                        <li><strong>Escolha seu candidato:</strong> Clique no botão "VOTAR" abaixo do seu candidato preferido, ou vote em branco.</li>
+                        <li><strong>Confirme sua escolha:</strong> Você verá uma janela de confirmação para verificar seu voto.</li>
+                        <li><strong>Finalizando seu voto:</strong> Após confirmação, seu voto será registrado com segurança no sistema.</li>
+                        <li><strong>Apenas um voto:</strong> Você pode votar em apenas um candidato ou em branco!</li>
+                        <li><strong>Voto em branco:</strong> Seu voto conta na participação, mas não escolhe nenhum candidato.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
         <?php if ($ja_votou && !$voto_confirmado): ?>
             <div class="callout info" style="margin-bottom: 20px;">
                 <div class="content">
@@ -319,21 +334,6 @@ if ($eleicao) {
                 </div>
             <?php endif; ?>
         <?php endif; ?>
-
-        <div class="callout info">
-            <div class="content">
-                <div class="instructions">
-                    <p class="title">Como votar</p>
-                    <ol>
-                        <li><strong>Escolha seu candidato:</strong> Clique no botão "VOTAR" abaixo do seu candidato preferido, ou vote em branco.</li>
-                        <li><strong>Confirme sua escolha:</strong> Você verá uma janela de confirmação para verificar seu voto.</li>
-                        <li><strong>Finalizando seu voto:</strong> Após confirmação, seu voto será registrado com segurança no sistema.</li>
-                        <li><strong>Apenas um voto:</strong> Você pode votar em apenas um candidato ou em branco!</li>
-                        <li><strong>Voto em branco:</strong> Seu voto conta na participação, mas não escolhe nenhum candidato.</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
     </div>
 </main>
 

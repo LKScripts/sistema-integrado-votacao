@@ -50,7 +50,7 @@ $eleicaoCandidatura = buscarEleicaoAtivaComVerificacao($curso, $semestre, 'candi
         </nav>
     </header>
 
-    <main class="user-home">
+    <main class="user-about">
         <div class="card-wrapper">
             <div class="card">
                 <section class="voting">
