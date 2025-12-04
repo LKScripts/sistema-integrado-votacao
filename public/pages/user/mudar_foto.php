@@ -2,6 +2,8 @@
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
 require_once '../../../config/csrf.php';
+require_once '../../../config/automacao_eleicoes.php';
+
 
 verificarAluno();
 
