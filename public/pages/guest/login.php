@@ -3,6 +3,7 @@ require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
 require_once '../../../config/csrf.php';
 require_once '../../../config/rate_limit.php';
+require_once '../../../config/helpers.php';
 
 $erro = "";
 
@@ -51,12 +52,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 // Registrar sucesso na tabela de tentativas
                 registrarTentativaLogin($email, $ip, true);
 
-                // Registrar login na auditoria
-                $stmtAudit = $conn->prepare("
-                    INSERT INTO AUDITORIA (id_admin, tabela, operacao, descricao, ip_origem)
-                    VALUES (?, 'ADMINISTRADOR', 'LOGIN', 'Login realizado', ?)
-                ");
-                $stmtAudit->execute([$admin["id_admin"], $ip]);
+                // Registrar login na auditoria com dados completos
+                registrarAuditoria(
+                    $conn,
+                    $admin["id_admin"],
+                    'ADMINISTRADOR',
+                    'LOGIN',
+                    "Login bem-sucedido - {$admin['nome_completo']} ({$admin['email_corporativo']})",
+                    $ip,
+                    null,  // Não relacionado a eleição
+                    null,  // Sem dados anteriores
+                    json_encode([
+                        'id_admin' => $admin["id_admin"],
+                        'nome' => $admin["nome_completo"],
+                        'email' => $admin["email_corporativo"],
+                        'timestamp' => date('Y-m-d H:i:s'),
+                        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown'
+                    ])
+                );
 
                 // Fazer login usando função da session.php
                 loginAdmin($admin["id_admin"], $admin["nome_completo"], $admin["email_corporativo"]);
