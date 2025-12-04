@@ -184,11 +184,12 @@ if ($eleicao) {
                 <div class="instructions">
                     <p class="title">Como votar</p>
                     <ol>
-                        <li><strong>Escolha seu candidato:</strong> Clique no botão "VOTAR" abaixo do seu candidato preferido, ou vote em branco.</li>
-                        <li><strong>Confirme sua escolha:</strong> Você verá uma janela de confirmação para verificar seu voto.</li>
-                        <li><strong>Finalizando seu voto:</strong> Após confirmação, seu voto será registrado com segurança no sistema.</li>
-                        <li><strong>Apenas um voto:</strong> Você pode votar em apenas um candidato ou em branco!</li>
-                        <li><strong>Voto em branco:</strong> Seu voto conta na participação, mas não escolhe nenhum candidato.</li>
+                        <li><strong>Escolha seu candidato:</strong> Clique no botão "VOTAR" do seu candidato preferido, ou opte por votar em branco.</li>
+                        <li><strong>Confirme com sua senha:</strong> Por segurança, você precisará confirmar sua identidade digitando sua senha.</li>
+                        <li><strong>Voto registrado:</strong> Após confirmação, seu voto é registrado de forma segura e anônima no banco de dados.</li>
+                        <li><strong>Uma única escolha:</strong> Cada eleitor pode votar apenas uma vez por eleição.</li>
+                        <li><strong>Sigilo garantido:</strong> Seu voto não pode ser vinculado à sua identidade, garantindo total sigilo eleitoral.</li>
+                        <li><strong>Voto em branco:</strong> É uma opção válida - seu voto conta na participação sem escolher candidato.</li>
                     </ol>
                 </div>
             </div>
@@ -325,7 +326,7 @@ if ($eleicao) {
                 <div class="voto-branco-container">
                     <h3>Não quer votar em nenhum candidato?</h3>
                     <p class="voto-branco-descricao">
-                        Ao votar em branco, seu voto será contabilizado na participação, mas não será atribuído a nenhum candidato.
+                        O voto em branco é uma opção democrática válida. Seu voto será registrado e contabilizado na participação total, mas não será atribuído a nenhum candidato específico. Esta escolha demonstra seu exercício de direito eleitoral.
                     </p>
                     <button type="button" class="button-voto-branco" onclick="abrirModalVoto('branco', 'VOTO EM BRANCO');">
                         <i class="fas fa-ban"></i>
