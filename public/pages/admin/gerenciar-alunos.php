@@ -88,11 +88,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $nome = trim($_POST["nome"] ?? "");
         $email = trim($_POST["email"] ?? "");
         $ra = trim($_POST["ra"] ?? "");
-        $curso = trim($_POST["curso"] ?? "");
-        $semestre = trim($_POST["semestre"] ?? "");
         $senha = $_POST["senha"] ?? "";
 
-        if (empty($nome) || empty($email) || empty($ra) || empty($curso) || empty($semestre)) {
+        if (empty($nome) || empty($email) || empty($ra)) {
             $mensagem = "Preencha todos os campos obrigatórios.";
             $tipo_mensagem = "error";
         } else {
@@ -117,20 +115,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
                             $stmtUpdate = $conn->prepare("
                                 UPDATE ALUNO
-                                SET nome_completo = ?, email_institucional = ?, ra = ?,
-                                    curso = ?, semestre = ?, senha_hash = ?
+                                SET nome_completo = ?, email_institucional = ?, ra = ?, senha_hash = ?
                                 WHERE id_aluno = ?
                             ");
-                            $stmtUpdate->execute([$nome, $email, $ra, $curso, $semestre, $senha_hash, $id_aluno]);
+                            $stmtUpdate->execute([$nome, $email, $ra, $senha_hash, $id_aluno]);
                         }
                     } else {
                         $stmtUpdate = $conn->prepare("
                             UPDATE ALUNO
-                            SET nome_completo = ?, email_institucional = ?, ra = ?,
-                                curso = ?, semestre = ?
+                            SET nome_completo = ?, email_institucional = ?, ra = ?
                             WHERE id_aluno = ?
                         ");
-                        $stmtUpdate->execute([$nome, $email, $ra, $curso, $semestre, $id_aluno]);
+                        $stmtUpdate->execute([$nome, $email, $ra, $id_aluno]);
                     }
 
                     if (isset($stmtUpdate) && $stmtUpdate->rowCount() > 0 || empty($senha)) {
@@ -529,7 +525,7 @@ $alunos = $stmt->fetchAll();
 
                     <div class="input-group">
                         <label for="editar_curso">Curso *</label>
-                        <select id="editar_curso" name="curso" required>
+                        <select id="editar_curso" name="curso" required disabled>
                             <option value="DSM">DSM - Desenvolvimento de Software Multiplataforma</option>
                             <option value="GE">GE - Gestão Empresarial</option>
                             <option value="GPI">GPI - Gestão da Produção Industrial</option>
@@ -538,7 +534,7 @@ $alunos = $stmt->fetchAll();
 
                     <div class="input-group">
                         <label for="editar_semestre">Semestre *</label>
-                        <select id="editar_semestre" name="semestre" required>
+                        <select id="editar_semestre" name="semestre" required disabled>
                             <?php for ($i = 1; $i <= 6; $i++): ?>
                                 <option value="<?= $i ?>"><?= $i ?>º Semestre</option>
                             <?php endfor; ?>
