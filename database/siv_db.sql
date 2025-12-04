@@ -326,6 +326,26 @@ BEGIN
     END IF;
 END$$
 
+-- Trigger: IMUTABILIDADE - Impedir UPDATE em registros de auditoria
+-- IMPORTANTE: Logs de auditoria NÃO podem ser alterados após criação
+-- Garante integridade e rastreabilidade completa do sistema
+DROP TRIGGER IF EXISTS `trg_auditoria_impedir_update`$$
+CREATE TRIGGER `trg_auditoria_impedir_update` BEFORE UPDATE ON `auditoria` FOR EACH ROW
+BEGIN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'PROIBIDO: Registros de auditoria são IMUTÁVEIS e não podem ser alterados. Logs devem permanecer íntegros para rastreabilidade.';
+END$$
+
+-- Trigger: IMUTABILIDADE - Impedir DELETE em registros de auditoria
+-- IMPORTANTE: Logs de auditoria NÃO podem ser deletados
+-- Garante preservação histórica completa de todas as operações
+DROP TRIGGER IF EXISTS `trg_auditoria_impedir_delete`$$
+CREATE TRIGGER `trg_auditoria_impedir_delete` BEFORE DELETE ON `auditoria` FOR EACH ROW
+BEGIN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'PROIBIDO: Registros de auditoria são IMUTÁVEIS e não podem ser deletados. Logs devem ser preservados permanentemente.';
+END$$
+
 -- Trigger: Validar candidatura na mesma turma
 DROP TRIGGER IF EXISTS `trg_valida_candidatura_turma`$$
 CREATE TRIGGER `trg_valida_candidatura_turma` BEFORE INSERT ON `candidatura` FOR EACH ROW

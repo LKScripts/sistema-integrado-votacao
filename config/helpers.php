@@ -207,29 +207,92 @@ function alunoVotouNaEleicao($conn, $id_eleicao, $id_aluno) {
  */
 
 /**
- * Registra operação no log de auditoria
+ * Registra operação no log de auditoria (VERSÃO COMPLETA)
+ *
+ * Função expandida para suportar todos os campos da tabela AUDITORIA:
+ * - id_eleicao: Rastreia qual eleição foi afetada pela operação
+ * - dados_anteriores: JSON com estado antes da mudança (before snapshot)
+ * - dados_novos: JSON com estado depois da mudança (after snapshot)
+ *
+ * IMPORTANTE: Tabela AUDITORIA é IMUTÁVEL (não pode ser editada/deletada via SQL)
+ * - Triggers do banco impedem UPDATE/DELETE em registros de auditoria
+ * - Garante integridade e rastreabilidade completa de todas as operações
+ *
  * @param PDO $conn Conexão PDO
- * @param int $id_admin ID do administrador
- * @param string $tabela Nome da tabela afetada
- * @param string $operacao Tipo de operação (INSERT, UPDATE, DELETE)
- * @param string $descricao Descrição da operação
+ * @param int $id_admin ID do administrador que executou a operação
+ * @param string $tabela Nome da tabela afetada (ALUNO, ELEICAO, CANDIDATURA, etc)
+ * @param string $operacao Tipo de operação (INSERT, UPDATE, DELETE, LOGIN, LOGOUT)
+ * @param string $descricao Descrição textual da operação (ex: "Aprovou candidatura #123")
  * @param string|null $ip_origem IP de origem (padrão: $_SERVER['REMOTE_ADDR'])
- * @return bool True se registrou com sucesso
+ * @param int|null $id_eleicao ID da eleição relacionada (opcional, para operações em eleições)
+ * @param string|null $dados_anteriores JSON com estado anterior (opcional, ex: json_encode(['status' => 'pendente']))
+ * @param string|null $dados_novos JSON com estado novo (opcional, ex: json_encode(['status' => 'aprovado']))
+ * @return bool True se registrou com sucesso, False em caso de erro
+ *
+ * @example Uso básico (compatível com código existente):
+ * registrarAuditoria($conn, $id_admin, 'ALUNO', 'DELETE', 'Deletou aluno João Silva');
+ *
+ * @example Uso completo com JSON (recomendado para operações críticas):
+ * registrarAuditoria(
+ *     $conn,
+ *     $_SESSION['usuario_id'],
+ *     'CANDIDATURA',
+ *     'UPDATE',
+ *     'Aprovou candidatura #123',
+ *     null, // IP será detectado automaticamente
+ *     $id_eleicao,
+ *     json_encode(['status' => 'pendente', 'validado_por' => null]),
+ *     json_encode(['status' => 'aprovado', 'validado_por' => $id_admin])
+ * );
  */
-function registrarAuditoria($conn, $id_admin, $tabela, $operacao, $descricao, $ip_origem = null) {
+function registrarAuditoria(
+    $conn,
+    $id_admin,
+    $tabela,
+    $operacao,
+    $descricao,
+    $ip_origem = null,
+    $id_eleicao = null,
+    $dados_anteriores = null,
+    $dados_novos = null
+) {
     try {
+        // Auto-detecção de IP se não fornecido
         if ($ip_origem === null) {
             $ip_origem = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         }
 
+        // Validação básica de JSON (se fornecidos)
+        if ($dados_anteriores !== null && !is_string($dados_anteriores)) {
+            error_log("AVISO: dados_anteriores deve ser string JSON válida");
+            $dados_anteriores = json_encode($dados_anteriores);
+        }
+
+        if ($dados_novos !== null && !is_string($dados_novos)) {
+            error_log("AVISO: dados_novos deve ser string JSON válida");
+            $dados_novos = json_encode($dados_novos);
+        }
+
         $stmt = $conn->prepare("
-            INSERT INTO AUDITORIA (id_admin, tabela, operacao, descricao, ip_origem)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO AUDITORIA (
+                id_admin, tabela, operacao, descricao,
+                ip_origem, id_eleicao, dados_anteriores, dados_novos
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
-        return $stmt->execute([$id_admin, $tabela, $operacao, $descricao, $ip_origem]);
+        return $stmt->execute([
+            $id_admin,
+            $tabela,
+            $operacao,
+            $descricao,
+            $ip_origem,
+            $id_eleicao,
+            $dados_anteriores,
+            $dados_novos
+        ]);
     } catch (PDOException $e) {
         error_log("Erro ao registrar auditoria: " . $e->getMessage());
+        // Falha silenciosa para não interromper operação principal
         return false;
     }
 }
