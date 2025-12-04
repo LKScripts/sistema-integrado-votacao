@@ -31,6 +31,10 @@ if (!isset($eleicaoCandidatura)) {
                         <i class="fas fa-camera"></i>
                         <span>Mudar Foto de Perfil</span>
                     </a>
+                    <a href="../../pages/user/editar_perfil.php">
+                        <i class="fas fa-camera"></i>
+                        <span>Mudar Informações de Usuário</span>
+                    </a>
                 </div>
             </div>
             <a href="../../logout.php">Sair da Conta</a>
