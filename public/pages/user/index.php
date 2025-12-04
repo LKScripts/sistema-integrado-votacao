@@ -43,7 +43,7 @@ if ($eleicao_candidatura || $eleicao_votacao) {
 }
 
 // Determinar estado dos botões
-$pode_inscrever = !empty($eleicao_candidatura);
+$pode_inscrever = !empty($eleicao_candidatura) && !$tem_candidatura; // Desabilita se já tem candidatura
 $pode_votar = !empty($eleicao_votacao);
 $pode_acompanhar = $tem_candidatura;
 ?>
@@ -67,6 +67,61 @@ $pode_acompanhar = $tem_candidatura;
     <?php include 'components/header.php'; ?>
 
     <main class="user-home">
+        <div class="card-wrapper">
+            <div class="card">
+                <h1>AÇÕES DISPONÍVEIS</h1>
+                <p>Confira as ações disponíveis de acordo com o período eleitoral:</p>
+
+                <?php if (!$pode_inscrever && !$pode_votar && !$pode_acompanhar): ?>
+                    <div class="callout warning" style="margin-top: 20px;">
+                        <div class="content">
+                            <span><strong>Nenhuma eleição ativa no momento</strong> para seu curso e semestre. Aguarde a abertura de novos editais.</span>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <div class="button-group">
+                    <!-- Botão Inscrever -->
+                    <?php if ($pode_inscrever): ?>
+                        <a href="../../pages/user/inscricao.php" class="button primary">
+                            <i class="fas fa-user-plus"></i> QUERO ME INSCREVER
+                        </a>
+                    <?php else: ?>
+                        <?php
+                        $titulo_desabilitado = $tem_candidatura
+                            ? "Você já possui uma candidatura cadastrada"
+                            : "Período de inscrições encerrado";
+                        ?>
+                        <button class="button primary disabled" disabled title="<?= htmlspecialchars($titulo_desabilitado) ?>">
+                            <i class="fas fa-user-plus"></i> QUERO ME INSCREVER
+                        </button>
+                    <?php endif; ?>
+
+                    <!-- Botão Votar -->
+                    <?php if ($pode_votar): ?>
+                        <a href="../../pages/user/votacao.php" class="button primary">
+                            <i class="fas fa-vote-yea"></i> QUERO VOTAR
+                        </a>
+                    <?php else: ?>
+                        <button class="button primary disabled" disabled title="Período de votação não iniciado ou encerrado">
+                            <i class="fas fa-vote-yea"></i> QUERO VOTAR
+                        </button>
+                    <?php endif; ?>
+
+                    <!-- Botão Acompanhar -->
+                    <?php if ($pode_acompanhar): ?>
+                        <a href="../../pages/user/acompanhar_inscricao.php" class="button primary">
+                            <i class="fas fa-clipboard-check"></i> ACOMPANHAR INSCRIÇÃO
+                        </a>
+                    <?php else: ?>
+                        <button class="button primary disabled" disabled title="Você não possui inscrição cadastrada">
+                            <i class="fas fa-clipboard-check"></i> ACOMPANHAR INSCRIÇÃO
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
         <div class="card-wrapper">
             <div class="card">
                 <section class="voting">
@@ -105,56 +160,6 @@ $pode_acompanhar = $tem_candidatura;
                 <div class="alert">
                     <span>⚠️ATENÇÃO: Verifique os prazos de cada edital para não perder seu direito de voto!</span>
                 </div>
-            </div>
-        </div>
-
-        <div class="card-wrapper">
-            <div class="card">
-                <h1>AÇÕES DISPONÍVEIS</h1>
-                <p>Confira as ações disponíveis de acordo com o período eleitoral:</p>
-
-                <?php if (!$pode_inscrever && !$pode_votar && !$pode_acompanhar): ?>
-                    <div class="callout warning" style="margin-top: 20px;">
-                        <div class="content">
-                            <span><strong>Nenhuma eleição ativa no momento</strong> para seu curso e semestre. Aguarde a abertura de novos editais.</span>
-                        </div>
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <div class="button-group">
-                <!-- Botão Inscrever -->
-                <?php if ($pode_inscrever): ?>
-                    <a href="../../pages/user/inscricao.php" class="button primary">
-                        <i class="fas fa-user-plus"></i> QUERO ME INSCREVER
-                    </a>
-                <?php else: ?>
-                    <button class="button primary disabled" disabled title="Período de inscrições encerrado">
-                        <i class="fas fa-user-plus"></i> QUERO ME INSCREVER
-                    </button>
-                <?php endif; ?>
-
-                <!-- Botão Votar -->
-                <?php if ($pode_votar): ?>
-                    <a href="../../pages/user/votacao.php" class="button primary">
-                        <i class="fas fa-vote-yea"></i> QUERO VOTAR
-                    </a>
-                <?php else: ?>
-                    <button class="button primary disabled" disabled title="Período de votação não iniciado ou encerrado">
-                        <i class="fas fa-vote-yea"></i> QUERO VOTAR
-                    </button>
-                <?php endif; ?>
-
-                <!-- Botão Acompanhar -->
-                <?php if ($pode_acompanhar): ?>
-                    <a href="../../pages/user/acompanhar_inscricao.php" class="button primary">
-                        <i class="fas fa-clipboard-check"></i> ACOMPANHAR INSCRIÇÃO
-                    </a>
-                <?php else: ?>
-                    <button class="button primary disabled" disabled title="Você não possui inscrição cadastrada">
-                        <i class="fas fa-clipboard-check"></i> ACOMPANHAR INSCRIÇÃO
-                    </button>
-                <?php endif; ?>
             </div>
         </div>
     </main>
