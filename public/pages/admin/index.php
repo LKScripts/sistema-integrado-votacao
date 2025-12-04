@@ -108,21 +108,24 @@ $top_participacao = $stmt->fetchAll();
 
 // Histórico de Eleições
 $sql = "SELECT
-            id_resultado,
-            curso,
-            semestre,
-            DATE_FORMAT(data_apuracao, '%d/%m/%Y') as data_apuracao_fmt,
-            representante,
-            ra_representante,
-            votos_representante,
-            suplente,
-            votos_suplente,
-            total_votantes,
-            total_aptos,
-            percentual_participacao
-        FROM v_resultados_completos
+            r.id_resultado,
+            r.curso,
+            r.semestre,
+            DATE_FORMAT(r.data_apuracao, '%d/%m/%Y') as data_apuracao_fmt,
+            DATE_FORMAT(e.data_inicio_votacao, '%d/%m/%Y') as data_inicio_fmt,
+            DATE_FORMAT(e.data_fim_votacao, '%d/%m/%Y') as data_fim_fmt,
+            r.representante,
+            r.ra_representante,
+            r.votos_representante,
+            r.suplente,
+            r.votos_suplente,
+            r.total_votantes,
+            r.total_aptos,
+            r.percentual_participacao
+        FROM v_resultados_completos r
+        INNER JOIN eleicao e ON r.id_eleicao = e.id_eleicao
         WHERE $where_clause
-        ORDER BY data_apuracao DESC
+        ORDER BY r.data_apuracao DESC
         LIMIT 10";
 
 $stmt = $conn->prepare($sql);
@@ -149,31 +152,35 @@ function obterNomeCurso($sigla) {
 }
 // ======== RECEBENDO FILTROS =========
 $busca = $_GET['busca'] ?? '';
-$filtro_operacao = $_GET['operacao'] ?? '';
 $filtro_tabela = $_GET['tabela'] ?? '';
 $filtro_admin = $_GET['admin'] ?? '';
-$filtro_ip = $_GET['ip'] ?? '';
+$filtro_data_inicio = $_GET['data_inicio'] ?? '';
+$filtro_data_fim = $_GET['data_fim'] ?? '';
 
 // ======== PAGINAÇÃO =========
-$limite = 10;
-$pagina = isset($_GET['pagina']) ? intval($_GET['pagina']) : 1;
+$limite = 15;  // Aumentado de 10 para 15
+$pagina = isset($_GET['pagina']) ? max(1, intval($_GET['pagina'])) : 1;
 $offset = ($pagina - 1) * $limite;
+
+// Buscar valores únicos para dropdowns
+$tabelas_disponiveis = $conn->query("SELECT DISTINCT tabela FROM AUDITORIA ORDER BY tabela")->fetchAll(PDO::FETCH_COLUMN);
+$admins_disponiveis = $conn->query("
+    SELECT DISTINCT a.id_admin, ad.nome_completo
+    FROM AUDITORIA a
+    LEFT JOIN ADMINISTRADOR ad ON a.id_admin = ad.id_admin
+    WHERE a.id_admin IS NOT NULL
+    ORDER BY ad.nome_completo
+")->fetchAll(PDO::FETCH_ASSOC);
 
 // ======== MONTANDO WHERE =========
 $where = "WHERE 1=1";
 $params = [];
-$types = "";
 
 if (!empty($busca)) {
     $where .= " AND (descricao LIKE ? OR dados_anteriores LIKE ? OR dados_novos LIKE ?)";
     $params[] = "%$busca%";
     $params[] = "%$busca%";
     $params[] = "%$busca%";
-}
-
-if (!empty($filtro_operacao)) {
-    $where .= " AND operacao = ?";
-    $params[] = $filtro_operacao;
 }
 
 if (!empty($filtro_tabela)) {
@@ -183,12 +190,17 @@ if (!empty($filtro_tabela)) {
 
 if (!empty($filtro_admin)) {
     $where .= " AND id_admin = ?";
-    $params[] = $filtro_admin;
+    $params[] = intval($filtro_admin);
 }
 
-if (!empty($filtro_ip)) {
-    $where .= " AND ip_origem = ?";
-    $params[] = $filtro_ip;
+if (!empty($filtro_data_inicio)) {
+    $where .= " AND DATE(data_hora) >= ?";
+    $params[] = $filtro_data_inicio;
+}
+
+if (!empty($filtro_data_fim)) {
+    $where .= " AND DATE(data_hora) <= ?";
+    $params[] = $filtro_data_fim;
 }
 
 // ======== TOTAL DE REGISTROS =========
@@ -361,7 +373,6 @@ $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         .top-item {
             padding: 15px;
-            border-left: 4px solid var(--primary);
             background: #f8f9fa;
             margin-bottom: 10px;
             border-radius: 4px;
@@ -573,7 +584,8 @@ $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <tr>
                             <th>Curso</th>
                             <th>Semestre</th>
-                            <th>Data</th>
+                            <th>Data Início</th>
+                            <th>Data Fim</th>
                             <th>Representante</th>
                             <th>Votos</th>
                             <th>Suplente</th>
@@ -586,7 +598,8 @@ $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <tr>
                                 <td><?= htmlspecialchars($item['curso']) ?></td>
                                 <td><?= $item['semestre'] ?>º</td>
-                                <td><?= $item['data_apuracao_fmt'] ?></td>
+                                <td><?= $item['data_inicio_fmt'] ?></td>
+                                <td><?= $item['data_fim_fmt'] ?></td>
                                 <td>
                                     <?= htmlspecialchars($item['representante']) ?>
                                     <br><small style="color: #999;">RA: <?= htmlspecialchars($item['ra_representante']) ?></small>
@@ -633,36 +646,50 @@ $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             <div class="filter-group">
                 <label for="tabela">Tabela</label>
-                <input id="tabela" name="tabela" type="text"
-                       placeholder="Ex: usuarios, eleicoes..."
-                       value="<?= htmlspecialchars($filtro_tabela) ?>">
+                <select id="tabela" name="tabela">
+                    <option value="">Todas</option>
+                    <?php foreach ($tabelas_disponiveis as $tabela): ?>
+                        <option value="<?= htmlspecialchars($tabela) ?>"
+                                <?= $filtro_tabela === $tabela ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($tabela) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
 
             <div class="filter-group">
-                <label for="operacao">Operação</label>
-                <input id="operacao" name="operacao" type="text"
-                       placeholder="INSERT, UPDATE, DELETE"
-                       value="<?= htmlspecialchars($filtro_operacao) ?>">
+                <label for="admin">Administrador</label>
+                <select id="admin" name="admin">
+                    <option value="">Todos</option>
+                    <?php foreach ($admins_disponiveis as $admin): ?>
+                        <option value="<?= $admin['id_admin'] ?>"
+                                <?= $filtro_admin == $admin['id_admin'] ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($admin['nome_completo'] ?? "Admin #{$admin['id_admin']}") ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
 
             <div class="filter-group">
-                <label for="admin">ID Admin</label>
-                <input id="admin" name="admin" type="text"
-                       placeholder="ID do administrador"
-                       value="<?= htmlspecialchars($filtro_admin) ?>">
+                <label for="data_inicio">Data Início</label>
+                <input id="data_inicio" name="data_inicio" type="date"
+                       value="<?= htmlspecialchars($filtro_data_inicio) ?>">
             </div>
 
             <div class="filter-group">
-                <label for="ip">IP</label>
-                <input id="ip" name="ip" type="text"
-                       placeholder="IP de origem"
-                       value="<?= htmlspecialchars($filtro_ip) ?>">
+                <label for="data_fim">Data Fim</label>
+                <input id="data_fim" name="data_fim" type="date"
+                       value="<?= htmlspecialchars($filtro_data_fim) ?>">
             </div>
         </div>
 
         <div class="filter-actions">
-            <button type="submit" class="button primary">Aplicar Filtros</button>
-            <a href="dashboard.php" class="button secondary">Limpar</a>
+            <button type="submit" class="button primary">
+                <i class="fas fa-search"></i> Filtrar
+            </button>
+            <a href="index.php" class="button secondary">
+                <i class="fas fa-times"></i> Limpar
+            </a>
         </div>
     </form>
 
@@ -718,28 +745,79 @@ $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </tbody>
 
         <!-- PAGINAÇÃO -->
-        <?php if ($total_paginas > 1): ?>
         <tfoot>
         <tr>
             <td colspan="10">
-                <div class="pagination">
+                <?php
+                // Calcular números para exibição
+                $primeiro_registro = $total_registros > 0 ? $offset + 1 : 0;
+                $ultimo_registro = min($offset + $limite, $total_registros);
 
-                    <ul>
-                        <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
+                // Construir query string com filtros
+                $query_params = [];
+                if (!empty($busca)) $query_params[] = 'busca=' . urlencode($busca);
+                if (!empty($filtro_tabela)) $query_params[] = 'tabela=' . urlencode($filtro_tabela);
+                if (!empty($filtro_admin)) $query_params[] = 'admin=' . urlencode($filtro_admin);
+                if (!empty($filtro_data_inicio)) $query_params[] = 'data_inicio=' . urlencode($filtro_data_inicio);
+                if (!empty($filtro_data_fim)) $query_params[] = 'data_fim=' . urlencode($filtro_data_fim);
+                $query_string = !empty($query_params) ? '&' . implode('&', $query_params) : '';
+                ?>
+
+                <div class="pagination" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0;">
+                    <div class="results" style="color: #666; font-size: 14px;">
+                        Mostrando <?= $primeiro_registro ?> a <?= $ultimo_registro ?> de <?= $total_registros ?> registro<?= $total_registros != 1 ? 's' : '' ?>
+                    </div>
+
+                    <?php if ($total_paginas > 1): ?>
+                    <ul style="display: flex; gap: 5px; list-style: none; margin: 0; padding: 0;">
+                        <!-- Botão Anterior -->
+                        <li>
+                            <?php if ($pagina > 1): ?>
+                                <a href="?pagina=<?= $pagina - 1 ?><?= $query_string ?>"
+                                   style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;">
+                                    ‹ Anterior
+                                </a>
+                            <?php else: ?>
+                                <span style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; color: #ccc; opacity: 0.5; cursor: not-allowed;">
+                                    ‹ Anterior
+                                </span>
+                            <?php endif; ?>
+                        </li>
+
+                        <?php
+                        // Mostrar até 5 páginas
+                        $inicio = max(1, $pagina - 2);
+                        $fim = min($total_paginas, $pagina + 2);
+
+                        for ($i = $inicio; $i <= $fim; $i++):
+                        ?>
                             <li>
-                                <a href="?pagina=<?= $i ?>"
-                                   <?= $i == $pagina ? 'style="background:#005f73; color:white; font-weight:bold;"' : '' ?>>
+                                <a href="?pagina=<?= $i ?><?= $query_string ?>"
+                                   style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; <?= $i == $pagina ? 'background:#005f73; color:white; font-weight:bold;' : 'color: #333;' ?>">
                                     <?= $i ?>
                                 </a>
                             </li>
                         <?php endfor; ?>
-                    </ul>
 
+                        <!-- Botão Próximo -->
+                        <li>
+                            <?php if ($pagina < $total_paginas): ?>
+                                <a href="?pagina=<?= $pagina + 1 ?><?= $query_string ?>"
+                                   style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;">
+                                    Próximo ›
+                                </a>
+                            <?php else: ?>
+                                <span style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; color: #ccc; opacity: 0.5; cursor: not-allowed;">
+                                    Próximo ›
+                                </span>
+                            <?php endif; ?>
+                        </li>
+                    </ul>
+                    <?php endif; ?>
                 </div>
             </td>
         </tr>
         </tfoot>
-        <?php endif; ?>
 
     </table>
 </section>
