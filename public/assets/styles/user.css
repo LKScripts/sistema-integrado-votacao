@@ -897,3 +897,38 @@ main.user-about .card-wrapper .button.primary:hover {
     }
 }
 /* Fim estilização página sobre (/pages/user/sobre.php) */
+
+/* Início estilização resultados de eleição encerrada (/pages/user/index.php) */
+main.user-home .resultados-eleicao {
+    border-top: 2px solid #e0e0e0;
+    padding-top: 30px;
+}
+
+main.user-home .resultados-eleicao .vencedores {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+main.user-home .resultados-eleicao .vencedor img {
+    display: block;
+    margin: 0 auto 15px;
+}
+
+@media (max-width: 768px) {
+    main.user-home .resultados-eleicao .vencedores {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    main.user-home .resultados-eleicao .vencedor {
+        padding: 15px !important;
+    }
+
+    main.user-home .resultados-eleicao .vencedor img,
+    main.user-home .resultados-eleicao .vencedor > div:first-of-type {
+        width: 80px !important;
+        height: 80px !important;
+    }
+}
+/* Fim estilização resultados de eleição encerrada */
