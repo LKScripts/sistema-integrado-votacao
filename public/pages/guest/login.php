@@ -165,8 +165,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <div class="callout info">
                 <div class="content">
                     <span>
-                        O SIV é um sistema para a realização de eleições completamente online e seguro.
-                        Para utilizar o sistema, preencha os campos abaixo com as suas credenciais do SIGA.
+                        O SIV é um sistema para realização de eleições acadêmicas completamente online e seguro,
+                        com proteção contra tentativas indevidas de acesso e sistema de auditoria integrado.
+                        Para acessar, utilize seu email institucional (@fatec.sp.gov.br ou @cps.sp.gov.br) e senha cadastrados.
                     </span>
                 </div>
             </div>
@@ -226,7 +227,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <div class="decoration"></div>
                 <img src="../../assets/images/logo-novo.png" alt="Logo SIV" width="140" />
                 <h2>Sistema Integrado de Votações</h2>
-                <p>Eleições acadêmicas seguras e transparentes para toda a comunidade FATEC</p>
+                <p>Plataforma completa para eleições acadêmicas: segura, automatizada e transparente. Sistema com backend robusto, auditoria imutável e gestão automatizada de prazos eleitorais.</p>
             </div>
         </div>
 

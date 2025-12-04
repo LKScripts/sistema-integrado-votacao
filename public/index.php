@@ -43,8 +43,8 @@
         <section class="upper">
             <h1>Sistema Integrado de Votações da<br>FATEC - Centro Paula Souza</h1>
             <p>
-                Uma plataforma digital completa para eleições virtuais, ágil e segura.<br>
-                Desenvolvido para simplificar o processo eleitoral acadêmico.
+                Uma plataforma digital completa para eleições acadêmicas, ágil e segura.<br>
+                Sistema automatizado com backend robusto para simplificar o processo eleitoral.
             </p>
         </section>
 
@@ -53,7 +53,7 @@
                 <div class="guest-image-container"><img src="./assets/images/selecting-team-cuate.svg" alt=""></div>
                 <div class="guest-text-container">
                     <h2>Deseja se Candidatar?</h2>
-                    <p>Você deve possuir credencial ativa no sistema SIV e estar apto ás regras específicas do edital.
+                    <p>Para se candidatar, você precisa ter uma conta ativa no sistema SIV com email institucional confirmado e estar apto às regras do edital eleitoral.
                     </p>
                     <a href="./pages/guest/cadastro.php" class="button primary">Cadastre-se Aqui</a>
                 </div>
@@ -63,14 +63,14 @@
                 <div class="guest-text-container">
                     <h2>Como se Candidatar?</h2>
                     <ul>
-                        <li>Acesse o sistema com suas credenciais SIV.</li>
-                        <li>Clique em “Inscrição”</li>
-                        <li>Navegue até o edital desejado.</li>
-                        <li>Confirme seus Dados</li>
+                        <li>Faça login no sistema com seu email institucional (@fatec.sp.gov.br)</li>
+                        <li>Confirme seu email através do link enviado</li>
+                        <li>Acesse a seção "Inscrição" durante o período de candidaturas</li>
+                        <li>Preencha sua proposta e envie sua foto</li>
+                        <li>Aguarde aprovação da administração</li>
                     </ul>
 
-                    <p>O botão estará disponível apenas durante o
-                        período de inscrições.</p>
+                    <p>A inscrição só estará disponível durante o período de candidaturas definido no edital. O sistema automatiza os prazos para garantir transparência no processo.</p>
                 </div>
                 <div class="guest-image-container"><img src="./assets/images/political-candidate-bro.svg" alt=""></div>
             </div>
@@ -78,12 +78,11 @@
             <div class="guest-container">
                 <div class="guest-image-container"><img src="./assets/images/active-support-amico.svg" alt=""></div>
                 <div class="guest-text-container">
-                    <h2>Suporte</h2>
-                    <p>Encontrou dificuldades no acesso ou esqueceu
-                        suas credenciais?
+                    <h2>Precisa de Ajuda?</h2>
+                    <p>Encontrou dificuldades no acesso, esqueceu suas credenciais ou não recebeu o email de confirmação?
 
-                        Clique <a href="./pages/guest/suporte.php">aqui</a> ou no botão abaixo para maiores informações.</p>
-                    <a href="./pages/guest/suporte.php" class="button primary">Suporte</a>
+                        Clique <a href="./pages/guest/suporte.php">aqui</a> ou no botão abaixo para acessar informações de suporte e contato.</p>
+                    <a href="./pages/guest/suporte.php" class="button primary">Acessar Suporte</a>
                 </div>
             </div>
 

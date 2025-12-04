@@ -300,9 +300,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <div class="callout info">
                     <div class="content">
                         <span>
-                            <strong>Cadastro de Aluno / Administrador</strong><br>
-                            Para cadastrar como <strong>ALUNO</strong> use seu e-mail @fatec.sp.gov.br e preencha RA, curso e semestre.<br>
-                            Para cadastrar como <strong>ADMINISTRADOR</strong> deixe RA/curso/semestre vazios e utilize o e-mail @cps.sp.gov.br.
+                            <strong>Cadastro no Sistema SIV</strong><br>
+                            <strong>Para ALUNOS:</strong> Use seu email institucional @fatec.sp.gov.br e preencha todos os campos (RA, curso e semestre).<br>
+                            <strong>Para ADMINISTRADORES:</strong> Use o email corporativo @cps.sp.gov.br e deixe os campos RA, curso e semestre vazios.<br>
+                            Após o cadastro, você receberá um email de confirmação. Clique no link para ativar sua conta antes de fazer login.
                         </span>
                     </div>
                 </div>

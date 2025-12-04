@@ -22,63 +22,70 @@
 
             <header>
                 <h1>
-                    <i class="fas fa-user-lock"></i>
-                    Recuperação de Credenciais
+                    <i class="fas fa-life-ring"></i>
+                    Suporte e Ajuda
                 </h1>
-                <p>Sistema Acadêmico - Acesso ao Portal</p>
+                <p>Sistema Integrado de Votações - SIV</p>
             </header>
 
             <div class="support-content">
                 <div class="callout info" style="margin-bottom: 30px;">
                     <div class="content">
-                        <i class="fas fa-exclamation-circle"></i>
+                        <i class="fas fa-info-circle"></i>
                         <p>
-                            <strong>Importante:</strong>
-                            Suas credenciais de acesso são fornecidas exclusivamente pela sua instituição de ensino.
-                            Para recuperá-las, siga o procedimento abaixo.
+                            <strong>Sobre o Sistema SIV:</strong>
+                            O Sistema Integrado de Votações é uma plataforma web desenvolvida para facilitar e automatizar
+                            o processo eleitoral acadêmico da FATEC Itapira. Se você está tendo dificuldades para acessar
+                            ou utilizar o sistema, consulte as informações abaixo.
                         </p>
                     </div>
                 </div>
 
-                <h2>Como recuperar suas credenciais?</h2>
+                <h2>Problemas Comuns e Soluções</h2>
 
                 <p style="margin-top: 15px; color: #555; line-height: 1.6;">
-                    Se você esqueceu seu login ou senha de acesso ao sistema acadêmico, é necessário realizar o processo
-                    de recuperação presencialmente na secretaria de sua instituição.
+                    <strong>Não recebi o email de confirmação:</strong><br>
+                    Verifique sua caixa de spam ou lixo eletrônico. O email é enviado automaticamente após o cadastro.
+                    Se não recebeu após alguns minutos, entre em contato com a coordenação.
+                </p>
+
+                <p style="margin-top: 15px; color: #555; line-height: 1.6;">
+                    <strong>Esqueci minha senha:</strong><br>
+                    Como suas credenciais estão vinculadas ao sistema institucional, é necessário redefinir sua senha
+                    diretamente na plataforma ou através da secretaria da sua instituição.
                 </p>
 
                 <div class="steps">
                     <div class="step">
                         <div class="step-number">1</div>
-                        <h3>Dirija-se à Secretaria</h3>
-                        <p>Visite pessoalmente a Secretaria Acadêmica da sua instituição de ensino durante o horário de
-                            funcionamento.</p>
+                        <h3>Problemas com Email de Confirmação</h3>
+                        <p>Se não recebeu o email após o cadastro, verifique sua caixa de spam. O sistema envia automaticamente
+                           um link de confirmação válido por 24 horas. Se expirou, entre em contato com a administração.</p>
                     </div>
 
                     <div class="step">
                         <div class="step-number">2</div>
-                        <h3>Apresente Documentação</h3>
-                        <p>Leve um documento de identificação com foto (RG, CNH ou Carteira Estudantil) para comprovar
-                            seu vínculo acadêmico.</p>
+                        <h3>Conta Bloqueada por Tentativas de Login</h3>
+                        <p>O sistema possui proteção contra múltiplas tentativas falhas de login (5 tentativas em 15 minutos).
+                           Aguarde o tempo especificado ou entre em contato com a secretaria acadêmica.</p>
                     </div>
 
                     <div class="step">
                         <div class="step-number">3</div>
-                        <h3>Solicite Recuperação</h3>
-                        <p>Informe que deseja recuperar suas credenciais de acesso. A equipe da secretaria fará a
-                            verificação e fornecerá as orientações.</p>
+                        <h3>Dúvidas Sobre o Processo Eleitoral</h3>
+                        <p>Para questões sobre prazos, candidaturas ou votação, consulte o edital da eleição ou entre em contato
+                           com a coordenação do curso. O sistema automatiza os prazos conforme configurado pelos administradores.</p>
                     </div>
                 </div>
 
                 <div class="callout warning">
                     <div class="content">
-                        <i class="fas fa-exclamation-circle"></i>
+                        <i class="fas fa-exclamation-triangle"></i>
                         <p>
-                            <strong>Informações Adicionais:</strong>
-                            O processo de recuperação é realizado exclusivamente de forma presencial para garantir a
-                            segurança dos seus dados acadêmicos.
-                            Recomendamos entrar em contato com sua instituição para confirmar horários de atendimento e
-                            documentação necessária antes de se dirigir à secretaria.
+                            <strong>Precisa de Ajuda Adicional?</strong>
+                            Para problemas técnicos ou dúvidas não resolvidas acima, entre em contato com a secretaria
+                            acadêmica da FATEC Itapira durante o horário de funcionamento. Tenha em mãos seu RA e email
+                            institucional para facilitar o atendimento.
                         </p>
                     </div>
                 </div>
