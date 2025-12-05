@@ -62,8 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote']) && $eleicao &
             // Se for voto em branco, inserir direto sem validação de candidato
             if ($id_candidatura === null) {
                 $stmtVoto = $conn->prepare("
-                    INSERT INTO VOTO (id_eleicao, id_aluno, id_candidatura, ip_votante)
-                    VALUES (?, ?, NULL, ?)
+                    INSERT INTO VOTO (id_eleicao, id_aluno, id_candidatura, ip_votante, assinatura_digital)
+                    VALUES (?, ?, NULL, ?, TRUE)
                 ");
                 $ip = $_SERVER['REMOTE_ADDR'];
 
@@ -87,10 +87,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote']) && $eleicao &
                 if (!$stmtValidaCandidato->fetch()) {
                     $erro = "Candidato inválido ou não aprovado para esta eleição.";
                 } else {
-                    // Inserir voto
+                    // Inserir voto com assinatura digital (confirmado com senha)
                     $stmtVoto = $conn->prepare("
-                        INSERT INTO VOTO (id_eleicao, id_aluno, id_candidatura, ip_votante)
-                        VALUES (?, ?, ?, ?)
+                        INSERT INTO VOTO (id_eleicao, id_aluno, id_candidatura, ip_votante, assinatura_digital)
+                        VALUES (?, ?, ?, ?, TRUE)
                     ");
                     $ip = $_SERVER['REMOTE_ADDR'];
 

@@ -129,8 +129,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $id_eleicao) {
                 }
             }
 
+            // Validar se foto foi fornecida (OBRIGATÓRIO)
+            if (empty($erro) && $foto_candidato === null) {
+                $erro = "A foto do candidato é obrigatória. Por favor, selecione uma foto.";
+            }
+
             // Se não houve erro, inserir candidatura
-            // IMPORTANTE: foto_candidato pode ser NULL se usuário não escolheu nenhuma opção
             if (empty($erro)) {
                 $stmtInsert = $conn->prepare("
                     INSERT INTO CANDIDATURA (id_eleicao, id_aluno, proposta, foto_candidato, status_validacao)
@@ -253,7 +257,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $id_eleicao) {
 
                     <?php if (!$ja_inscrito): ?>
                     <div class="input-group">
-                        <label>Foto do Candidato (opcional)</label>
+                        <label>Foto do Candidato <span style="color:red;">*</span></label>
                         <button type="button" class="button primary" onclick="event.preventDefault(); abrirModalFoto(); return false;">Enviar Foto</button>
                         <p id="foto-status" style="margin-top:10px; color:#28a745; display:none; font-weight:bold;">Foto selecionada com sucesso</p>
                     </div>
