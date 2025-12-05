@@ -105,7 +105,7 @@ main.login {
     justify-content: center;
     align-items: center;
     padding: 20px;
-    background: linear-gradient(135deg, #0d1b48 0%, #1a2a6c 100%);
+    background: #1a2a6c;
 }
 
 main.login .container {
@@ -198,8 +198,7 @@ main.login .wrapper-form .input-field input:focus {
 main.login .wrapper-form .input-field i[class^="fa"] {
     position: absolute;
     left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 18px;
     color: #005c6d;
 }
 
@@ -216,27 +215,26 @@ main.login .wrapper-form [class^="button"] {
 }
 
 main.login .wrapper-form [class^="button"]:hover {
-    transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
 }
 
 main.login .wrapper-form .button.primary {
-    background: linear-gradient(135deg, #006172 0%, #004955 100%);
+    background: #006172;
 }
 
 main.login .wrapper-form .button.primary:hover {
-    background: linear-gradient(135deg, #004955 0%, #003844 100%);
+    background: #004955;
 }
 
 /* Garantir que botões secondary tenham texto branco (ícones e texto) */
 main.login .wrapper-form .button.secondary,
 main.login .wrapper-form .button.secondary i {
     color: white;
-    background: linear-gradient(135deg, #8b0000 0%, #6a0101 100%);
+    background: #8b0000;
 }
 
 main.login .wrapper-form .button.secondary:hover {
-    background: linear-gradient(135deg, #6a0101 0%, #5c0d0d 100%);
+    background: #6a0101;
 }
 
 main.login .wrapper-visual {
@@ -246,7 +244,7 @@ main.login .wrapper-visual {
     align-items: center;
     justify-content: center;
     flex: 1 0 50%;
-    background: linear-gradient(135deg, #005c6d 0%, #0d1b48 100%);
+    background: #0d1b48;
     padding: 40px;
 }
 
@@ -301,7 +299,7 @@ main.login-support {
     flex-direction: column;
     flex: 1 1 auto;
     padding: 20px;
-    background: linear-gradient(135deg, #1a2a6c, #2a4b8d, #3a6bc7);
+    background: #2a4b8d;
 }
 
 main.login-support .container {
@@ -509,16 +507,15 @@ main.about .card-wrapper .button {
 }
 
 main.about .card-wrapper .button:hover {
-    transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(139, 0, 0, 0.35);
 }
 
 main.about .card-wrapper .button.primary {
-    background: linear-gradient(135deg, #8b0000 0%, #6a0101 100%);
+    background: #8b0000;
 }
 
 main.about .card-wrapper .button.primary:hover {
-    background: linear-gradient(135deg, #6a0101 0%, #5c0d0d 100%);
+    background: #6a0101;
 }
 
 @media (max-width: 768px) {

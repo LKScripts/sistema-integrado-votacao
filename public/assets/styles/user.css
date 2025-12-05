@@ -157,19 +157,18 @@ main.user-home .card-wrapper .button-group .button {
 }
 
 main.user-home .card-wrapper .button-group .button:hover:not(.disabled) {
-    transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(139, 0, 0, 0.35);
 }
 
 main.user-home .card-wrapper .button-group .button.primary {
-    background: linear-gradient(135deg, #8b0000 0%, #6a0101 100%);
+    background: #8b0000;
 }
 
 main.user-home
     .card-wrapper
     .button-group
     .button.primary:hover:not(.disabled) {
-    background: linear-gradient(135deg, #6a0101 0%, #5c0d0d 100%);
+    background: #6a0101;
 }
 
 main.user-home .callout.warning {
@@ -328,24 +327,23 @@ main.user-application .form-buttons .button {
 }
 
 main.user-application .form-buttons .button:hover {
-    transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(139, 0, 0, 0.35);
 }
 
 main.user-application .form-buttons .button.primary {
-    background: linear-gradient(135deg, #006172 0%, #004955 100%);
+    background: #006172;
 }
 
 main.user-application .form-buttons .button.primary:hover {
-    background: linear-gradient(135deg, #004955 0%, #003844 100%);
+    background: #004955;
 }
 
 main.user-application .form-buttons .button.secondary {
-    background: linear-gradient(135deg, #8b0000 0%, #6a0101 100%);
+    background: #8b0000;
 }
 
 main.user-application .form-buttons .button.secondary:hover {
-    background: linear-gradient(135deg, #6a0101 0%, #5c0d0d 100%);
+    background: #6a0101;
 }
 
 /* Fim estilização página de inscrição (/pages/user/inscricao.html) */
@@ -615,11 +613,9 @@ main.user-vote .instructions strong {
 
 @keyframes modalSlideIn {
     from {
-        transform: translateY(-50px);
         opacity: 0;
     }
     to {
-        transform: translateY(0);
         opacity: 1;
     }
 }
@@ -630,7 +626,7 @@ main.user-vote .instructions strong {
     align-items: center;
     padding: 20px 25px;
     border-bottom: 2px solid #e0e0e0;
-    background: linear-gradient(to right, #005c6d, #005262);
+    background: #005c6d;
     color: white;
     border-radius: 15px 15px 0 0;
 }
@@ -682,7 +678,7 @@ main.user-vote .instructions strong {
 
 /* Voto em Branco */
 .voto-branco-container {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: #f8f9fa;
     border: 2px dashed #6c757d;
     border-radius: 15px;
     padding: 30px;
@@ -715,7 +711,7 @@ main.user-vote .instructions strong {
 }
 
 .button-voto-branco {
-    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    background: #6c757d;
     color: white;
     border: none;
     border-radius: 10px;
@@ -731,12 +727,11 @@ main.user-vote .instructions strong {
 }
 
 .button-voto-branco:hover {
-    background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+    background: #5a6268;
     box-shadow: 0 6px 15px rgba(108, 117, 125, 0.4);
 }
 
 .button-voto-branco:active {
-    transform: translateY(0);
     box-shadow: 0 2px 5px rgba(108, 117, 125, 0.3);
 }
 
@@ -867,16 +862,15 @@ main.user-about .card-wrapper .button {
 }
 
 main.user-about .card-wrapper .button:hover {
-    transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(139, 0, 0, 0.35);
 }
 
 main.user-about .card-wrapper .button.primary {
-    background: linear-gradient(135deg, #8b0000 0%, #6a0101 100%);
+    background: #8b0000;
 }
 
 main.user-about .card-wrapper .button.primary:hover {
-    background: linear-gradient(135deg, #6a0101 0%, #5c0d0d 100%);
+    background: #6a0101;
 }
 
 @media (max-width: 768px) {

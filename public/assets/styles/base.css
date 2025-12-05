@@ -197,9 +197,8 @@ form[class^="form-"] .wrapper-select {
 form[class^="form-"] .wrapper-select::after {
     content: "";
     position: absolute;
-    top: 50%;
+    top: calc(50% - 4px);
     right: 10px;
-    transform: translateY(-50%);
     width: 0;
     height: 0;
     border-left: 6px solid transparent;
