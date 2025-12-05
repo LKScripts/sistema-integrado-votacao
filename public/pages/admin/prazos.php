@@ -85,11 +85,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $status = "candidatura_aberta";
 
+        // Gerar identificador único de lote se for criação múltipla
+        $lote_criacao = null;
+        if (count($lista_cursos) > 1) {
+            $lote_criacao = md5(uniqid($id_admin . time(), true));
+        }
+
         $stmt = $conn->prepare("
             INSERT INTO ELEICAO
             (curso, semestre, data_inicio_candidatura, data_fim_candidatura,
-             data_inicio_votacao, data_fim_votacao, status, criado_por)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+             data_inicio_votacao, data_fim_votacao, status, criado_por, lote_criacao)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
         try {
@@ -104,7 +110,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $votacao_inicio,
                     $votacao_fim,
                     $status,
-                    $id_admin
+                    $id_admin,
+                    $lote_criacao
                 ]);
 
                 $id_eleicao_criada = $conn->lastInsertId();

@@ -24,13 +24,17 @@ if (!$resultado) {
     exit;
 }
 
-// Buscar lista de alunos aptos para assinatura
-$sql = "SELECT nome_completo, ra
-        FROM ALUNO
-        WHERE curso = ? AND semestre = ?
-        ORDER BY nome_completo";
+// Buscar lista de alunos aptos para assinatura com verificação de voto
+$sql = "SELECT
+            a.nome_completo,
+            a.ra,
+            v.id_voto
+        FROM ALUNO a
+        LEFT JOIN VOTO v ON a.id_aluno = v.id_aluno AND v.id_eleicao = ?
+        WHERE a.curso = ? AND a.semestre = ?
+        ORDER BY a.nome_completo";
 $stmt = $conn->prepare($sql);
-$stmt->execute([$resultado['curso'], $resultado['semestre']]);
+$stmt->execute([$id_eleicao, $resultado['curso'], $resultado['semestre']]);
 $alunos = $stmt->fetchAll();
 
 // Função para converter data para extenso
@@ -400,7 +404,13 @@ $semestre_ano = getSemestreExtenso($resultado['data_apuracao']);
                             <td class="col-num"><?= $numero++ ?>.</td>
                             <td class="col-nome"><?= htmlspecialchars($aluno['nome_completo']) ?></td>
                             <td class="col-ra"><?= htmlspecialchars($aluno['ra']) ?></td>
-                            <td class="col-assinatura"></td>
+                            <td class="col-assinatura">
+                                <?php if ($aluno['id_voto']): ?>
+                                    <em style="color: #006400; font-size: 9pt;">Votou</em>
+                                <?php else: ?>
+                                    <em style="color: #dc3545; font-size: 9pt;">Não votou</em>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
 
