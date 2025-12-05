@@ -5,6 +5,29 @@ require_once '../../../config/conexao.php';
 // Verificar se é administrador
 verificarAdmin();
 
+// Buscar solicitações de mudança pendentes
+$stmt_solicitacoes = $conn->query("
+    SELECT
+        s.id_solicitacao,
+        s.tipo_mudanca,
+        s.curso_atual,
+        s.semestre_atual,
+        s.curso_novo,
+        s.semestre_novo,
+        s.justificativa,
+        s.data_solicitacao,
+        a.id_aluno,
+        a.nome_completo,
+        a.ra,
+        a.email_institucional
+    FROM solicitacao_mudanca s
+    INNER JOIN aluno a ON s.id_aluno = a.id_aluno
+    WHERE s.status = 'pendente'
+    ORDER BY s.data_solicitacao ASC
+");
+$solicitacoes_pendentes = $stmt_solicitacoes->fetchAll();
+$total_solicitacoes = count($solicitacoes_pendentes);
+
 // Aplicar filtros
 $filtro_curso = $_GET['curso'] ?? '';
 $filtro_semestre = $_GET['semestre'] ?? '';
@@ -223,7 +246,6 @@ $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIV - Sistema Integrado de Votações</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="/assets/styles/guest.css">
     <link rel="stylesheet" href="../../assets/styles/guest.css">
     <link rel="stylesheet" href="../../assets/styles/admin.css">
     <link rel="stylesheet" href="../../assets/styles/base.css">
@@ -231,6 +253,7 @@ $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="../../assets/styles/footer-site.css">
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
     <link rel="stylesheet" href="../../assets/styles/inscricoes.css">
+    <link rel="stylesheet" href="../../assets/styles/modal.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .dashboard {
@@ -458,10 +481,115 @@ $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <?php require_once 'components/header.php'; ?>
 
     <main class="dashboard">
+        <?php if (isset($_SESSION['sucesso'])): ?>
+            <div style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <strong>✓</strong> <?= $_SESSION['sucesso'] ?>
+            </div>
+            <?php unset($_SESSION['sucesso']); ?>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['erro'])): ?>
+            <div style="background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <strong>✗</strong> <?= $_SESSION['erro'] ?>
+            </div>
+            <?php unset($_SESSION['erro']); ?>
+        <?php endif; ?>
+
         <div class="page-header">
             <h1 class="page-title">Dashboard de Eleições</h1>
             <p class="page-subtitle">Análise histórica e estatísticas de eleições encerradas</p>
         </div>
+
+        <!-- Painel de Solicitações de Mudança -->
+        <?php if ($total_solicitacoes > 0): ?>
+        <div class="solicitacoes-painel" style="background: #fffbea; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin-bottom: 30px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleSolicitacoes()">
+                <div>
+                    <h3 style="margin: 0; color: #856404; font-size: 16px;">
+                        <strong><?= $total_solicitacoes ?></strong> Solicitação<?= $total_solicitacoes > 1 ? 'ões' : '' ?> de Mudança Pendente<?= $total_solicitacoes > 1 ? 's' : '' ?>
+                    </h3>
+                    <p style="margin: 5px 0 0 0; color: #856404; font-size: 13px;">
+                        Clique para expandir e visualizar as solicitações de alunos
+                    </p>
+                </div>
+                <i id="iconToggle" class="fas fa-chevron-down" style="color: #856404; font-size: 20px; transition: transform 0.3s;"></i>
+            </div>
+
+            <div id="listaSolicitacoes" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ffc107;">
+                <?php foreach ($solicitacoes_pendentes as $sol): ?>
+                    <div class="solicitacao-item" style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 15px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div>
+                                <h4 style="margin: 0 0 10px 0; color: #333; font-size: 15px;">
+                                    <i class="fas fa-user"></i> <?= htmlspecialchars($sol['nome_completo']) ?>
+                                </h4>
+                                <p style="margin: 3px 0; font-size: 13px; color: #666;">
+                                    <strong>RA:</strong> <?= htmlspecialchars($sol['ra']) ?>
+                                </p>
+                                <p style="margin: 3px 0; font-size: 13px; color: #666;">
+                                    <strong>Email:</strong> <?= htmlspecialchars($sol['email_institucional']) ?>
+                                </p>
+                            </div>
+                            <div style="text-align: right;">
+                                <p style="margin: 3px 0; font-size: 13px; color: #666;">
+                                    <strong>Solicitado em:</strong> <?= date('d/m/Y H:i', strtotime($sol['data_solicitacao'])) ?>
+                                </p>
+                                <p style="margin: 3px 0; font-size: 13px;">
+                                    <span style="background: #007bff; color: white; padding: 3px 10px; border-radius: 12px; font-size: 11px;">
+                                        <?= strtoupper(str_replace('_', ' ', $sol['tipo_mudanca'])) ?>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                            <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center;">
+                                <div>
+                                    <p style="margin: 0 0 8px 0; font-size: 12px; color: #999; text-transform: uppercase; font-weight: 600;">Dados Atuais</p>
+                                    <p style="margin: 5px 0; font-size: 14px; color: #495057;">
+                                        <strong>Curso:</strong> <?= htmlspecialchars($sol['curso_atual']) ?><br>
+                                        <strong>Semestre:</strong> <?= htmlspecialchars($sol['semestre_atual']) ?>º
+                                    </p>
+                                </div>
+                                <div style="text-align: center; align-self: center;">
+                                    <i class="fas fa-arrow-right" style="color: #6c757d; font-size: 28px;"></i>
+                                </div>
+                                <div>
+                                    <p style="margin: 0 0 8px 0; font-size: 12px; color: #007bff; text-transform: uppercase; font-weight: 600;">Dados Solicitados</p>
+                                    <p style="margin: 5px 0; font-size: 14px; color: #007bff; font-weight: 600;">
+                                        <strong>Curso:</strong> <?= $sol['curso_novo'] ? htmlspecialchars($sol['curso_novo']) : '<em style="color: #999; font-weight: 400;">Sem alteração</em>' ?><br>
+                                        <strong>Semestre:</strong> <?= $sol['semestre_novo'] ? htmlspecialchars($sol['semestre_novo']) . 'º' : '<em style="color: #999; font-weight: 400;">Sem alteração</em>' ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <?php if ($sol['justificativa']): ?>
+                            <div style="margin-bottom: 15px;">
+                                <p style="margin: 0 0 5px 0; font-size: 12px; color: #666; font-weight: 700;">JUSTIFICATIVA:</p>
+                                <p style="margin: 0; font-size: 14px; color: #555; font-style: italic; line-height: 1.6;">
+                                    "<?= htmlspecialchars($sol['justificativa']) ?>"
+                                </p>
+                            </div>
+                        <?php endif; ?>
+
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <button onclick="abrirModalAnalise(<?= $sol['id_solicitacao'] ?>, 'recusar')"
+                                    class="button secondary"
+                                    style="background: #dc3545; color: #fff; border: 2px solid #dc3545; padding: 8px 20px; font-size: 13px; font-weight: 600;">
+                                <i class="fas fa-times"></i> Recusar
+                            </button>
+                            <button onclick="abrirModalAnalise(<?= $sol['id_solicitacao'] ?>, 'aprovar')"
+                                    class="button primary"
+                                    style="background: #28a745; border-color: #28a745; color: #fff; padding: 8px 20px; font-size: 13px;">
+                                <i class="fas fa-check"></i> Aprovar
+                            </button>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Filtros -->
         <div class="filters">
@@ -951,6 +1079,92 @@ $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
         });
         <?php endif; ?>
+
+        // ===== FUNÇÕES DE SOLICITAÇÃO DE MUDANÇA =====
+        function toggleSolicitacoes() {
+            const lista = document.getElementById('listaSolicitacoes');
+            const icon = document.getElementById('iconToggle');
+
+            if (lista.style.display === 'none') {
+                lista.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                lista.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function abrirModalAnalise(idSolicitacao, acao) {
+            const titulo = acao === 'aprovar' ? 'Aprovar Solicitação' : 'Recusar Solicitação';
+            const corFundo = acao === 'aprovar' ? '#28a745' : '#dc3545';
+            const textoConfirmacao = acao === 'aprovar'
+                ? 'Tem certeza que deseja APROVAR esta solicitação? Os dados do aluno serão alterados.'
+                : 'Tem certeza que deseja RECUSAR esta solicitação?';
+
+            const observacoesLabel = acao === 'aprovar'
+                ? 'Observações (opcional)'
+                : 'Motivo da recusa (opcional)';
+
+            const html = `
+                <div class="modal show" id="modalAnalise">
+                    <div class="modal-content" style="max-width: 500px;">
+                        <div class="modal-header" style="background: ${corFundo};">
+                            <h2 style="margin: 0; color: #fff;">
+                                <i class="fas fa-${acao === 'aprovar' ? 'check-circle' : 'times-circle'}"></i>
+                                ${titulo}
+                            </h2>
+                            <button class="btn-close" type="button" onclick="fecharModalAnalise()">&times;</button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                                <p style="margin: 0; font-size: 14px; color: #555;">
+                                    ${textoConfirmacao}
+                                </p>
+                            </div>
+
+                            <form method="POST" action="processar_solicitacao_admin.php">
+                                <input type="hidden" name="id_solicitacao" value="${idSolicitacao}">
+                                <input type="hidden" name="acao" value="${acao}">
+
+                                <div class="form-group">
+                                    <label for="observacoes">${observacoesLabel}</label>
+                                    <textarea id="observacoes" name="observacoes" rows="3"
+                                              placeholder="${acao === 'recusar' ? 'Ex: Dados inconsistentes com registros acadêmicos...' : 'Ex: Aprovado conforme documentação apresentada...'}"></textarea>
+                                </div>
+
+                                <div class="form-buttons">
+                                    <button type="button" class="button secondary" onclick="fecharModalAnalise()">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" class="button primary" style="background: ${corFundo}; border-color: ${corFundo};">
+                                        <i class="fas fa-${acao === 'aprovar' ? 'check' : 'times'}"></i>
+                                        Confirmar ${acao === 'aprovar' ? 'Aprovação' : 'Recusa'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', html);
+        }
+
+        function fecharModalAnalise() {
+            const modal = document.getElementById('modalAnalise');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Fechar modal ao clicar fora
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('modalAnalise');
+            if (modal && e.target === modal) {
+                fecharModalAnalise();
+            }
+        });
     </script>
 </body>
 
