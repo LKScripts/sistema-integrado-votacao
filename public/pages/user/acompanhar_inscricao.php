@@ -52,7 +52,7 @@ if (!$candidatura) {
 $status_colors = [
     'pendente' => ['bg' => '#fff3cd', 'border' => '#ffc107', 'text' => '#856404', 'icon' => 'clock'],
     'deferido' => ['bg' => '#d4edda', 'border' => '#28a745', 'text' => '#155724', 'icon' => 'check-circle'],
-    'indeferido' => ['bg' => '#f8d7da', 'border' => '#dc3545', 'text' => '#721c24', 'icon' => 'times-circle']
+    'indeferido' => ['bg' => '#ffe5e5', 'border' => '#ff6b6b', 'text' => '#721c24', 'icon' => 'times-circle']
 ];
 
 $status_atual = $candidatura['status_validacao'];
@@ -97,41 +97,68 @@ if (!empty($candidatura['foto_candidato'])) {
                     Acompanhamento de Inscrição
                 </h1>
 
+                <?php if (isset($_GET['edicao_sucesso']) && $_GET['edicao_sucesso'] == '1'): ?>
+                    <div style="background: #d4edda; border: 2px solid #28a745; border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <i class="fas fa-check-circle" style="font-size: 32px; color: #155724;"></i>
+                            <div>
+                                <h3 style="margin: 0 0 5px 0; color: #155724; font-size: 18px;">
+                                    Candidatura atualizada com sucesso!
+                                </h3>
+                                <p style="margin: 0; color: #155724; font-size: 14px;">
+                                    Sua candidatura voltou ao status "pendente" e será reavaliada pelo administrador.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <!-- Status da Candidatura -->
                 <div style="background: <?= $cor_status['bg'] ?>; border: 2px solid <?= $cor_status['border'] ?>; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <i class="fas fa-<?= $cor_status['icon'] ?>" style="font-size: 40px; color: <?= $cor_status['text'] ?>;"></i>
-                        <div>
-                            <h2 style="margin: 0; color: <?= $cor_status['text'] ?>; font-size: 24px; text-transform: uppercase;">
-                                Status: <?= htmlspecialchars($status_atual) ?>
-                            </h2>
-                            <p style="margin: 5px 0 0 0; color: <?= $cor_status['text'] ?>; font-size: 14px;">
-                                <?php if ($status_atual === 'pendente'): ?>
-                                    Sua candidatura está aguardando análise do administrador.
-                                <?php elseif ($status_atual === 'deferido'): ?>
-                                    Parabéns! Sua candidatura foi aprovada e você aparecerá na votação.
-                                <?php else: ?>
-                                    Infelizmente sua candidatura foi indeferida. Veja a justificativa abaixo.
-                                <?php endif; ?>
-                            </p>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
+                            <i class="fas fa-<?= $cor_status['icon'] ?>" style="font-size: 40px; color: <?= $cor_status['text'] ?>;"></i>
+                            <div>
+                                <h2 style="margin: 0; color: <?= $cor_status['text'] ?>; font-size: 24px; text-transform: uppercase; font-weight: bold;">
+                                    Status: <?= htmlspecialchars($status_atual) ?>
+                                </h2>
+                                <p style="margin: 5px 0 0 0; color: <?= $cor_status['text'] ?>; font-size: 14px; font-weight: normal;">
+                                    <?php if ($status_atual === 'pendente'): ?>
+                                        Sua candidatura está aguardando análise do administrador.
+                                    <?php elseif ($status_atual === 'deferido'): ?>
+                                        Parabéns! Sua candidatura foi aprovada e você aparecerá na votação.
+                                    <?php else: ?>
+                                        Infelizmente sua candidatura foi indeferida. Veja a justificativa abaixo.
+                                    <?php endif; ?>
+                                </p>
+                            </div>
                         </div>
+
+                        <?php if ($status_atual === 'indeferido'): ?>
+                            <a href="editar-candidatura.php?id=<?= $candidatura['id_candidatura'] ?>"
+                               style="background: <?= $cor_status['text'] ?>; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.2s;"
+                               onmouseover="this.style.opacity='0.85'"
+                               onmouseout="this.style.opacity='1'">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                        <?php endif; ?>
                     </div>
 
                     <?php if ($status_atual === 'indeferido' && !empty($candidatura['justificativa_indeferimento'])): ?>
                         <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid <?= $cor_status['border'] ?>;">
-                            <h3 style="margin: 0 0 10px 0; color: <?= $cor_status['text'] ?>; font-size: 16px;">
+                            <h3 style="margin: 0 0 10px 0; color: <?= $cor_status['text'] ?>; font-size: 16px; font-weight: bold;">
                                 <i class="fas fa-exclamation-triangle"></i> Motivo do Indeferimento:
                             </h3>
-                            <p style="margin: 0; color: <?= $cor_status['text'] ?>; font-size: 14px; line-height: 1.6;">
+                            <p style="margin: 0; color: <?= $cor_status['text'] ?>; font-size: 14px; line-height: 1.6; font-weight: normal;">
                                 <?= nl2br(htmlspecialchars($candidatura['justificativa_indeferimento'])) ?>
                             </p>
                         </div>
                     <?php endif; ?>
 
                     <?php if ($candidatura['validado_por'] && $candidatura['data_validacao']): ?>
-                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid <?= $cor_status['border'] ?>; font-size: 13px; color: <?= $cor_status['text'] ?>;">
+                        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid <?= $cor_status['border'] ?>; font-size: 13px; color: <?= $cor_status['text'] ?>; font-weight: normal;">
                             <i class="fas fa-user-shield"></i>
-                            Validado por: <strong><?= htmlspecialchars($candidatura['nome_validador']) ?></strong> em
+                            Validado por: <?= htmlspecialchars($candidatura['nome_validador']) ?> em
                             <?= date('d/m/Y H:i', strtotime($candidatura['data_validacao'])) ?>
                         </div>
                     <?php endif; ?>
@@ -167,12 +194,9 @@ if (!empty($candidatura['foto_candidato'])) {
                         </div>
                         <?php if (!empty($candidatura['proposta'])): ?>
                             <div class="info-row proposta-preview">
-                                <p style="margin-top: 10px;"><strong>Proposta:</strong> <?= htmlspecialchars(substr($candidatura['proposta'], 0, 100)) ?>...</p>
+                                <p style="margin-top: 10px;"><strong>Proposta:</strong> <?= nl2br(htmlspecialchars($candidatura['proposta'])) ?></p>
                             </div>
                         <?php endif; ?>
-                    </div>
-                    <div style="padding: 15px; background: #f8f9fa; border-top: 1px solid #ddd; text-align: center; color: #666; font-size: 14px;">
-                        <i class="fas fa-info-circle"></i> Apenas preview - não é possível votar aqui
                     </div>
                 </div>
 
@@ -229,6 +253,10 @@ if (!empty($candidatura['foto_candidato'])) {
                     <?php if ($status_atual === 'deferido'): ?>
                         <a href="votacao.php" class="button primary">
                             <i class="fas fa-vote-yea"></i> Ver Votação
+                        </a>
+                    <?php elseif ($status_atual === 'indeferido'): ?>
+                        <a href="editar-candidatura.php?id=<?= $candidatura['id_candidatura'] ?>" class="button primary">
+                            <i class="fas fa-edit"></i> Editar Candidatura
                         </a>
                     <?php endif; ?>
                 </div>
