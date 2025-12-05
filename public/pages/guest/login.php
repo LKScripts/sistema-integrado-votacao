@@ -203,9 +203,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     Entrar
                 </button>
 
-                <a class="button secondary" href="../../pages/guest/suporte.php">
-                    <i class="fa fa-user-times"></i>
-                    Esqueci minhas credenciais
+                <a class="button secondary" href="../../pages/guest/recuperar-senha.php">
+                    <i class="fa fa-key"></i>
+                    Esqueci minha senha
+                </a>
+
+                <a class="button secondary" href="../../index.php">
+                    <i class="fas fa-home"></i>
+                    Voltar à Homepage
                 </a>
             </form>
 
