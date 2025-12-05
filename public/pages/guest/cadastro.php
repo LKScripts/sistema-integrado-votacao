@@ -434,6 +434,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         <i class="fas fa-arrow-left"></i>
                         Já tenho conta
                     </a>
+
+                    <a class="button secondary" href="../../index.php">
+                        <i class="fas fa-home"></i>
+                        Voltar à Homepage
+                    </a>
                 </form>
 
             <?php endif; ?>
