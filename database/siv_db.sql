@@ -1,23 +1,11 @@
 -- =====================================================
 -- SETUP OTIMIZADO - SISTEMA INTEGRADO DE VOTAÇÃO (SIV)
 -- =====================================================
--- Versão: 2.0 - Otimizada para Performance
 -- Data: 2025-12-02
 -- Compatibilidade: MariaDB 10.4.32+ / MySQL 8.0+
+-- Idempotente (pode executar múltiplas vezes com segurança)
 --
--- MELHORIAS NESTA VERSÃO:
--- ✓ Script unificado (1 arquivo ao invés de 3-4)
--- ✓ Índices otimizados para queries mais rápidas (50-70% mais rápido)
--- ✓ Stored procedures sem cursors (3x mais rápido)
--- ✓ Views com MERGE algorithm (2-5x mais rápido)
--- ✓ Verificações de pré-requisitos automáticas
--- ✓ Idempotente (pode executar múltiplas vezes com segurança)
 --
--- TEMPO DE EXECUÇÃO: ~10-15 segundos (vs 2-5 minutos antes)
---
--- COMO USAR:
---   mysql -u root -p -P 3307 < database/setup_otimizado.sql
---   (Remova -P 3307 se usar porta padrão 3306)
 -- =====================================================
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -277,6 +265,38 @@ CREATE TABLE IF NOT EXISTS `login_tentativas` (
   PRIMARY KEY (`id_tentativa`),
   KEY `idx_email_ip` (`email`,`ip_origem`),
   KEY `idx_data` (`data_tentativa`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabela: SOLICITACAO_MUDANCA
+CREATE TABLE IF NOT EXISTS `solicitacao_mudanca` (
+  `id_solicitacao` int(11) NOT NULL AUTO_INCREMENT,
+  `id_aluno` int(11) NOT NULL,
+  `tipo_mudanca` enum('curso','semestre','ambos') NOT NULL COMMENT 'Tipo de mudança solicitada',
+  `curso_atual` varchar(100) NOT NULL,
+  `semestre_atual` int(11) NOT NULL,
+  `curso_novo` varchar(100) DEFAULT NULL COMMENT 'Novo curso (NULL se não mudar)',
+  `semestre_novo` int(11) DEFAULT NULL COMMENT 'Novo semestre (NULL se não mudar)',
+  `justificativa` text DEFAULT NULL COMMENT 'Motivo da solicitação',
+  `status` enum('pendente','aprovado','recusado') NOT NULL DEFAULT 'pendente',
+  `data_solicitacao` timestamp NOT NULL DEFAULT current_timestamp(),
+  `data_resposta` timestamp NULL DEFAULT NULL,
+  `id_admin_responsavel` int(11) DEFAULT NULL COMMENT 'Admin que aprovou/recusou',
+  `motivo_recusa` text DEFAULT NULL COMMENT 'Justificativa em caso de recusa',
+  `observacoes_admin` text DEFAULT NULL COMMENT 'Notas internas do admin',
+  PRIMARY KEY (`id_solicitacao`),
+  KEY `idx_aluno_solicitacao` (`id_aluno`),
+  KEY `idx_status_solicitacao` (`status`),
+  KEY `idx_data_solicitacao` (`data_solicitacao` DESC),
+  KEY `idx_admin_responsavel` (`id_admin_responsavel`),
+  KEY `idx_status_data` (`status`,`data_solicitacao`),
+  CONSTRAINT `fk_solicitacao_aluno` FOREIGN KEY (`id_aluno`) REFERENCES `aluno` (`id_aluno`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_solicitacao_admin` FOREIGN KEY (`id_admin_responsavel`) REFERENCES `administrador` (`id_admin`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `chk_semestre_novo` CHECK (`semestre_novo` IS NULL OR `semestre_novo` BETWEEN 1 AND 6),
+  CONSTRAINT `chk_mudanca_valida` CHECK (
+    (`tipo_mudanca` = 'curso' AND `curso_novo` IS NOT NULL) OR
+    (`tipo_mudanca` = 'semestre' AND `semestre_novo` IS NOT NULL) OR
+    (`tipo_mudanca` = 'ambos' AND `curso_novo` IS NOT NULL AND `semestre_novo` IS NOT NULL)
+  )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
@@ -776,6 +796,65 @@ END$$
 DELIMITER ;
 
 -- =====================================================
+-- 7.2. EVENTO DE PROGRESSÃO SEMESTRAL AUTOMÁTICA
+-- =====================================================
+
+-- Remover evento se existir
+DROP EVENT IF EXISTS `evt_progressao_semestral`;
+
+DELIMITER $$
+
+-- Evento: Progressão semestral automática (2x por ano)
+-- Executa início de fevereiro (01/02) e final de julho (25/07)
+CREATE EVENT `evt_progressao_semestral`
+ON SCHEDULE EVERY 1 YEAR
+STARTS '2026-02-01 00:00:00'
+ON COMPLETION PRESERVE
+ENABLE
+DO
+BEGIN
+    DECLARE total_alunos_atualizados INT DEFAULT 0;
+    DECLARE mes_atual INT;
+
+    SET mes_atual = MONTH(CURDATE());
+
+    -- Executar apenas em fevereiro (2) ou julho (7)
+    IF mes_atual IN (2, 7) THEN
+        -- Atualizar semestre dos alunos ativos (não passa do 6º semestre)
+        UPDATE `aluno`
+        SET semestre = semestre + 1
+        WHERE ativo = 1
+          AND semestre < 6;
+
+        SET total_alunos_atualizados = ROW_COUNT();
+
+        -- Registrar auditoria da progressão automática
+        INSERT INTO `auditoria` (
+            id_admin,
+            tabela,
+            operacao,
+            descricao,
+            dados_novos,
+            ip_origem
+        ) VALUES (
+            NULL,  -- Sistema, não admin
+            'ALUNO',
+            'UPDATE',
+            CONCAT('Progressão semestral automática - ', total_alunos_atualizados, ' alunos atualizados'),
+            JSON_OBJECT(
+                'semestre_incrementado', 1,
+                'data_progressao', NOW(),
+                'total_alunos', total_alunos_atualizados,
+                'mes', mes_atual
+            ),
+            '127.0.0.1'
+        );
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- =====================================================
 -- 8. DADOS INICIAIS (ADMIN PADRÃO)
 -- =====================================================
 
@@ -839,3 +918,156 @@ WHERE curso IN (
     'GESTAO DA PRODUCAO INDUSTRIAL',
     'Gestao Producao Industrial'
 );
+
+-- =====================================================
+-- 10. SISTEMA DE NOTIFICAÇÃO POR E-MAIL
+-- =====================================================
+
+-- Campo para rastrear se notificação de apuração foi enviada
+ALTER TABLE `eleicao`
+ADD COLUMN IF NOT EXISTS `notificacao_apuracao_enviada` TINYINT(1) DEFAULT 0
+COMMENT 'Indica se admin foi notificado sobre apuração pendente';
+
+-- Campo para agrupar eleições criadas em lote (mesmo momento)
+ALTER TABLE `eleicao`
+ADD COLUMN IF NOT EXISTS `lote_criacao` VARCHAR(32) NULL
+COMMENT 'Hash para agrupar eleições criadas juntas';
+
+-- Índice para facilitar queries
+ALTER TABLE `eleicao`
+ADD INDEX IF NOT EXISTS `idx_notificacao_apuracao` (`status`, `notificacao_apuracao_enviada`);
+
+ALTER TABLE `eleicao`
+ADD INDEX IF NOT EXISTS `idx_lote_criacao` (`lote_criacao`);
+
+-- Tabela de log de notificações
+CREATE TABLE IF NOT EXISTS `notificacoes_email` (
+  `id_notificacao` INT AUTO_INCREMENT PRIMARY KEY,
+  `tipo` ENUM('apuracao_individual', 'apuracao_lote') NOT NULL,
+  `id_admin` INT NOT NULL,
+  `email_destino` VARCHAR(255) NOT NULL,
+  `assunto` VARCHAR(255) NOT NULL,
+  `eleicoes_ids` TEXT NOT NULL COMMENT 'JSON array com IDs das eleições',
+  `status_envio` ENUM('enviado', 'falhou') NOT NULL,
+  `mensagem_erro` TEXT NULL,
+  `data_envio` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  INDEX `idx_tipo_notif` (`tipo`),
+  INDEX `idx_admin_notif` (`id_admin`),
+  INDEX `idx_data_envio` (`data_envio` DESC),
+
+  FOREIGN KEY (`id_admin`) REFERENCES `administrador` (`id_admin`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='Log de notificações enviadas aos administradores';
+
+-- Tabela de tokens de recuperação de senha
+CREATE TABLE IF NOT EXISTS `tokens_recuperacao_senha` (
+  `id_token` INT AUTO_INCREMENT PRIMARY KEY,
+  `email` VARCHAR(255) NOT NULL,
+  `tipo_usuario` ENUM('aluno', 'admin') NOT NULL,
+  `token` VARCHAR(64) NOT NULL,
+  `data_criacao` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `data_expiracao` TIMESTAMP NOT NULL,
+  `usado` TINYINT(1) DEFAULT 0,
+  `data_uso` TIMESTAMP NULL,
+  `ip_solicitacao` VARCHAR(45) NULL,
+  `ip_uso` VARCHAR(45) NULL,
+
+  UNIQUE KEY `uk_token` (`token`),
+  INDEX `idx_email_tipo` (`email`, `tipo_usuario`),
+  INDEX `idx_token_valido` (`token`, `usado`, `data_expiracao`),
+  INDEX `idx_data_expiracao` (`data_expiracao`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='Tokens para recuperação de senha de alunos e administradores';
+
+DELIMITER $$
+
+-- Procedure: Notificar apuração pendente
+DROP PROCEDURE IF EXISTS `sp_notificar_apuracao_pendente`$$
+CREATE PROCEDURE `sp_notificar_apuracao_pendente`()
+BEGIN
+    DECLARE v_eleicoes_pendentes INT DEFAULT 0;
+
+    -- Contar eleições que precisam de notificação
+    SELECT COUNT(*) INTO v_eleicoes_pendentes
+    FROM eleicao
+    WHERE status = 'aguardando_finalizacao'
+      AND notificacao_apuracao_enviada = 0;
+
+    IF v_eleicoes_pendentes > 0 THEN
+        -- Marcar eleições como "precisa notificar"
+        UPDATE eleicao
+        SET notificacao_apuracao_enviada = 1
+        WHERE status = 'aguardando_finalizacao'
+          AND notificacao_apuracao_enviada = 0;
+
+        -- Registrar na auditoria
+        INSERT INTO AUDITORIA (
+            id_admin,
+            tabela,
+            operacao,
+            descricao,
+            ip_origem,
+            data_hora
+        ) VALUES (
+            1,
+            'ELEICAO',
+            'UPDATE',
+            CONCAT(v_eleicoes_pendentes, ' eleição(ões) marcada(s) para notificação de apuração'),
+            '127.0.0.1',
+            NOW()
+        );
+    END IF;
+END$$
+
+-- Atualizar procedure existente para incluir notificações
+DROP PROCEDURE IF EXISTS `sp_atualizar_status_eleicoes`$$
+CREATE PROCEDURE `sp_atualizar_status_eleicoes`()
+BEGIN
+    DECLARE v_eleicoes_atualizadas INT DEFAULT 0;
+
+    -- Atualizar para 'votacao_aberta'
+    UPDATE ELEICAO
+    SET status = 'votacao_aberta'
+    WHERE status = 'candidatura_aberta'
+      AND NOW() >= data_inicio_votacao
+      AND NOW() < data_fim_votacao;
+
+    SET v_eleicoes_atualizadas = ROW_COUNT();
+
+    IF v_eleicoes_atualizadas > 0 THEN
+        INSERT INTO AUDITORIA (id_admin, operacao, descricao, ip_origem, data_hora)
+        VALUES (
+            1,
+            'UPDATE',
+            CONCAT(v_eleicoes_atualizadas, ' eleição(ões) mudou(aram) para votacao_aberta'),
+            '127.0.0.1',
+            NOW()
+        );
+    END IF;
+
+    -- Marcar para finalização (COM NOTIFICAÇÃO)
+    UPDATE ELEICAO
+    SET status = 'aguardando_finalizacao',
+        notificacao_apuracao_enviada = 0
+    WHERE status = 'votacao_aberta'
+      AND NOW() >= data_fim_votacao;
+
+    SET v_eleicoes_atualizadas = ROW_COUNT();
+
+    IF v_eleicoes_atualizadas > 0 THEN
+        INSERT INTO AUDITORIA (id_admin, operacao, descricao, ip_origem, data_hora)
+        VALUES (
+            1,
+            'UPDATE',
+            CONCAT(v_eleicoes_atualizadas, ' eleição(ões) finalizou(aram) votação e aguardam notificação'),
+            '127.0.0.1',
+            NOW()
+        );
+
+        -- Disparar marcação de notificações
+        CALL sp_notificar_apuracao_pendente();
+    END IF;
+END$$
+
+DELIMITER ;
