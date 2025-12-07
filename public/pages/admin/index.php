@@ -1,6 +1,7 @@
 <?php
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
+require_once '../../../config/helpers.php';
 
 // Verificar se é administrador
 verificarAdmin();
@@ -751,7 +752,7 @@ $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </p>
             <?php endif; ?>
         </div>
-<!-- ==================== AUDITORIA (ESTILO INSCRICOES.PHP) ==================== -->
+<!-- ==================== AUDITORIA ==================== -->
 <section class="list-applicants" style="margin-top: 40px;">
     
     <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; color: #333;">
@@ -821,134 +822,238 @@ $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </form>
 
-    <!-- TABELA -->
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Admin</th>
-                <th>Eleição</th>
-                <th>Tabela</th>
-                <th>Operação</th>
-                <th>Descrição</th>
-                <th>Dados Anteriores</th>
-                <th>Dados Novos</th>
-                <th>IP</th>
-                <th>Data/Hora</th>
-            </tr>
-        </thead>
-
-        <tbody>
-        <?php if (count($resultados) > 0): ?>
-            <?php foreach ($resultados as $audit): ?>
-                <tr>
-                    <td><?= $audit['id_auditoria'] ?></td>
-                    <td><?= $audit['id_admin'] ?></td>
-                    <td><?= $audit['id_eleicao'] ?></td>
-                    <td><?= $audit['tabela'] ?></td>
-                    <td><?= $audit['operacao'] ?></td>
-                    <td><?= htmlspecialchars($audit['descricao']) ?></td>
-
-                    <td style="max-width:200px; word-break:break-word;">
-                        <?= $audit['dados_anteriores'] ?: '<i>N/A</i>' ?>
-                    </td>
-
-                    <td style="max-width:200px; word-break:break-word;">
-                        <?= $audit['dados_novos'] ?: '<i>N/A</i>' ?>
-                    </td>
-
-                    <td><?= $audit['ip_origem'] ?></td>
-                    <td><?= $audit['data_hora'] ?></td>
-                </tr>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <tr>
-                <td colspan="10" style="text-align:center; padding:25px;">
-                    <div style="background:#fff3cd; padding:20px; border-radius:8px; border:1px solid #ffc107;">
-                        <p style="color:#856404; margin:0;">Nenhum registro encontrado.</p>
-                    </div>
-                </td>
-            </tr>
-        <?php endif; ?>
-        </tbody>
-
-        <!-- PAGINAÇÃO -->
-        <tfoot>
-        <tr>
-            <td colspan="10">
-                <?php
-                // Calcular números para exibição
-                $primeiro_registro = $total_registros > 0 ? $offset + 1 : 0;
-                $ultimo_registro = min($offset + $limite, $total_registros);
-
-                // Construir query string com filtros
-                $query_params = [];
-                if (!empty($busca)) $query_params[] = 'busca=' . urlencode($busca);
-                if (!empty($filtro_tabela)) $query_params[] = 'tabela=' . urlencode($filtro_tabela);
-                if (!empty($filtro_admin)) $query_params[] = 'admin=' . urlencode($filtro_admin);
-                if (!empty($filtro_data_inicio)) $query_params[] = 'data_inicio=' . urlencode($filtro_data_inicio);
-                if (!empty($filtro_data_fim)) $query_params[] = 'data_fim=' . urlencode($filtro_data_fim);
-                $query_string = !empty($query_params) ? '&' . implode('&', $query_params) : '';
-                ?>
-
-                <div class="pagination" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0;">
-                    <div class="results" style="color: #666; font-size: 14px;">
-                        Mostrando <?= $primeiro_registro ?> a <?= $ultimo_registro ?> de <?= $total_registros ?> registro<?= $total_registros != 1 ? 's' : '' ?>
-                    </div>
-
-                    <?php if ($total_paginas > 1): ?>
-                    <ul style="display: flex; gap: 5px; list-style: none; margin: 0; padding: 0;">
-                        <!-- Botão Anterior -->
-                        <li>
-                            <?php if ($pagina > 1): ?>
-                                <a href="?pagina=<?= $pagina - 1 ?><?= $query_string ?>"
-                                   style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;">
-                                    ‹ Anterior
-                                </a>
-                            <?php else: ?>
-                                <span style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; color: #ccc; opacity: 0.5; cursor: not-allowed;">
-                                    ‹ Anterior
+    <!-- Tabela com visualização -->
+    <?php if (count($resultados) > 0): ?>
+        <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <?php foreach ($resultados as $index => $audit): ?>
+                <div class="audit-item" style="border-bottom: 1px solid #e9ecef; padding: 15px; <?= $index % 2 === 0 ? 'background: #fff;' : 'background: #f8f9fa;' ?>">
+                    
+                    <!-- CABEÇALHO COMPACTO -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" 
+                         onclick="toggleAuditDetails(<?= $audit['id_auditoria'] ?>)">
+                        
+                        <div style="flex: 1;">
+                            <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                                <!-- ID -->
+                                <span style="background: #007bff; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+                                    #<?= $audit['id_auditoria'] ?>
                                 </span>
-                            <?php endif; ?>
-                        </li>
-
-                        <?php
-                        // Mostrar até 5 páginas
-                        $inicio = max(1, $pagina - 2);
-                        $fim = min($total_paginas, $pagina + 2);
-
-                        for ($i = $inicio; $i <= $fim; $i++):
-                        ?>
-                            <li>
-                                <a href="?pagina=<?= $i ?><?= $query_string ?>"
-                                   style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; <?= $i == $pagina ? 'background:#005f73; color:white; font-weight:bold;' : 'color: #333;' ?>">
-                                    <?= $i ?>
-                                </a>
-                            </li>
-                        <?php endfor; ?>
-
-                        <!-- Botão Próximo -->
-                        <li>
-                            <?php if ($pagina < $total_paginas): ?>
-                                <a href="?pagina=<?= $pagina + 1 ?><?= $query_string ?>"
-                                   style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333;">
-                                    Próximo ›
-                                </a>
-                            <?php else: ?>
-                                <span style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; color: #ccc; opacity: 0.5; cursor: not-allowed;">
-                                    Próximo ›
+                                
+                                <!-- Operação -->
+                                <?php
+                                $cor_operacao = [
+                                    'INSERT' => '#28a745',
+                                    'UPDATE' => '#ffc107',
+                                    'DELETE' => '#dc3545',
+                                    'LOGIN' => '#17a2b8',
+                                    'LOGOUT' => '#6c757d'
+                                ];
+                                $cor = $cor_operacao[$audit['operacao']] ?? '#6c757d';
+                                ?>
+                                <span style="background: <?= $cor ?>; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+                                    <?= $audit['operacao'] ?>
                                 </span>
-                            <?php endif; ?>
-                        </li>
-                    </ul>
-                    <?php endif; ?>
+                                
+                                <!-- Tabela -->
+                                <span style="background: #e9ecef; color: #495057; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+                                    <?= $audit['tabela'] ?>
+                                </span>
+                                
+                                <!-- Descrição -->
+                                <span style="color: #495057; font-size: 14px; font-weight: 500;">
+                                    <?= htmlspecialchars($audit['descricao']) ?>
+                                </span>
+                            </div>
+                            
+                            <!-- Info Secundária -->
+                            <div style="margin-top: 8px; display: flex; gap: 20px; font-size: 12px; color: #6c757d;">
+                                <span>
+                                    <i class="fas fa-user"></i> 
+                                    <?php
+                                    if ($audit['id_admin']) {
+                                        $stmt_admin = $conn->prepare("SELECT nome_completo FROM ADMINISTRADOR WHERE id_admin = ?");
+                                        $stmt_admin->execute([$audit['id_admin']]);
+                                        $admin_nome = $stmt_admin->fetchColumn();
+                                        echo htmlspecialchars($admin_nome ?: "Admin #{$audit['id_admin']}");
+                                    } else {
+                                        echo '<em>Sistema</em>';
+                                    }
+                                    ?>
+                                </span>
+                                
+                                <span>
+                                    <i class="fas fa-clock"></i> 
+                                    <?= formatarDataLegivel($audit['data_hora']) ?>
+                                </span>
+                                
+                                <?php if ($audit['ip_origem']): ?>
+                                    <span>
+                                        <i class="fas fa-map-marker-alt"></i> 
+                                        <?= htmlspecialchars($audit['ip_origem']) ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
+                        <!-- Botão Expandir -->
+                        <div>
+                            <i id="icon-<?= $audit['id_auditoria'] ?>" class="fas fa-chevron-down" 
+                               style="color: #6c757d; font-size: 18px; transition: transform 0.3s;"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- DETALHES EXPANSÍVEIS -->
+                    <div id="details-<?= $audit['id_auditoria'] ?>" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 2px solid #dee2e6;">
+                        
+                        <?php if ($audit['dados_anteriores'] && $audit['dados_novos']): ?>
+                            <!-- COMPARAÇÃO LADO A LADO -->
+                            <h4 style="margin: 0 0 15px 0; color: #333; font-size: 15px;">
+                                <i class="fas fa-exchange-alt"></i> Comparação de Mudanças
+                            </h4>
+                            <?= gerarComparacaoAuditoria($conn, $audit['dados_anteriores'], $audit['dados_novos'], $audit['tabela']) ?>
+                            
+                        <?php elseif ($audit['dados_anteriores']): ?>
+                            <!-- APENAS DADOS ANTERIORES -->
+                            <h4 style="margin: 0 0 15px 0; color: #856404; font-size: 15px;">
+                                <i class="fas fa-history"></i> Dados Anteriores
+                            </h4>
+                            <?= enriquecerDadosAuditoria($conn, $audit['dados_anteriores'], $audit['tabela']) ?>
+                            
+                        <?php elseif ($audit['dados_novos']): ?>
+                            <!-- APENAS DADOS NOVOS -->
+                            <h4 style="margin: 0 0 15px 0; color: #155724; font-size: 15px;">
+                                <i class="fas fa-plus-circle"></i> Dados Novos
+                            </h4>
+                            <?= enriquecerDadosAuditoria($conn, $audit['dados_novos'], $audit['tabela']) ?>
+                            
+                        <?php else: ?>
+                            <p style="text-align: center; color: #999; padding: 20px; background: #f8f9fa; border-radius: 6px;">
+                                <i class="fas fa-info-circle"></i> Nenhum dado adicional registrado para esta operação
+                            </p>
+                        <?php endif; ?>
+                        
+                        <?php if ($audit['id_eleicao']): ?>
+                            <!-- LINK PARA ELEIÇÃO -->
+                            <div style="margin-top: 15px; padding: 10px; background: #e7f3ff; border-radius: 4px;">
+                                <strong style="color: #004085;">
+                                    <i class="fas fa-link"></i> Eleição Relacionada:
+                                </strong>
+                                <?php
+                                $stmt_eleicao = $conn->prepare("SELECT curso, semestre FROM ELEICAO WHERE id_eleicao = ?");
+                                $stmt_eleicao->execute([$audit['id_eleicao']]);
+                                $eleicao = $stmt_eleicao->fetch();
+                                if ($eleicao) {
+                                    echo " " . obterNomeCursoCompleto($eleicao['curso']) . " - {$eleicao['semestre']}º Semestre";
+                                } else {
+                                    echo " ID #{$audit['id_eleicao']}";
+                                }
+                                ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
-            </td>
-        </tr>
-        </tfoot>
+            <?php endforeach; ?>
+        </div>
+        
+    <?php else: ?>
+        <div style="text-align:center; padding:40px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="background:#fff3cd; padding:30px; border-radius:8px; border:2px solid #ffc107; display: inline-block;">
+                <i class="fas fa-search" style="font-size: 48px; color: #856404; margin-bottom: 15px;"></i>
+                <p style="color:#856404; margin:0; font-size: 16px; font-weight: 600;">Nenhum registro encontrado com os filtros selecionados.</p>
+                <p style="color:#856404; margin:10px 0 0 0; font-size: 14px;">Tente ajustar os filtros ou realizar uma nova busca.</p>
+            </div>
+        </div>
+    <?php endif; ?>
 
-    </table>
+    <!-- PAGINAÇÃO -->
+    <?php if (count($resultados) > 0): ?>
+        <div style="margin-top: 20px;">
+            <?php
+            // Calcular números para exibição
+            $primeiro_registro = $total_registros > 0 ? $offset + 1 : 0;
+            $ultimo_registro = min($offset + $limite, $total_registros);
+
+            // Construir query string com filtros
+            $query_params = [];
+            if (!empty($busca)) $query_params[] = 'busca=' . urlencode($busca);
+            if (!empty($filtro_tabela)) $query_params[] = 'tabela=' . urlencode($filtro_tabela);
+            if (!empty($filtro_admin)) $query_params[] = 'admin=' . urlencode($filtro_admin);
+            if (!empty($filtro_data_inicio)) $query_params[] = 'data_inicio=' . urlencode($filtro_data_inicio);
+            if (!empty($filtro_data_fim)) $query_params[] = 'data_fim=' . urlencode($filtro_data_fim);
+            $query_string = !empty($query_params) ? '&' . implode('&', $query_params) : '';
+            ?>
+
+            <div class="pagination" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div class="results" style="color: #666; font-size: 14px;">
+                    Mostrando <strong><?= $primeiro_registro ?></strong> a <strong><?= $ultimo_registro ?></strong> de <strong><?= $total_registros ?></strong> registro<?= $total_registros != 1 ? 's' : '' ?>
+                </div>
+
+                <?php if ($total_paginas > 1): ?>
+                <ul style="display: flex; gap: 5px; list-style: none; margin: 0; padding: 0;">
+                    <!-- Botão Anterior -->
+                    <li>
+                        <?php if ($pagina > 1): ?>
+                            <a href="?pagina=<?= $pagina - 1 ?><?= $query_string ?>"
+                               style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333; transition: all 0.3s;">
+                                ‹ Anterior
+                            </a>
+                        <?php else: ?>
+                            <span style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; color: #ccc; opacity: 0.5; cursor: not-allowed;">
+                                ‹ Anterior
+                            </span>
+                        <?php endif; ?>
+                    </li>
+
+                    <?php
+                    // Mostrar até 5 páginas
+                    $inicio = max(1, $pagina - 2);
+                    $fim = min($total_paginas, $pagina + 2);
+
+                    for ($i = $inicio; $i <= $fim; $i++):
+                    ?>
+                        <li>
+                            <a href="?pagina=<?= $i ?><?= $query_string ?>"
+                               style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; <?= $i == $pagina ? 'background:#005f73; color:white; font-weight:bold; border-color:#005f73;' : 'color: #333;' ?> transition: all 0.3s;">
+                                <?= $i ?>
+                            </a>
+                        </li>
+                    <?php endfor; ?>
+
+                    <!-- Botão Próximo -->
+                    <li>
+                        <?php if ($pagina < $total_paginas): ?>
+                            <a href="?pagina=<?= $pagina + 1 ?><?= $query_string ?>"
+                               style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333; transition: all 0.3s;">
+                                Próximo ›
+                            </a>
+                        <?php else: ?>
+                            <span style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; color: #ccc; opacity: 0.5; cursor: not-allowed;">
+                                Próximo ›
+                            </span>
+                        <?php endif; ?>
+                    </li>
+                </ul>
+                <?php endif; ?>
+            </div>
+        </div>
+    <?php endif; ?>
 </section>
+
+<!-- JAVASCRIPT PARA EXPANSÃO -->
+<script>
+function toggleAuditDetails(id) {
+    const details = document.getElementById('details-' + id);
+    const icon = document.getElementById('icon-' + id);
+    
+    if (details.style.display === 'none' || details.style.display === '') {
+        details.style.display = 'block';
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        details.style.display = 'none';
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+</script>
 <!-- ==================== FIM AUDITORIA ==================== -->
 
     </main>

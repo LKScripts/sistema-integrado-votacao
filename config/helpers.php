@@ -392,3 +392,429 @@ function formatarCamposErro($campos) {
     return implode(', ', $campos_formatados) . ' e ' . $ultimo;
 }
 ?>
+
+<?php
+
+// =====================================================
+// Funções que transformam IDs em informações legíveis
+// =====================================================
+
+/**
+ * Transforma IDs em nomes, adiciona contexto e formata para exibição
+ * 
+ * @param PDO $conn Conexão PDO
+ * @param string|null $json_dados JSON string com dados
+ * @param string $tabela Nome da tabela para contexto
+ * @return string HTML formatado ou string vazia
+ */
+function enriquecerDadosAuditoria($conn, $json_dados, $tabela) {
+    if (empty($json_dados)) {
+        return '<em style="color: #999;">Nenhum dado</em>';
+    }
+    
+    try {
+        $dados = json_decode($json_dados, true);
+        
+        if (!is_array($dados)) {
+            return '<em style="color: #999;">Dados inválidos</em>';
+        }
+        
+        // Enriquecer dados baseado na tabela
+        $dados_enriquecidos = [];
+        
+        foreach ($dados as $chave => $valor) {
+            $rotulo = traduzirCampoAuditoria($chave);
+            $valor_legivel = formatarValorAuditoria($conn, $chave, $valor, $tabela);
+            
+            $dados_enriquecidos[] = [
+                'rotulo' => $rotulo,
+                'valor' => $valor_legivel,
+                'chave_original' => $chave
+            ];
+        }
+        
+        // Gerar HTML formatado
+        return gerarHTMLDadosAuditoria($dados_enriquecidos);
+        
+    } catch (Exception $e) {
+        error_log("Erro ao enriquecer dados de auditoria: " . $e->getMessage());
+        return '<em style="color: #999;">Erro ao processar dados</em>';
+    }
+}
+
+/**
+ * Traduz nome técnico de campo para algo amigável
+ * 
+ * @param string $campo Nome técnico do campo
+ * @return string Rótulo amigável
+ */
+function traduzirCampoAuditoria($campo) {
+    $traducoes = [
+        // Campos de identificação
+        'id_aluno' => 'Aluno',
+        'id_admin' => 'Administrador',
+        'id_eleicao' => 'Eleição',
+        'id_candidatura' => 'Candidatura',
+        
+        // Campos de dados pessoais
+        'nome_completo' => 'Nome Completo',
+        'email_institucional' => 'E-mail Institucional',
+        'email_corporativo' => 'E-mail Corporativo',
+        'ra' => 'RA',
+        
+        // Campos de curso
+        'curso' => 'Curso',
+        'curso_atual' => 'Curso Atual',
+        'curso_novo' => 'Curso Novo',
+        'semestre' => 'Semestre',
+        'semestre_atual' => 'Semestre Atual',
+        'semestre_novo' => 'Semestre Novo',
+        
+        // Campos de status
+        'status' => 'Status',
+        'status_validacao' => 'Status de Validação',
+        'ativo' => 'Ativo',
+        'aprovado_por' => 'Aprovado Por',
+        'validado_por' => 'Validado Por',
+        'rejeitado_por' => 'Rejeitado Por',
+        
+        // Campos de datas
+        'data_cadastro' => 'Data de Cadastro',
+        'data_inscricao' => 'Data de Inscrição',
+        'data_aprovacao' => 'Data de Aprovação',
+        'data_rejeicao' => 'Data de Rejeição',
+        'data_inicio_candidatura' => 'Início Candidatura',
+        'data_fim_candidatura' => 'Fim Candidatura',
+        'data_inicio_votacao' => 'Início Votação',
+        'data_fim_votacao' => 'Fim Votação',
+        
+        // Campos de texto
+        'proposta' => 'Proposta',
+        'justificativa' => 'Justificativa',
+        'justificativa_indeferimento' => 'Justificativa de Indeferimento',
+        'motivo_rejeicao' => 'Motivo de Rejeição',
+        'motivo_recusa' => 'Motivo de Recusa',
+        'observacoes_admin' => 'Observações do Admin',
+        
+        // Campos técnicos
+        'foto_candidato' => 'Foto',
+        'foto_perfil' => 'Foto de Perfil'
+    ];
+    
+    return $traducoes[$campo] ?? ucfirst(str_replace('_', ' ', $campo));
+}
+
+/**
+ * Formata valor de campo para exibição legível
+ * Busca no banco quando necessário para resolver IDs
+ * 
+ * @param PDO $conn Conexão PDO
+ * @param string $campo Nome do campo
+ * @param mixed $valor Valor do campo
+ * @param string $tabela Tabela de contexto
+ * @return string Valor formatado
+ */
+function formatarValorAuditoria($conn, $campo, $valor, $tabela) {
+    // NULL values
+    if ($valor === null) {
+        return '<em style="color: #999;">Não informado</em>';
+    }
+    
+    // Campos de ID - resolver para nomes
+    if (strpos($campo, 'id_') === 0 || strpos($campo, '_por') !== false) {
+        return resolverIDParaNome($conn, $campo, $valor);
+    }
+    
+    // Status - adicionar badge colorido
+    if (strpos($campo, 'status') !== false) {
+        return formatarStatusComBadge($valor);
+    }
+    
+    // Boolean - transformar em Sim/Não
+    if (is_bool($valor) || $valor === '0' || $valor === '1') {
+        $booleano = (bool)$valor;
+        $cor = $booleano ? '#28a745' : '#dc3545';
+        $texto = $booleano ? 'Sim' : 'Não';
+        return "<strong style='color: {$cor};'>{$texto}</strong>";
+    }
+    
+    // Datas - formatar
+    if (strpos($campo, 'data_') === 0 && preg_match('/^\d{4}-\d{2}-\d{2}/', $valor)) {
+        return formatarDataLegivel($valor);
+    }
+    
+    // Curso - nome completo
+    if ($campo === 'curso' || $campo === 'curso_atual' || $campo === 'curso_novo') {
+        return obterNomeCursoCompleto($valor);
+    }
+    
+    // Semestre - adicionar "º"
+    if (strpos($campo, 'semestre') !== false) {
+        return $valor . 'º Semestre';
+    }
+    
+    // Textos longos - truncar com tooltip
+    if (is_string($valor) && strlen($valor) > 100) {
+        $resumo = substr($valor, 0, 100) . '...';
+        return "<span title='" . htmlspecialchars($valor) . "'>{$resumo}</span>";
+    }
+    
+    // Valor padrão
+    return htmlspecialchars($valor);
+}
+
+/**
+ * Resolve ID para nome legível (busca no banco)
+ * 
+ * @param PDO $conn Conexão PDO
+ * @param string $campo Nome do campo
+ * @param mixed $valor ID a resolver
+ * @return string Nome ou ID formatado
+ */
+function resolverIDParaNome($conn, $campo, $valor) {
+    if (empty($valor)) {
+        return '<em style="color: #999;">Nenhum</em>';
+    }
+    
+    try {
+        $stmt = null;
+        
+        switch ($campo) {
+            case 'id_aluno':
+                $stmt = $conn->prepare("SELECT nome_completo, ra FROM ALUNO WHERE id_aluno = ?");
+                $stmt->execute([$valor]);
+                $resultado = $stmt->fetch();
+                if ($resultado) {
+                    return "<strong>{$resultado['nome_completo']}</strong> <small style='color: #666;'>(RA: {$resultado['ra']})</small>";
+                }
+                break;
+                
+            case 'id_admin':
+            case 'aprovado_por':
+            case 'validado_por':
+            case 'rejeitado_por':
+                $stmt = $conn->prepare("SELECT nome_completo FROM ADMINISTRADOR WHERE id_admin = ?");
+                $stmt->execute([$valor]);
+                $resultado = $stmt->fetch();
+                if ($resultado) {
+                    return "<strong>{$resultado['nome_completo']}</strong>";
+                }
+                break;
+                
+            case 'id_eleicao':
+                $stmt = $conn->prepare("SELECT curso, semestre, status FROM ELEICAO WHERE id_eleicao = ?");
+                $stmt->execute([$valor]);
+                $resultado = $stmt->fetch();
+                if ($resultado) {
+                    $curso_nome = obterNomeCursoCompleto($resultado['curso']);
+                    return "<strong>{$curso_nome}</strong> - {$resultado['semestre']}º Sem <small style='color: #666;'>({$resultado['status']})</small>";
+                }
+                break;
+                
+            case 'id_candidatura':
+                $stmt = $conn->prepare("
+                    SELECT a.nome_completo, a.ra, e.curso, e.semestre
+                    FROM CANDIDATURA c
+                    JOIN ALUNO a ON c.id_aluno = a.id_aluno
+                    JOIN ELEICAO e ON c.id_eleicao = e.id_eleicao
+                    WHERE c.id_candidatura = ?
+                ");
+                $stmt->execute([$valor]);
+                $resultado = $stmt->fetch();
+                if ($resultado) {
+                    return "<strong>{$resultado['nome_completo']}</strong> ({$resultado['curso']}-{$resultado['semestre']}º)";
+                }
+                break;
+        }
+        
+        // Se não encontrou ou campo não reconhecido, retornar ID formatado
+        return "<code style='background: #f0f0f0; padding: 2px 6px; border-radius: 3px;'>ID: {$valor}</code>";
+        
+    } catch (PDOException $e) {
+        error_log("Erro ao resolver ID {$campo}={$valor}: " . $e->getMessage());
+        return "<code>ID: {$valor}</code>";
+    }
+}
+
+/**
+ * Formata status com badge colorido
+ * 
+ * @param string $status Status a formatar
+ * @return string HTML com badge
+ */
+function formatarStatusComBadge($status) {
+    $badges = [
+        'pendente' => ['cor' => '#ffc107', 'icone' => 'clock', 'texto' => 'Pendente'],
+        'deferido' => ['cor' => '#28a745', 'icone' => 'check', 'texto' => 'Deferido'],
+        'indeferido' => ['cor' => '#dc3545', 'icone' => 'times', 'texto' => 'Indeferido'],
+        'aprovado' => ['cor' => '#28a745', 'icone' => 'check', 'texto' => 'Aprovado'],
+        'rejeitado' => ['cor' => '#dc3545', 'icone' => 'times', 'texto' => 'Rejeitado'],
+        'recusado' => ['cor' => '#dc3545', 'icone' => 'times', 'texto' => 'Recusado'],
+        'candidatura_aberta' => ['cor' => '#007bff', 'icone' => 'user-plus', 'texto' => 'Candidatura Aberta'],
+        'votacao_aberta' => ['cor' => '#28a745', 'icone' => 'vote-yea', 'texto' => 'Votação Aberta'],
+        'aguardando_finalizacao' => ['cor' => '#ffc107', 'icone' => 'hourglass-half', 'texto' => 'Aguardando Finalização'],
+        'encerrada' => ['cor' => '#6c757d', 'icone' => 'flag-checkered', 'texto' => 'Encerrada']
+    ];
+    
+    $badge = $badges[$status] ?? ['cor' => '#6c757d', 'icone' => 'info', 'texto' => ucfirst($status)];
+    
+    return "<span style='background: {$badge['cor']}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block;'>
+                <i class='fas fa-{$badge['icone']}'></i> {$badge['texto']}
+            </span>";
+}
+
+/**
+ * Formata data para legibilidade
+ * 
+ * @param string $data Data em formato SQL
+ * @return string Data formatada
+ */
+function formatarDataLegivel($data) {
+    if (empty($data)) {
+        return '<em style="color: #999;">-</em>';
+    }
+    
+    try {
+        $timestamp = strtotime($data);
+        
+        // Formato: 15/01/2025 14:30
+        $formatado = date('d/m/Y H:i', $timestamp);
+        
+        // Adicionar "hoje", "ontem" se relevante
+        $hoje = date('Y-m-d');
+        $data_apenas = date('Y-m-d', $timestamp);
+        
+        if ($data_apenas === $hoje) {
+            $formatado = "<strong style='color: #007bff;'>Hoje</strong> às " . date('H:i', $timestamp);
+        } elseif ($data_apenas === date('Y-m-d', strtotime('-1 day'))) {
+            $formatado = "<strong style='color: #6c757d;'>Ontem</strong> às " . date('H:i', $timestamp);
+        }
+        
+        return $formatado;
+        
+    } catch (Exception $e) {
+        return htmlspecialchars($data);
+    }
+}
+
+/**
+ * Obtém nome completo do curso a partir da sigla
+ * 
+ * @param string $sigla Sigla do curso (DSM, GE, GPI)
+ * @return string Nome completo
+ */
+function obterNomeCursoCompleto($sigla) {
+    $cursos = [
+        'DSM' => 'Desenvolvimento de Software Multiplataforma',
+        'GE' => 'Gestão Empresarial',
+        'GPI' => 'Gestão da Produção Industrial'
+    ];
+    
+    return $cursos[$sigla] ?? $sigla;
+}
+
+/**
+ * Gera HTML formatado para dados de auditoria
+ * 
+ * @param array $dados_enriquecidos Array com dados enriquecidos
+ * @return string HTML formatado
+ */
+function gerarHTMLDadosAuditoria($dados_enriquecidos) {
+    if (empty($dados_enriquecidos)) {
+        return '<em style="color: #999;">Sem dados</em>';
+    }
+    
+    $html = "<div style='background: #f8f9fa; padding: 10px; border-radius: 6px; font-size: 13px;'>";
+    
+    foreach ($dados_enriquecidos as $item) {
+        $html .= "<div style='margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e9ecef;'>";
+        $html .= "<strong style='color: #495057; display: block; margin-bottom: 3px;'>{$item['rotulo']}:</strong>";
+        $html .= "<div style='color: #212529; padding-left: 10px;'>{$item['valor']}</div>";
+        $html .= "</div>";
+    }
+    
+    // Remover última borda
+    $html = preg_replace('/; border-bottom: 1px solid #e9ecef;\'>[^<]*<\/div>$/', '\'>', $html);
+    
+    $html .= "</div>";
+    
+    return $html;
+}
+
+/**
+ * Gera comparação visual entre dados anteriores e novos
+ * Mostra diff lado a lado com destaque de mudanças
+ * 
+ * @param PDO $conn Conexão PDO
+ * @param string|null $json_anterior JSON com dados anteriores
+ * @param string|null $json_novo JSON com dados novos
+ * @param string $tabela Nome da tabela para contexto
+ * @return string HTML com comparação visual
+ */
+function gerarComparacaoAuditoria($conn, $json_anterior, $json_novo, $tabela) {
+    if (empty($json_anterior) && empty($json_novo)) {
+        return '<em style="color: #999;">Sem dados para comparar</em>';
+    }
+    
+    try {
+        $dados_anteriores = $json_anterior ? json_decode($json_anterior, true) : [];
+        $dados_novos = $json_novo ? json_decode($json_novo, true) : [];
+        
+        if (!is_array($dados_anteriores)) $dados_anteriores = [];
+        if (!is_array($dados_novos)) $dados_novos = [];
+        
+        // Unir todas as chaves
+        $todas_chaves = array_unique(array_merge(array_keys($dados_anteriores), array_keys($dados_novos)));
+        
+        $html = "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 13px;'>";
+        
+        // Coluna ANTES
+        $html .= "<div style='background: #fff3cd; padding: 12px; border-radius: 6px; border: 2px solid #ffc107;'>";
+        $html .= "<h4 style='margin: 0 0 10px 0; color: #856404; font-size: 14px;'><i class='fas fa-history'></i> ANTES</h4>";
+        
+        foreach ($todas_chaves as $chave) {
+            $valor_anterior = $dados_anteriores[$chave] ?? null;
+            $rotulo = traduzirCampoAuditoria($chave);
+            $valor_formatado = formatarValorAuditoria($conn, $chave, $valor_anterior, $tabela);
+            
+            $html .= "<div style='margin-bottom: 8px;'>";
+            $html .= "<strong style='color: #856404;'>{$rotulo}:</strong><br>";
+            $html .= "<span style='color: #212529;'>{$valor_formatado}</span>";
+            $html .= "</div>";
+        }
+        
+        $html .= "</div>";
+        
+        // Coluna DEPOIS
+        $html .= "<div style='background: #d4edda; padding: 12px; border-radius: 6px; border: 2px solid #28a745;'>";
+        $html .= "<h4 style='margin: 0 0 10px 0; color: #155724; font-size: 14px;'><i class='fas fa-check'></i> DEPOIS</h4>";
+        
+        foreach ($todas_chaves as $chave) {
+            $valor_novo = $dados_novos[$chave] ?? null;
+            $valor_anterior = $dados_anteriores[$chave] ?? null;
+            $rotulo = traduzirCampoAuditoria($chave);
+            $valor_formatado = formatarValorAuditoria($conn, $chave, $valor_novo, $tabela);
+            
+            // Destacar se mudou
+            $mudou = $valor_novo !== $valor_anterior;
+            $estilo_destaque = $mudou ? "background: #fff; padding: 5px; margin-left: -5px; padding-left: 8px;" : "";
+            
+            $html .= "<div style='margin-bottom: 8px; {$estilo_destaque}'>";
+            $html .= "<strong style='color: #155724;'>{$rotulo}:</strong>";
+            if ($mudou) {
+                $html .= " <span style='color: #28a745; font-size: 10px;'><i class='fas fa-arrow-right'></i> MUDOU</span>";
+            }
+            $html .= "<br><span style='color: #212529;'>{$valor_formatado}</span>";
+            $html .= "</div>";
+        }
+        
+        $html .= "</div>";
+        $html .= "</div>";
+        
+        return $html;
+        
+    } catch (Exception $e) {
+        error_log("Erro ao gerar comparação de auditoria: " . $e->getMessage());
+        return '<em style="color: #999;">Erro ao processar comparação</em>';
+    }
+}
