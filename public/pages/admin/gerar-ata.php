@@ -508,9 +508,11 @@ $semestre_ano = getSemestreAnoExtenso($resultado['data_apuracao']);
                     orientation: 'portrait'
                 },
                 pagebreak: {
-                    mode: ['avoid-all', 'css', 'legacy'],
-                    before: '.page-break'
-                }
+                    mode: ['css', 'legacy'],
+                    before: '.page-break',
+                    after: '.page-break'
+                },
+                enableLinks: false
             };
 
             html2pdf().set(opt).from(element).save().then(() => {

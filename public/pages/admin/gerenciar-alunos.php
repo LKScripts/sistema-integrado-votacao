@@ -90,99 +90,84 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } elseif ($acao === 'editar') {
         // Editar aluno existente
         $id_aluno = $_POST["id_aluno"] ?? 0;
-        $nome = trim($_POST["nome"] ?? "");
-        $email = trim($_POST["email"] ?? "");
-        $ra = trim($_POST["ra"] ?? "");
+        $curso = $_POST["curso"] ?? "";
+        $semestre = $_POST["semestre"] ?? "";
         $senha = $_POST["senha"] ?? "";
 
-        if (empty($nome) || empty($email) || empty($ra)) {
-            $mensagem = "Preencha todos os campos obrigatórios.";
-            $tipo_mensagem = "error";
-        } else {
-            try {
-                // Verificar duplicatas (exceto o próprio aluno)
-                $stmtCheck = $conn->prepare("
-                    SELECT id_aluno FROM ALUNO
-                    WHERE (email_institucional = ? OR ra = ?) AND id_aluno != ?
-                ");
-                $stmtCheck->execute([$email, $ra, $id_aluno]);
+        try {
+            // Buscar dados ANTES da alteração
+            $stmtAntes = $conn->prepare("
+                SELECT nome_completo, email_institucional, ra, curso, semestre
+                FROM ALUNO WHERE id_aluno = ?
+            ");
+            $stmtAntes->execute([$id_aluno]);
+            $dados_antes = $stmtAntes->fetch();
 
-                if ($stmtCheck->fetch()) {
-                    $mensagem = "Email ou RA já cadastrado para outro aluno.";
+            if (!$dados_antes) {
+                $mensagem = "Aluno não encontrado.";
+                $tipo_mensagem = "error";
+            } else {
+                // Usar valores atuais se não fornecidos
+                $curso_final = !empty($curso) ? $curso : $dados_antes['curso'];
+                $semestre_final = !empty($semestre) ? $semestre : $dados_antes['semestre'];
+
+                // Validar senha se fornecida
+                if (!empty($senha) && strlen($senha) < 6) {
+                    $mensagem = "A senha deve ter pelo menos 6 caracteres.";
                     $tipo_mensagem = "error";
                 } else {
-                    // Buscar dados ANTES da alteração para auditoria
-                    $stmtAntes = $conn->prepare("
-                        SELECT nome_completo, email_institucional, ra, curso, semestre
-                        FROM ALUNO WHERE id_aluno = ?
-                    ");
-                    $stmtAntes->execute([$id_aluno]);
-                    $dados_antes = $stmtAntes->fetch();
-
                     // Atualizar com ou sem senha
                     if (!empty($senha)) {
-                        if (strlen($senha) < 6) {
-                            $mensagem = "A senha deve ter pelo menos 6 caracteres.";
-                            $tipo_mensagem = "error";
-                        } else {
-                            $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
-                            $stmtUpdate = $conn->prepare("
-                                UPDATE ALUNO
-                                SET nome_completo = ?, senha_hash = ?,curso = ?, semestre = ?
-                                WHERE id_aluno = ?
-                            ");
-                            $stmtUpdate->execute([$nome, $email, $ra, $senha_hash, $id_aluno]);
-                        }
+                        $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
+                        $stmtUpdate = $conn->prepare("
+                            UPDATE ALUNO
+                            SET curso = ?, semestre = ?, senha_hash = ?
+                            WHERE id_aluno = ?
+                        ");
+                        $stmtUpdate->execute([$curso_final, $semestre_final, $senha_hash, $id_aluno]);
                     } else {
                         $stmtUpdate = $conn->prepare("
                             UPDATE ALUNO
-                            SET nome_completo = ?, curso = ?, semestre = ?
+                            SET curso = ?, semestre = ?
                             WHERE id_aluno = ?
                         ");
-                        $stmtUpdate->execute([$nome, $email, $ra, $id_aluno]);
+                        $stmtUpdate->execute([$curso_final, $semestre_final, $id_aluno]);
                     }
 
-                    if (isset($stmtUpdate) && $stmtUpdate->rowCount() > 0 || empty($senha)) {
-                        // Registrar auditoria com before/after
-                        registrarAuditoria(
-                            $conn,
-                            $id_admin,
-                            'ALUNO',
-                            'UPDATE',
-                            "Editou dados do aluno: $ra - $nome",
-                            null,  // IP detectado automaticamente
-                            null,  // Não relacionado a eleição específica
-                            json_encode([
-                                'id_aluno' => $id_aluno,
-                                'nome' => $dados_antes['nome_completo'],
-                                'email' => $dados_antes['email_institucional'],
-                                'ra' => $dados_antes['ra'],
-                                'curso' => $dados_antes['curso'],
-                                'semestre' => $dados_antes['semestre']
-                            ]),
-                            json_encode([
-                                'id_aluno' => $id_aluno,
-                                'nome' => $nome,
-                                'email' => $email,
-                                'ra' => $ra,
-                                'curso' => $dados_antes['curso'],  // Curso não pode ser alterado
-                                'semestre' => $dados_antes['semestre'],  // Semestre não pode ser alterado
-                                'senha_alterada' => !empty($senha)
-                            ])
-                        );
+                    // Registrar auditoria
+                    registrarAuditoria(
+                        $conn,
+                        $id_admin,
+                        'ALUNO',
+                        'UPDATE',
+                        "Editou dados do aluno: {$dados_antes['ra']} - {$dados_antes['nome_completo']}",
+                        null,
+                        null,
+                        json_encode([
+                            'id_aluno' => $id_aluno,
+                            'nome' => $dados_antes['nome_completo'],
+                            'ra' => $dados_antes['ra'],
+                            'curso' => $dados_antes['curso'],
+                            'semestre' => $dados_antes['semestre']
+                        ]),
+                        json_encode([
+                            'id_aluno' => $id_aluno,
+                            'nome' => $dados_antes['nome_completo'],
+                            'ra' => $dados_antes['ra'],
+                            'curso' => $curso_final,
+                            'semestre' => $semestre_final,
+                            'senha_alterada' => !empty($senha)
+                        ])
+                    );
 
-                        $mensagem = "Dados do aluno atualizados com sucesso!";
-                        $tipo_mensagem = "success";
-                    } else {
-                        $mensagem = "Nenhuma alteração foi feita.";
-                        $tipo_mensagem = "info";
-                    }
+                    $mensagem = "Dados do aluno atualizados com sucesso!";
+                    $tipo_mensagem = "success";
                 }
-            } catch (PDOException $e) {
-                error_log("Erro ao editar aluno: " . $e->getMessage());
-                $mensagem = "Erro ao processar edição. Tente novamente.";
-                $tipo_mensagem = "error";
             }
+        } catch (PDOException $e) {
+            error_log("Erro ao editar aluno: " . $e->getMessage());
+            $mensagem = "Erro ao processar edição. Tente novamente.";
+            $tipo_mensagem = "error";
         }
     }
 }
@@ -547,8 +532,8 @@ $alunos = $stmt->fetchAll();
                     </div>
 
                     <div class="input-group">
-                        <label for="editar_curso">Curso *</label>
-                        <select id="editar_curso" name="curso" required>
+                        <label for="editar_curso">Curso</label>
+                        <select id="editar_curso" name="curso">
                             <option value="DSM">DSM - Desenvolvimento de Software Multiplataforma</option>
                             <option value="GE">GE - Gestão Empresarial</option>
                             <option value="GPI">GPI - Gestão da Produção Industrial</option>
@@ -556,8 +541,8 @@ $alunos = $stmt->fetchAll();
                     </div>
 
                     <div class="input-group">
-                        <label for="editar_semestre">Semestre *</label>
-                        <select id="editar_semestre" name="semestre" required>
+                        <label for="editar_semestre">Semestre</label>
+                        <select id="editar_semestre" name="semestre">
                             <?php for ($i = 1; $i <= 6; $i++): ?>
                                 <option value="<?= $i ?>"><?= $i ?>º Semestre</option>
                             <?php endfor; ?>
