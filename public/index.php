@@ -75,19 +75,7 @@
                 <div class="guest-image-container"><img src="./assets/images/political-candidate-bro.svg" alt=""></div>
             </div>
 
-            <div class="guest-container">
-                <div class="guest-image-container"><img src="./assets/images/active-support-amico.svg" alt=""></div>
-                <div class="guest-text-container">
-                    <h2>Precisa de Ajuda?</h2>
-                    <p>Encontrou dificuldades no acesso, esqueceu suas credenciais ou não recebeu o email de confirmação?
-
-                        Clique <a href="./pages/guest/suporte.php">aqui</a> ou no botão abaixo para acessar informações de suporte e contato.</p>
-                    <a href="./pages/guest/suporte.php" class="button primary">Acessar Suporte</a>
-                </div>
-            </div>
-
-        </div>
-    </main>
+        </main>
 
     <footer class="site">
         <div class="content">
@@ -96,7 +84,7 @@
             <a href="./pages/guest/sobre.php" class="btn-about">SOBRE O SISTEMA</a>
 
             <p>Sistema Integrado de Votação - FATEC/CPS</p>
-            <p>Versão 0.1 (11/06/2025)</p>
+            <p>Versão 12/07/2025</p>
         </div>
     </footer>
 </body>

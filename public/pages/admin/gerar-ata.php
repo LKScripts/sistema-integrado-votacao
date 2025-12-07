@@ -154,21 +154,31 @@ $semestre_ano = getSemestreAnoExtenso($resultado['data_apuracao']);
 
         @page {
             size: A4;
-            margin: 2cm 2cm 3cm 2cm;
+            margin: 1.5cm 2cm 2cm 2cm;
         }
 
         @media print {
             .footer {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
+                margin-top: 30px;
+                page-break-inside: avoid;
                 text-align: center;
                 font-size: 9pt;
                 color: #666;
                 border-top: 1px solid #8b0000;
                 padding-top: 5px;
-                background: white;
+            }
+
+            .assinaturas-section {
+                page-break-inside: auto;
+            }
+
+            table {
+                page-break-inside: auto;
+            }
+
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
             }
         }
 
@@ -414,6 +424,7 @@ $semestre_ano = getSemestreAnoExtenso($resultado['data_apuracao']);
                 Itapira, <?= $data_apuracao['completa'] ?>.
             </div>
 
+            <div class="assinaturas-section">
             <table class="signature-table">
                 <thead>
                     <tr>
@@ -478,7 +489,7 @@ $semestre_ano = getSemestreAnoExtenso($resultado['data_apuracao']);
                     ?>
                 </tbody>
             </table>
-        </div>
+            </div>
 
         <div class="footer">
             www.fatecitapira.edu.br<br>
@@ -496,23 +507,22 @@ $semestre_ano = getSemestreAnoExtenso($resultado['data_apuracao']);
             const opt = {
                 margin: [10, 10, 15, 10],
                 filename: 'ata-eleicao-<?= $resultado['curso'] ?>-<?= $resultado['semestre'] ?>sem-<?= date('Y', strtotime($resultado['data_apuracao'])) ?>.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
+                image: { type: 'jpeg', quality: 0.95 },
                 html2canvas: {
                     scale: 2,
                     useCORS: true,
-                    letterRendering: true
+                    letterRendering: true,
+                    windowHeight: element.scrollHeight
                 },
                 jsPDF: {
                     unit: 'mm',
                     format: 'a4',
-                    orientation: 'portrait'
+                    orientation: 'portrait',
+                    compress: true
                 },
                 pagebreak: {
-                    mode: ['css', 'legacy'],
-                    before: '.page-break',
-                    after: '.page-break'
-                },
-                enableLinks: false
+                    mode: ['css', 'legacy']
+                }
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
