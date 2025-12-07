@@ -60,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $stmtAuditoria->execute([
                         $id_admin_criador,
                         "Cadastrou novo administrador: $email",
-                        $_SERVER['REMOTE_ADDR']
+                        $_SERVER['REMOTE_ADDR'] ?? 'unknown'
                     ]);
 
                     $mensagem = "Administrador cadastrado com sucesso!";

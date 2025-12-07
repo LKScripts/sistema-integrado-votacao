@@ -15,7 +15,12 @@ $tipo_mensagem = ""; // success | error
 
 // Verificar se houve sucesso via GET (após redirect)
 if (isset($_GET['success']) && $_GET['success'] == '1') {
-    $mensagem = "Eleição cadastrada com sucesso!";
+    $count = intval($_GET['count'] ?? 1);
+    if ($count > 1) {
+        $mensagem = "$count eleições cadastradas com sucesso!";
+    } else {
+        $mensagem = "Eleição cadastrada com sucesso!";
+    }
     $tipo_mensagem = "success";
 }
 
@@ -44,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     validarCSRFOuMorrer("Token de segurança inválido. Recarregue a página e tente criar a eleição novamente.");
 
     $curso            = $_POST['curso'] ?? '';
-    $semestre         = intval($_POST['semestre'] ?? 0);
+    $semestre         = $_POST['semestre'] ?? '';
     $inscricao_inicio = $_POST['inscricao_inicio'] ?? '';
     $inscricao_fim    = $_POST['inscricao_fim'] ?? '';
     $votacao_inicio   = $_POST['votacao_inicio'] ?? '';
@@ -77,17 +82,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // ✔ SALVAR NO BANCO
         // ============================
 
+        // Determinar lista de cursos
         if ($curso === "Todos os Cursos") {
             $lista_cursos = ["DSM", "GE", "GPI"];
         } else {
             $lista_cursos = [$curso];
         }
 
+        // Determinar lista de semestres
+        if ($semestre === "todos") {
+            $lista_semestres = [1, 2, 3, 4, 5, 6];
+        } else {
+            $lista_semestres = [intval($semestre)];
+        }
+
         $status = "candidatura_aberta";
 
         // Gerar identificador único de lote se for criação múltipla
         $lote_criacao = null;
-        if (count($lista_cursos) > 1) {
+        if (count($lista_cursos) > 1 || count($lista_semestres) > 1) {
             $lote_criacao = md5(uniqid($id_admin . time(), true));
         }
 
@@ -101,24 +114,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         try {
             $eleicoes_criadas = [];
 
+            // Loop duplo: cursos x semestres
             foreach ($lista_cursos as $c) {
-                $stmt->execute([
-                    $c,
-                    $semestre,
-                    $inscricao_inicio,
-                    $inscricao_fim,
-                    $votacao_inicio,
-                    $votacao_fim,
-                    $status,
-                    $id_admin,
-                    $lote_criacao
-                ]);
+                foreach ($lista_semestres as $s) {
+                    $stmt->execute([
+                        $c,
+                        $s,
+                        $inscricao_inicio,
+                        $inscricao_fim,
+                        $votacao_inicio,
+                        $votacao_fim,
+                        $status,
+                        $id_admin,
+                        $lote_criacao
+                    ]);
 
-                $id_eleicao_criada = $conn->lastInsertId();
-                $eleicoes_criadas[] = [
-                    'id_eleicao' => $id_eleicao_criada,
-                    'curso' => $c
-                ];
+                    $id_eleicao_criada = $conn->lastInsertId();
+                    $eleicoes_criadas[] = [
+                        'id_eleicao' => $id_eleicao_criada,
+                        'curso' => $c,
+                        'semestre' => $s
+                    ];
+                }
             }
 
             // Registrar auditoria com dados completos
@@ -128,26 +145,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $id_admin,
                     'ELEICAO',
                     'INSERT',
-                    "Criou eleição #{$eleicao['id_eleicao']} para {$eleicao['curso']} {$semestre}º semestre",
+                    "Criou eleição #{$eleicao['id_eleicao']} para {$eleicao['curso']} {$eleicao['semestre']}º semestre",
                     null,  // IP detectado automaticamente
                     $eleicao['id_eleicao'],  // ID da eleição criada
                     null,  // Sem dados anteriores (é INSERT)
                     json_encode([
                         'id_eleicao' => $eleicao['id_eleicao'],
                         'curso' => $eleicao['curso'],
-                        'semestre' => $semestre,
+                        'semestre' => $eleicao['semestre'],
                         'data_inicio_candidatura' => $inscricao_inicio,
                         'data_fim_candidatura' => $inscricao_fim,
                         'data_inicio_votacao' => $votacao_inicio,
                         'data_fim_votacao' => $votacao_fim,
                         'status' => $status,
-                        'criado_por' => $id_admin
+                        'criado_por' => $id_admin,
+                        'lote_criacao' => $lote_criacao
                     ])
                 );
             }
 
             // Redirecionar para evitar resubmissão do formulário (padrão PRG: Post-Redirect-Get)
-            header("Location: prazos.php?success=1");
+            $total_criadas = count($eleicoes_criadas);
+            header("Location: prazos.php?success=1&count=$total_criadas");
             exit();
         } catch (PDOException $e) {
             // Logar erro completo para debug
@@ -805,7 +824,15 @@ function obterStatusLegivel($status) {
                         <option value="4">4º Semestre</option>
                         <option value="5">5º Semestre</option>
                         <option value="6">6º Semestre</option>
+                        <option value="todos">Todos os Semestres</option>
                     </select>
+                </div>
+
+                <div class="warning-box" id="warningAllSemesters">
+                    <div class="warning-box-title">Atenção!</div>
+                    <div class="warning-box-text">
+                        Ao selecionar "Todos os Semestres", serão criadas <strong>6 eleições simultâneas</strong> (1º ao 6º semestre) com os mesmos prazos.
+                    </div>
                 </div>
 
                 <div class="input-group">
@@ -842,6 +869,12 @@ function obterStatusLegivel($status) {
                     <div class="timeline-info">
                         <span id="duracao-inscricao"></span>
                         <span id="duracao-votacao"></span>
+                    </div>
+                    <div class="warning-box" id="warningDuracaoMinima" style="display: none; margin-top: 15px; background: #f8d7da; border-color: #dc3545;">
+                        <div class="warning-box-title" style="color: #721c24;">⚠️ Duração Insuficiente!</div>
+                        <div class="warning-box-text" style="color: #721c24;">
+                            A duração total da eleição deve ser de <strong>no mínimo 7 dias</strong> (do início das inscrições ao fim da votação). Duração atual: <strong id="duracaoAtual">0 dias</strong>.
+                        </div>
                     </div>
                 </div>
 
@@ -1068,7 +1101,19 @@ function validarTudo() {
     const curso = document.getElementById('curso').value;
     const semestre = document.getElementById('semestre').value;
 
-    if (v1 && v2 && v3 && v4 && curso && semestre) {
+    // VALIDAÇÃO ADICIONAL: Duração mínima total de 7 dias
+    let duracaoValida = true;
+    const inscricaoInicio = document.getElementById('inscricao_inicio').value;
+    const votacaoFim = document.getElementById('votacao_fim').value;
+
+    if (inscricaoInicio && votacaoFim) {
+        const totalDias = calcularDias(inscricaoInicio, votacaoFim);
+        if (totalDias < 7) {
+            duracaoValida = false;
+        }
+    }
+
+    if (v1 && v2 && v3 && v4 && curso && semestre && duracaoValida) {
         btnSubmit.disabled = false;
     } else {
         btnSubmit.disabled = true;
@@ -1109,17 +1154,41 @@ function atualizarTimeline() {
     timelineVotacao.style.left = percentInscricao + '%';
     timelineVotacao.textContent = `Votação (${diasVotacao}d)`;
 
+    // Mostrar aviso se duração total for menor que 7 dias
+    const warningDuracao = document.getElementById('warningDuracaoMinima');
+    if (totalDias < 7) {
+        document.getElementById('duracao-inscricao').style.color = '#dc3545';
+        document.getElementById('duracao-votacao').style.color = '#dc3545';
+        warningDuracao.style.display = 'block';
+        document.getElementById('duracaoAtual').textContent = `${totalDias} dias`;
+    } else {
+        document.getElementById('duracao-inscricao').style.color = '';
+        document.getElementById('duracao-votacao').style.color = '';
+        warningDuracao.style.display = 'none';
+    }
+
     document.getElementById('duracao-inscricao').textContent = `${diasInscricao} dias de inscrição`;
-    document.getElementById('duracao-votacao').textContent = `${diasVotacao} dias de votação`;
+    document.getElementById('duracao-votacao').textContent = `${diasVotacao} dias de votação (Total: ${totalDias} dias)`;
 }
 
 // ====================================
-// AVISO "TODOS OS CURSOS"
+// AVISO "TODOS OS CURSOS" E "TODOS OS SEMESTRES"
 // ====================================
 
 document.getElementById('curso').addEventListener('change', function() {
     const warning = document.getElementById('warningAllCourses');
     if (this.value === 'Todos os Cursos') {
+        warning.classList.add('show');
+    } else {
+        warning.classList.remove('show');
+    }
+    salvarRascunho();
+    validarTudo();
+});
+
+document.getElementById('semestre').addEventListener('change', function() {
+    const warning = document.getElementById('warningAllSemesters');
+    if (this.value === 'todos') {
         warning.classList.add('show');
     } else {
         warning.classList.remove('show');
@@ -1150,11 +1219,6 @@ document.getElementById('votacao_inicio').addEventListener('change', function() 
 document.getElementById('votacao_fim').addEventListener('change', function() {
     validarTudo();
     salvarRascunho();
-});
-
-document.getElementById('semestre').addEventListener('change', function() {
-    salvarRascunho();
-    validarTudo();
 });
 
 // Validar também quando outros campos forem alterados
@@ -1199,11 +1263,30 @@ function mostrarPreview() {
     const cursoTexto = curso.options[curso.selectedIndex].text;
     const semestreTexto = semestre.options[semestre.selectedIndex].text;
 
-    let html = '<div class="preview-item">';
+    // Calcular total de eleições que serão criadas
+    const numCursos = (curso.value === 'Todos os Cursos') ? 3 : 1;
+    const numSemestres = (semestre.value === 'todos') ? 6 : 1;
+    const totalEleicoes = numCursos * numSemestres;
+
+    let html = '';
+
+    // Mostrar aviso se criar múltiplas eleições
+    if (totalEleicoes > 1) {
+        html += '<div class="preview-item" style="background-color: #fff3cd; padding: 15px; margin-bottom: 15px;">';
+        html += '<div class="preview-label" style="color: #856404; font-weight: bold;">⚠️ Atenção: Criação em Lote</div>';
+        html += '<div class="preview-value" style="color: #856404;">';
+        html += 'Serão criadas <strong>' + totalEleicoes + ' eleições simultâneas</strong> ';
+        html += '(' + numCursos + ' curso' + (numCursos > 1 ? 's' : '') + ' × ';
+        html += numSemestres + ' semestre' + (numSemestres > 1 ? 's' : '') + ')';
+        html += '</div>';
+        html += '</div>';
+    }
+
+    html += '<div class="preview-item">';
     html += '<div class="preview-label">Curso(s)</div>';
 
     if (curso.value === 'Todos os Cursos') {
-        html += '<div class="preview-value">Serão criadas 3 eleições:</div>';
+        html += '<div class="preview-value">Todos os cursos:</div>';
         html += '<ul class="preview-list">';
         html += '<li>DSM - Desenvolvimento de Software Multiplataforma</li>';
         html += '<li>GE - Gestão Empresarial</li>';
@@ -1215,8 +1298,21 @@ function mostrarPreview() {
     html += '</div>';
 
     html += '<div class="preview-item">';
-    html += '<div class="preview-label">Semestre</div>';
-    html += '<div class="preview-value">' + semestreTexto + '</div>';
+    html += '<div class="preview-label">Semestre(s)</div>';
+
+    if (semestre.value === 'todos') {
+        html += '<div class="preview-value">Todos os semestres:</div>';
+        html += '<ul class="preview-list">';
+        html += '<li>1º Semestre</li>';
+        html += '<li>2º Semestre</li>';
+        html += '<li>3º Semestre</li>';
+        html += '<li>4º Semestre</li>';
+        html += '<li>5º Semestre</li>';
+        html += '<li>6º Semestre</li>';
+        html += '</ul>';
+    } else {
+        html += '<div class="preview-value">' + semestreTexto + '</div>';
+    }
     html += '</div>';
 
     html += '<div class="preview-item">';
@@ -1231,15 +1327,68 @@ function mostrarPreview() {
     html += ' (' + calcularDias(votacaoInicio, votacaoFim) + ' dias)</div>';
     html += '</div>';
 
+    // Aviso sobre permanência das eleições
+    html += '<div class="preview-item" style="background-color: #e7f3ff; padding: 15px; margin-top: 15px;">';
+    html += '<div class="preview-label" style="color: #004085; font-weight: bold;">📌 Informação Importante</div>';
+    html += '<div class="preview-value" style="color: #004085; font-size: 0.9em;">';
+    html += 'As eleições criadas são <strong>permanentes</strong> e não podem ser facilmente removidas. ';
+    html += 'Certifique-se de que todos os prazos estão corretos antes de confirmar.';
+    html += '</div>';
+    html += '</div>';
+
+    // Checkbox de confirmação obrigatório para criação em lote
+    if (totalEleicoes > 1) {
+        html += '<div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px;">';
+        html += '<label style="display: flex; align-items: start; gap: 10px; cursor: pointer;">';
+        html += '<input type="checkbox" id="confirmCheckbox" style="margin-top: 3px; width: 18px; height: 18px; cursor: pointer;" onchange="toggleConfirmButton()">';
+        html += '<span style="color: #856404; font-size: 0.95em;">';
+        html += 'Confirmo que revisei os prazos e estou ciente que <strong>' + totalEleicoes + ' eleições permanentes</strong> serão criadas ';
+        html += '(não poderão ser excluídas facilmente do sistema).';
+        html += '</span>';
+        html += '</label>';
+        html += '</div>';
+    }
+
     document.getElementById('modalPreviewContent').innerHTML = html;
     document.getElementById('confirmModal').classList.add('show');
+
+    // Desabilitar botão de confirmação se for criação em lote
+    const btnConfirm = document.querySelector('#confirmModal .btn-primary');
+    if (totalEleicoes > 1) {
+        btnConfirm.disabled = true;
+        btnConfirm.style.opacity = '0.5';
+        btnConfirm.style.cursor = 'not-allowed';
+    } else {
+        btnConfirm.disabled = false;
+        btnConfirm.style.opacity = '1';
+        btnConfirm.style.cursor = 'pointer';
+    }
 }
 
 function fecharModal() {
     document.getElementById('confirmModal').classList.remove('show');
 }
 
+function toggleConfirmButton() {
+    const checkbox = document.getElementById('confirmCheckbox');
+    const btnConfirm = document.querySelector('#confirmModal .btn-primary');
+
+    if (checkbox && checkbox.checked) {
+        btnConfirm.disabled = false;
+        btnConfirm.style.opacity = '1';
+        btnConfirm.style.cursor = 'pointer';
+    } else if (checkbox) {
+        btnConfirm.disabled = true;
+        btnConfirm.style.opacity = '0.5';
+        btnConfirm.style.cursor = 'not-allowed';
+    }
+}
+
 function confirmarCriacao() {
+    const btnConfirm = document.querySelector('#confirmModal .btn-primary');
+    if (btnConfirm.disabled) {
+        return; // Não submeter se botão estiver desabilitado
+    }
     document.getElementById('formPrazos').submit();
 }
 
@@ -1259,6 +1408,7 @@ function limparFormulario() {
         document.querySelectorAll('input[type="date"]').forEach(el => el.className = '');
         document.getElementById('timelinePreview').style.display = 'none';
         document.getElementById('warningAllCourses').classList.remove('show');
+        document.getElementById('warningAllSemesters').classList.remove('show');
         document.getElementById('btnSubmit').disabled = true;
         localStorage.removeItem('prazos_rascunho');
     }

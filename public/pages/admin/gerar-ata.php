@@ -31,7 +31,7 @@ $sql = "SELECT
             v.id_voto
         FROM ALUNO a
         LEFT JOIN VOTO v ON a.id_aluno = v.id_aluno AND v.id_eleicao = ?
-        WHERE a.curso = ? AND a.semestre = ?
+        WHERE a.curso = ? AND a.semestre = ? AND a.ativo = 1
         ORDER BY a.nome_completo";
 $stmt = $conn->prepare($sql);
 $stmt->execute([$id_eleicao, $resultado['curso'], $resultado['semestre']]);
@@ -125,21 +125,18 @@ function getPeriodoExtenso($semestre) {
     return $periodos[$semestre] ?? "{$semestre}º período";
 }
 
-// Função para obter semestre por extenso baseado na data da votação
-function getSemestreExtenso($data_votacao) {
-    $mes_votacao = (int)date('n', strtotime($data_votacao));
-
+// Função para obter ano letivo por extenso (primeiro ou segundo semestre)
+// Baseado na data de apuração, determina se é 1º ou 2º semestre do ano
+function getSemestreAnoExtenso($data_apuracao) {
+    $mes = (int)date('n', strtotime($data_apuracao));
     // Janeiro a Junho = Primeiro Semestre, Julho a Dezembro = Segundo Semestre
-    $semestre_num = ($mes_votacao <= 6) ? 1 : 2;
-    $semestre_texto = $semestre_num == 1 ? 'primeiro' : 'segundo';
-
-    return $semestre_texto;
+    return ($mes <= 6) ? 'primeiro' : 'segundo';
 }
 
 $data_apuracao = dataExtenso($resultado['data_apuracao']);
 $nome_curso = obterNomeCurso($resultado['curso']);
 $periodo = getPeriodoExtenso($resultado['semestre']);
-$semestre_ano = getSemestreExtenso($resultado['data_apuracao']);
+$semestre_ano = getSemestreAnoExtenso($resultado['data_apuracao']);
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -147,6 +144,7 @@ $semestre_ano = getSemestreExtenso($resultado['data_apuracao']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ata de Eleição - <?= $nome_curso ?> - <?= $resultado['semestre'] ?>º Semestre</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -320,30 +318,60 @@ $semestre_ano = getSemestreExtenso($resultado['data_apuracao']);
             }
         }
 
-        .print-button {
+        .action-buttons {
             position: fixed;
             top: 20px;
             right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .btn-action {
             padding: 15px 30px;
-            background: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-size: 14pt;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 1000;
+            transition: all 0.3s ease;
         }
 
-        .print-button:hover {
+        .btn-download {
+            background: #28a745;
+        }
+
+        .btn-download:hover {
+            background: #218838;
+        }
+
+        .btn-print {
+            background: #007bff;
+        }
+
+        .btn-print:hover {
             background: #0056b3;
+        }
+
+        .btn-action:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.6;
         }
     </style>
 </head>
 <body>
-    <button onclick="window.print()" class="print-button no-print">Imprimir / Salvar PDF</button>
+    <div class="action-buttons no-print">
+        <button onclick="downloadPDF()" class="btn-action btn-download" id="btnDownload">
+            Baixar PDF
+        </button>
+        <button onclick="window.print()" class="btn-action btn-print">
+            Imprimir
+        </button>
+    </div>
 
-    <div class="container">
+    <div class="container" id="ata-content">
         <div class="header">
             <div class="header-logos">
                 <img src="../../assets/images/Logo.png" alt="Logo CPS">
@@ -360,6 +388,77 @@ $semestre_ano = getSemestreExtenso($resultado['data_apuracao']);
                 ATA DE ELEIÇÃO DE REPRESENTANTES DE TURMA DO <?= strtoupper($periodo) ?> DO <?= strtoupper($semestre_ano) ?>
                 SEMESTRE DE <?= strtoupper($data_apuracao['ano']) ?>, DO CURSO DE TECNOLOGIA EM
                 <?= $nome_curso ?> DA FACULDADE DE TECNOLOGIA DE ITAPIRA "OGARI DE CASTRO PACHECO".
+            </div>
+
+            <!-- Fotos dos Eleitos -->
+            <div style="display: flex; justify-content: center; gap: 40px; margin: 25px 0; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+                <!-- Representante -->
+                <div style="text-align: center;">
+                    <div style="font-weight: bold; color: #8b0000; margin-bottom: 10px; font-size: 10pt;">
+                        REPRESENTANTE ELEITO
+                    </div>
+                    <?php
+                    $foto_rep_src = null;
+                    if (!empty($resultado['foto_representante'])) {
+                        $foto_rep_src = (filter_var($resultado['foto_representante'], FILTER_VALIDATE_URL))
+                            ? htmlspecialchars($resultado['foto_representante'])
+                            : '../../storage/uploads/candidatos/' . htmlspecialchars($resultado['foto_representante']);
+                    }
+                    ?>
+                    <?php if ($foto_rep_src): ?>
+                        <img src="<?= $foto_rep_src ?>"
+                             alt="Foto do representante"
+                             style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #8b0000; margin-bottom: 8px;">
+                    <?php else: ?>
+                        <div style="width: 80px; height: 80px; border-radius: 50%; background: #e0e0e0; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; border: 2px solid #8b0000;">
+                            <span style="font-size: 35px; color: #666;">👤</span>
+                        </div>
+                    <?php endif; ?>
+                    <div style="font-weight: bold; font-size: 10pt;">
+                        <?= htmlspecialchars($resultado['representante']) ?>
+                    </div>
+                    <div style="font-size: 9pt; color: #666;">
+                        RA: <?= htmlspecialchars($resultado['ra_representante']) ?>
+                    </div>
+                    <div style="font-size: 9pt; color: #8b0000; margin-top: 5px;">
+                        <?= $resultado['votos_representante'] ?> votos
+                    </div>
+                </div>
+
+                <!-- Suplente -->
+                <?php if ($resultado['suplente']): ?>
+                    <div style="text-align: center;">
+                        <div style="font-weight: bold; color: #4a5568; margin-bottom: 10px; font-size: 10pt;">
+                            VICE-REPRESENTANTE
+                        </div>
+                        <?php
+                        $foto_sup_src = null;
+                        if (!empty($resultado['foto_suplente'])) {
+                            $foto_sup_src = (filter_var($resultado['foto_suplente'], FILTER_VALIDATE_URL))
+                                ? htmlspecialchars($resultado['foto_suplente'])
+                                : '../../storage/uploads/candidatos/' . htmlspecialchars($resultado['foto_suplente']);
+                        }
+                        ?>
+                        <?php if ($foto_sup_src): ?>
+                            <img src="<?= $foto_sup_src ?>"
+                                 alt="Foto do suplente"
+                                 style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #4a5568; margin-bottom: 8px;">
+                        <?php else: ?>
+                            <div style="width: 80px; height: 80px; border-radius: 50%; background: #e0e0e0; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; border: 2px solid #4a5568;">
+                                <span style="font-size: 35px; color: #666;">👤</span>
+                            </div>
+                        <?php endif; ?>
+                        <div style="font-weight: bold; font-size: 10pt;">
+                            <?= htmlspecialchars($resultado['suplente']) ?>
+                        </div>
+                        <div style="font-size: 9pt; color: #666;">
+                            RA: <?= htmlspecialchars($resultado['ra_suplente']) ?>
+                        </div>
+                        <div style="font-size: 9pt; color: #4a5568; margin-top: 5px;">
+                            <?= $resultado['votos_suplente'] ?> votos
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="paragraph">
@@ -398,25 +497,45 @@ $semestre_ano = getSemestreExtenso($resultado['data_apuracao']);
                 <tbody>
                     <?php
                     $numero = 1;
-                    foreach ($alunos as $aluno):
+                    $total_alunos = count($alunos);
+
+                    // Separar alunos que votaram e que não votaram
+                    $alunos_votaram = array_filter($alunos, function($a) { return $a['id_voto'] !== null; });
+                    $alunos_nao_votaram = array_filter($alunos, function($a) { return $a['id_voto'] === null; });
+
+                    // Exibir primeiro os que votaram
+                    foreach ($alunos_votaram as $aluno):
                     ?>
                         <tr>
                             <td class="col-num"><?= $numero++ ?>.</td>
                             <td class="col-nome"><?= htmlspecialchars($aluno['nome_completo']) ?></td>
                             <td class="col-ra"><?= htmlspecialchars($aluno['ra']) ?></td>
                             <td class="col-assinatura">
-                                <?php if ($aluno['id_voto']): ?>
-                                    <em style="color: #006400; font-size: 9pt;">Votou</em>
-                                <?php else: ?>
-                                    <em style="color: #dc3545; font-size: 9pt;">Não votou</em>
-                                <?php endif; ?>
+                                <em style="color: #006400; font-size: 9pt;">Votou</em>
                             </td>
                         </tr>
                     <?php endforeach; ?>
 
                     <?php
-                    // Adicionar linhas vazias se houver menos de 48 alunos
-                    while ($numero <= 48):
+                    // Depois exibir os que não votaram
+                    foreach ($alunos_nao_votaram as $aluno):
+                    ?>
+                        <tr>
+                            <td class="col-num"><?= $numero++ ?>.</td>
+                            <td class="col-nome"><?= htmlspecialchars($aluno['nome_completo']) ?></td>
+                            <td class="col-ra"><?= htmlspecialchars($aluno['ra']) ?></td>
+                            <td class="col-assinatura">
+                                <em style="color: #dc3545; font-size: 9pt;">Não votou</em>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+
+                    <?php
+                    // Adicionar linhas vazias apenas se necessário para manter um mínimo visual
+                    // Mínimo de 10 linhas totais para manter layout profissional
+                    $minimo_linhas = 10;
+                    if ($total_alunos < $minimo_linhas) {
+                        while ($numero <= $minimo_linhas):
                     ?>
                         <tr>
                             <td class="col-num"><?= $numero++ ?>.</td>
@@ -424,7 +543,10 @@ $semestre_ano = getSemestreExtenso($resultado['data_apuracao']);
                             <td class="col-ra"></td>
                             <td class="col-assinatura"></td>
                         </tr>
-                    <?php endwhile; ?>
+                    <?php
+                        endwhile;
+                    }
+                    ?>
                 </tbody>
             </table>
         </div>
@@ -434,5 +556,44 @@ $semestre_ano = getSemestreExtenso($resultado['data_apuracao']);
             Rua Tereza Lera Paoletti, 590 • Jardim Bela Vista • 13974-080 • Itapira • SP • Tel.: (19) 3843-7537
         </div>
     </div>
+
+    <script>
+        function downloadPDF() {
+            const button = document.getElementById('btnDownload');
+            button.disabled = true;
+            button.textContent = 'Gerando PDF...';
+
+            const element = document.getElementById('ata-content');
+            const opt = {
+                margin: [10, 10, 15, 10],
+                filename: 'ata-eleicao-<?= $resultado['curso'] ?>-<?= $resultado['semestre'] ?>sem-<?= date('Y', strtotime($resultado['data_apuracao'])) ?>.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    letterRendering: true
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
+                },
+                pagebreak: {
+                    mode: ['avoid-all', 'css', 'legacy'],
+                    before: '.page-break'
+                }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                button.disabled = false;
+                button.textContent = 'Baixar PDF';
+            }).catch(err => {
+                console.error('Erro ao gerar PDF:', err);
+                alert('Erro ao gerar PDF. Tente usar a opção "Imprimir" e salvar como PDF.');
+                button.disabled = false;
+                button.textContent = 'Baixar PDF';
+            });
+        }
+    </script>
 </body>
 </html>

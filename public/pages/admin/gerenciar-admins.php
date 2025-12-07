@@ -64,7 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 'ADMINISTRADOR',
                                 'INSERT',
                                 "Cadastrou admin pendente: $email",
-                                $_SERVER['REMOTE_ADDR']
+                                $_SERVER['REMOTE_ADDR'] ?? 'unknown'
                             ]);
                         } catch (PDOException $e) {
                             error_log("Erro ao registrar auditoria: " . $e->getMessage());
@@ -218,7 +218,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             'ADMINISTRADOR',
                             'UPDATE',
                             "Removeu admin ID: $id_admin. Motivo: $motivo",
-                            $_SERVER['REMOTE_ADDR']
+                            $_SERVER['REMOTE_ADDR'] ?? 'unknown'
                         ]);
                     } catch (PDOException $e) {
                         error_log("Erro ao registrar auditoria: " . $e->getMessage());
@@ -255,7 +255,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         'ADMINISTRADOR',
                         'UPDATE',
                         "Reativou admin ID: $id_admin",
-                        $_SERVER['REMOTE_ADDR']
+                        $_SERVER['REMOTE_ADDR'] ?? 'unknown'
                     ]);
                 } catch (PDOException $e) {
                     error_log("Erro ao registrar auditoria: " . $e->getMessage());
@@ -326,7 +326,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                 'ADMINISTRADOR',
                                 'UPDATE',
                                 "Editou dados do admin: $email",
-                                $_SERVER['REMOTE_ADDR']
+                                $_SERVER['REMOTE_ADDR'] ?? 'unknown'
                             ]);
                         } catch (PDOException $e) {
                             error_log("Erro ao registrar auditoria: " . $e->getMessage());

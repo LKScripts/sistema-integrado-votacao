@@ -28,8 +28,21 @@ if (!$eleicao) {
     exit;
 }
 
-// Buscar contagem de votos (incluindo votos em branco)
-$sql = "SELECT * FROM v_contagem_votos_completa WHERE id_eleicao = ? ORDER BY total_votos DESC";
+// Buscar contagem de votos (incluindo votos em branco e fotos)
+$sql = "SELECT
+            v.id_voto,
+            v.id_candidatura,
+            COALESCE(c.id_candidatura, 0) as id_candidatura,
+            COALESCE(a.nome_completo, 'Voto em Branco') as nome_candidato,
+            COALESCE(a.ra, '') as ra,
+            COALESCE(c.foto_candidato, '') as foto_candidato,
+            COUNT(*) as total_votos
+        FROM VOTO v
+        LEFT JOIN CANDIDATURA c ON v.id_candidatura = c.id_candidatura
+        LEFT JOIN ALUNO a ON c.id_aluno = a.id_aluno
+        WHERE v.id_eleicao = ?
+        GROUP BY COALESCE(v.id_candidatura, 0)
+        ORDER BY total_votos DESC";
 $stmt = $conn->prepare($sql);
 $stmt->execute([$id_eleicao]);
 $contagem = $stmt->fetchAll();
@@ -71,6 +84,7 @@ function obterNomeCurso($sigla) {
     <link rel="stylesheet" href="../../assets/styles/fonts.css">
     <link rel="stylesheet" href="../../assets/styles/footer-site.css">
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .stats-grid {
             display: grid;
@@ -211,6 +225,7 @@ function obterNomeCurso($sigla) {
                         <thead>
                             <tr>
                                 <th>Posição</th>
+                                <th style="width: 80px;">Foto</th>
                                 <th>Candidato</th>
                                 <th>RA</th>
                                 <th>Votos</th>
@@ -228,6 +243,27 @@ function obterNomeCurso($sigla) {
                             ?>
                                 <tr>
                                     <td><?= $posicao++ ?>º</td>
+                                    <td style="text-align: center;">
+                                        <?php if ($is_blank): ?>
+                                            <div style="width: 50px; height: 50px; border-radius: 50%; background: #f0f0f0; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-ban" style="font-size: 24px; color: #dc3545;"></i>
+                                            </div>
+                                        <?php elseif (!empty($c['foto_candidato'])): ?>
+                                            <?php
+                                            // Detecta se é URL externa (http/https) ou caminho local
+                                            $foto_src = (filter_var($c['foto_candidato'], FILTER_VALIDATE_URL))
+                                                ? htmlspecialchars($c['foto_candidato'])
+                                                : '../../storage/uploads/candidatos/' . htmlspecialchars($c['foto_candidato']);
+                                            ?>
+                                            <img src="<?= $foto_src ?>"
+                                                 alt="Foto do candidato"
+                                                 style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                                        <?php else: ?>
+                                            <div style="width: 50px; height: 50px; border-radius: 50%; background: #f0f0f0; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-user" style="font-size: 24px; color: #999;"></i>
+                                            </div>
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="<?= $is_blank ? 'blank-vote' : 'candidate-name' ?>">
                                         <?= htmlspecialchars($c['nome_candidato']) ?>
                                     </td>
