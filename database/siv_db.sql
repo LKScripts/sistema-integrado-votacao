@@ -1,11 +1,8 @@
 -- =====================================================
--- SETUP OTIMIZADO - SISTEMA INTEGRADO DE VOTAÇÃO (SIV)
+-- SETUP - SISTEMA INTEGRADO DE VOTAÇÃO (SIV)
 -- =====================================================
--- Data: 2025-12-02
+-- Data: Última atualização 2025-12-07
 -- Compatibilidade: MariaDB 10.4.32+ / MySQL 8.0+
--- Idempotente (pode executar múltiplas vezes com segurança)
---
---
 -- =====================================================
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -432,10 +429,88 @@ BEGIN
     END IF;
 END$$
 
+-- ---------------------------------------------------------------------------
+-- TRIGGER: Validação de períodos ANTES de INSERT em ELEICAO
+-- Garante integridade temporal impedindo sobreposições e validando ordem cronológica
+-- ---------------------------------------------------------------------------
+DROP TRIGGER IF EXISTS `trg_validar_periodos_eleicao_insert`$$
+CREATE TRIGGER `trg_validar_periodos_eleicao_insert`
+BEFORE INSERT ON `eleicao`
+FOR EACH ROW
+BEGIN
+    -- Validação 1: Ordem cronológica dos prazos
+    IF NEW.data_inicio_candidatura >= NEW.data_fim_candidatura THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'ERRO: data_inicio_candidatura deve ser anterior a data_fim_candidatura';
+    END IF;
+
+    IF NEW.data_fim_candidatura >= NEW.data_fim_votacao THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'ERRO: data_fim_candidatura deve ser anterior a data_fim_votacao';
+    END IF;
+
+    -- Validação 2: Verificar sobreposição com outras eleições do mesmo curso/semestre
+    IF EXISTS (
+        SELECT 1 FROM `eleicao`
+        WHERE curso = NEW.curso
+          AND semestre = NEW.semestre
+          AND id_eleicao != IFNULL(NEW.id_eleicao, 0)
+          AND (
+              -- Período de candidatura sobrepõe
+              (NEW.data_inicio_candidatura <= data_fim_candidatura AND NEW.data_fim_candidatura >= data_inicio_candidatura)
+              OR
+              -- Período de votação sobrepõe
+              (NEW.data_fim_candidatura <= data_fim_votacao AND NEW.data_fim_votacao >= data_fim_candidatura)
+          )
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'ERRO: Já existe eleição para este curso/semestre com período sobreposto';
+    END IF;
+END$$
+
+-- ---------------------------------------------------------------------------
+-- TRIGGER: Validação de períodos ANTES de UPDATE em ELEICAO
+-- Garante integridade temporal ao alterar datas de eleições existentes
+-- ---------------------------------------------------------------------------
+DROP TRIGGER IF EXISTS `trg_validar_periodos_eleicao_update`$$
+CREATE TRIGGER `trg_validar_periodos_eleicao_update`
+BEFORE UPDATE ON `eleicao`
+FOR EACH ROW
+BEGIN
+    -- Validação 1: Ordem cronológica dos prazos
+    IF NEW.data_inicio_candidatura >= NEW.data_fim_candidatura THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'ERRO: data_inicio_candidatura deve ser anterior a data_fim_candidatura';
+    END IF;
+
+    IF NEW.data_fim_candidatura >= NEW.data_fim_votacao THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'ERRO: data_fim_candidatura deve ser anterior a data_fim_votacao';
+    END IF;
+
+    -- Validação 2: Verificar sobreposição com outras eleições do mesmo curso/semestre
+    IF EXISTS (
+        SELECT 1 FROM `eleicao`
+        WHERE curso = NEW.curso
+          AND semestre = NEW.semestre
+          AND id_eleicao != NEW.id_eleicao
+          AND (
+              -- Período de candidatura sobrepõe
+              (NEW.data_inicio_candidatura <= data_fim_candidatura AND NEW.data_fim_candidatura >= data_inicio_candidatura)
+              OR
+              -- Período de votação sobrepõe
+              (NEW.data_fim_candidatura <= data_fim_votacao AND NEW.data_fim_votacao >= data_fim_candidatura)
+          )
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'ERRO: Já existe eleição para este curso/semestre com período sobreposto';
+    END IF;
+END$$
+
 DELIMITER ;
 
 -- =====================================================
--- 5. STORED PROCEDURES - OTIMIZADAS (SEM CURSORS)
+-- 5. STORED PROCEDURES
 -- =====================================================
 
 DELIMITER $$
@@ -560,7 +635,7 @@ BEGIN
     COMMIT;
 END$$
 
--- Procedure: Atualizar Status de Eleições (OTIMIZADA)
+-- Procedure: Atualizar Status de Eleições
 DROP PROCEDURE IF EXISTS `sp_atualizar_status_eleicoes`$$
 CREATE PROCEDURE `sp_atualizar_status_eleicoes`()
 BEGIN
@@ -606,7 +681,7 @@ BEGIN
     END IF;
 END$$
 
--- Procedure: Auto-finalizar Eleições (OTIMIZADA - SEM CURSOR)
+-- Procedure: Auto-finalizar Eleições
 DROP PROCEDURE IF EXISTS `sp_auto_finalizar_eleicoes`$$
 CREATE PROCEDURE `sp_auto_finalizar_eleicoes`()
 BEGIN
@@ -654,7 +729,7 @@ END$$
 DELIMITER ;
 
 -- =====================================================
--- 6. VIEWS OTIMIZADAS (MERGE ALGORITHM)
+-- 6. VIEWS
 -- =====================================================
 
 -- View: Alunos Aptos para Votação
@@ -698,7 +773,7 @@ INNER JOIN aluno a ON c.id_aluno = a.id_aluno
 INNER JOIN eleicao e ON c.id_eleicao = e.id_eleicao
 WHERE c.status_validacao = 'deferido';
 
--- View: Contagem de Votos (OTIMIZADA)
+-- View: Contagem de Votos
 DROP VIEW IF EXISTS `v_contagem_votos`;
 CREATE ALGORITHM=MERGE
 DEFINER=`root`@`localhost`
@@ -758,9 +833,11 @@ SELECT
     e.semestre,
     a_rep.nome_completo AS representante,
     a_rep.ra AS ra_representante,
+    c_rep.foto_candidato AS foto_representante,
     r.votos_representante,
     a_sup.nome_completo AS suplente,
     a_sup.ra AS ra_suplente,
+    c_sup.foto_candidato AS foto_suplente,
     r.votos_suplente,
     r.total_votantes,
     r.total_aptos,
