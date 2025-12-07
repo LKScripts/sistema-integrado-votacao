@@ -128,7 +128,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
                             $stmtUpdate = $conn->prepare("
                                 UPDATE ALUNO
-                                SET nome_completo = ?, email_institucional = ?, ra = ?, senha_hash = ?
+                                SET nome_completo = ?, senha_hash = ?,curso = ?, semestre = ?
                                 WHERE id_aluno = ?
                             ");
                             $stmtUpdate->execute([$nome, $email, $ra, $senha_hash, $id_aluno]);
@@ -136,7 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     } else {
                         $stmtUpdate = $conn->prepare("
                             UPDATE ALUNO
-                            SET nome_completo = ?, email_institucional = ?, ra = ?
+                            SET nome_completo = ?, curso = ?, semestre = ?
                             WHERE id_aluno = ?
                         ");
                         $stmtUpdate->execute([$nome, $email, $ra, $id_aluno]);
@@ -536,19 +536,19 @@ $alunos = $stmt->fetchAll();
 
                     <div class="input-group">
                         <label for="editar_email">Email Institucional *</label>
-                        <input type="email" id="editar_email" name="email" required
+                        <input type="email" id="editar_email" name="email" required disabled
                                pattern=".*@fatec\.sp\.gov\.br$"
                                title="O email deve ser do domínio @fatec.sp.gov.br">
                     </div>
 
                     <div class="input-group">
                         <label for="editar_ra">RA *</label>
-                        <input type="text" id="editar_ra" name="ra" required>
+                        <input type="text" id="editar_ra" name="ra" required disabled>
                     </div>
 
                     <div class="input-group">
                         <label for="editar_curso">Curso *</label>
-                        <select id="editar_curso" name="curso" required disabled>
+                        <select id="editar_curso" name="curso" required>
                             <option value="DSM">DSM - Desenvolvimento de Software Multiplataforma</option>
                             <option value="GE">GE - Gestão Empresarial</option>
                             <option value="GPI">GPI - Gestão da Produção Industrial</option>
@@ -557,7 +557,7 @@ $alunos = $stmt->fetchAll();
 
                     <div class="input-group">
                         <label for="editar_semestre">Semestre *</label>
-                        <select id="editar_semestre" name="semestre" required disabled>
+                        <select id="editar_semestre" name="semestre" required>
                             <?php for ($i = 1; $i <= 6; $i++): ?>
                                 <option value="<?= $i ?>"><?= $i ?>º Semestre</option>
                             <?php endfor; ?>

@@ -34,7 +34,7 @@ if (!in_array($tipo_mudanca, ['curso', 'semestre', 'ambos'])) {
 if ($tipo_mudanca === 'curso' || $tipo_mudanca === 'ambos') {
     if (empty($curso_novo)) {
         $erros[] = 'Novo curso é obrigatório para este tipo de mudança.';
-    } elseif (!in_array($curso_novo, ['ADS', 'DSM', 'GE', 'GPI'])) {
+    } elseif (!in_array($curso_novo, ['DSM', 'GE', 'GPI'])) {
         $erros[] = 'Curso selecionado é inválido.';
     } elseif ($curso_novo === $curso_atual && $tipo_mudanca === 'curso') {
         $erros[] = 'O novo curso deve ser diferente do atual.';

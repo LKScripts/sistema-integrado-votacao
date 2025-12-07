@@ -84,7 +84,23 @@ if (!empty($candidatura['foto_candidato'])) {
     <link rel="stylesheet" href="../../assets/styles/footer-site.css">
     <link rel="stylesheet" href="../../assets/styles/user.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
+    <style>
+        div #image-perfil img{
+            display: flex;
+            justify-content: center; /* horizontal */
+            align-items: center;     /* vertical */
+            height: 300px;           /* ou o tamanho do container */
+            border: 3px solid #000;  /* só para visualizar */
+            border-radius: 50px;
+            margin-bottom: 20px;
+        }
+    </style>
+
 </head>
+
+
 
 <body>
     <?php include 'components/header.php'; ?>
@@ -169,8 +185,8 @@ if (!empty($candidatura['foto_candidato'])) {
                     <i class="fas fa-eye"></i> Preview - Como aparecerá na votação:
                 </h2>
 
-                <div class="candidate-card" style="max-width: 400px; margin: 0 auto 30px;">
-                    <div class="media">
+                <div class="candidate-card" style="max-width: 400px; margin: 0 auto 30px;" id="candidate-card">
+                    <div class="media" id="image-perfil">
                         <?php if ($foto_preview): ?>
                             <img src="<?= htmlspecialchars($foto_preview) ?>" alt="Sua foto" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                             <div class="placeholder" style="display:none;">
