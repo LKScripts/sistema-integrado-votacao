@@ -397,7 +397,6 @@ $pode_acompanhar = $tem_candidatura;
                     <label for="cursoNovo">Novo Curso <span style="color: red;">*</span></label>
                     <select id="cursoNovo" name="curso_novo">
                         <option value="">Selecione...</option>
-                        <option value="ADS">ADS - Análise e Desenvolvimento de Sistemas</option>
                         <option value="DSM">DSM - Desenvolvimento de Software Multiplataforma</option>
                         <option value="GE">GE - Gestão Empresarial</option>
                         <option value="GPI">GPI - Gestão da Produção Industrial</option>

@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto_perfil'])) {
                 $fotoAntiga = $stmtOld->fetch();
 
                 // Atualizar no banco
-                $stmt = $conn->prepare("UPDATE ALUNO SET foto_perfil = ?, foto_perfil_original = ? WHERE id_aluno = ?");
+                $stmt = $conn->prepare("UPDATE ALUNO SET foto_perfil = ?, foto_perfil = ? WHERE id_aluno = ?");
 
                 if ($stmt->execute([$caminhoRelativo, $arquivo['name'], $usuario['id']])) {
                     // Atualizar sessão

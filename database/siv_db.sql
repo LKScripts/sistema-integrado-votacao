@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS `administrador` (
   `ativo` tinyint(1) DEFAULT 1,
   `aprovado_por` int(11) DEFAULT NULL,
   `data_aprovacao` timestamp NULL DEFAULT NULL,
+  `motivo_rejeicao` TEXT NULL COMMENT 'Motivo da rejeição ou remoção',
   `email_confirmado` tinyint(1) DEFAULT 1,
   `token_confirmacao` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`id_admin`),

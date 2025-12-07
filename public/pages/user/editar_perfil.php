@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $alteracoes[] = "foto_perfil = ?";
                         $params[] = $caminhoRelativo;
 
-                        $alteracoes[] = "foto_perfil_original = ?";
+                        $alteracoes[] = "foto_perfil = ?";
                         $params[] = $arquivo['name'];
 
                         $atualizouAlgo = true;
