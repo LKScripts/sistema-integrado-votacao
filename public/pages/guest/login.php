@@ -29,9 +29,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // ===== LOGIN DE ADMINISTRADOR =====
         try {
             $stmtAdmin = $conn->prepare("
-                SELECT id_admin, nome_completo, email_corporativo, senha_hash, ativo
+                SELECT id_admin, nome_completo, email_corporativo, senha_hash, ativo, email_confirmado
                 FROM ADMINISTRADOR
-                WHERE email_corporativo = ? AND ativo = 1
+                WHERE email_corporativo = ? AND ativo = 1 AND email_confirmado = 1
             ");
 
             $stmtAdmin->execute([$email]);
