@@ -76,7 +76,7 @@ function limparCacheEleicoes() {
 
 /**
  * Atualiza status das eleições baseado na data/hora atual
- * OTIMIZADO: Só atualiza se houver eleições que precisam mudar
+ *Só atualiza se houver eleições que precisam mudar
  *
  * @param bool $forcar Forçar atualização ignorando cache
  * @return array Estatísticas de atualizações realizadas

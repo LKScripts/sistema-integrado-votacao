@@ -50,14 +50,14 @@ function registrarTentativaLogin($email, $ip_origem, $sucesso = false) {
  *
  * @param string $email Email a verificar
  * @param string $ip_origem IP a verificar
- * @return array ['bloqueado' => bool, 'tentativas' => int, 'tempo_restante' => int]
+ * @return array ['bloqueado' => bool, 'tentativas' => int, 'tempo_restante' => int, 'motivo' => string]
  */
 function verificarBloqueio($email, $ip_origem) {
     global $conn;
 
     try {
-        // Conta tentativas FALHAS nos últimos X minutos (apenas por EMAIL)
-        $stmt = $conn->prepare("
+        // Conta tentativas FALHAS nos últimos X minutos (por EMAIL)
+        $stmtEmail = $conn->prepare("
             SELECT COUNT(*) as tentativas,
                    MIN(data_tentativa) as primeira_tentativa
             FROM LOGIN_TENTATIVAS
@@ -66,25 +66,76 @@ function verificarBloqueio($email, $ip_origem) {
               AND data_tentativa >= DATE_SUB(NOW(), INTERVAL ? MINUTE)
         ");
 
-        $stmt->execute([$email, JANELA_TEMPO_MINUTOS]);
-        $resultado = $stmt->fetch();
+        $stmtEmail->execute([$email, JANELA_TEMPO_MINUTOS]);
+        $resultadoEmail = $stmtEmail->fetch();
 
-        $tentativas = intval($resultado['tentativas']);
-        $bloqueado = ($tentativas >= MAX_TENTATIVAS);
+        $tentativasEmail = intval($resultadoEmail['tentativas']);
+        $bloqueadoEmail = ($tentativasEmail >= MAX_TENTATIVAS);
 
-        // Calcular tempo restante de bloqueio (em segundos)
+        // Conta tentativas FALHAS nos últimos X minutos (por IP)
+        $stmtIP = $conn->prepare("
+            SELECT COUNT(*) as tentativas,
+                   MIN(data_tentativa) as primeira_tentativa
+            FROM LOGIN_TENTATIVAS
+            WHERE ip_origem = ?
+              AND sucesso = 0
+              AND data_tentativa >= DATE_SUB(NOW(), INTERVAL ? MINUTE)
+        ");
+
+        $stmtIP->execute([$ip_origem, JANELA_TEMPO_MINUTOS]);
+        $resultadoIP = $stmtIP->fetch();
+
+        $tentativasIP = intval($resultadoIP['tentativas']);
+        $bloqueadoIP = ($tentativasIP >= MAX_TENTATIVAS);
+
+        // Determinar qual bloqueio tem prioridade (o que expira mais tarde)
         $tempo_restante = 0;
-        if ($bloqueado && $resultado['primeira_tentativa']) {
-            $primeira = strtotime($resultado['primeira_tentativa']);
-            $expira = $primeira + (JANELA_TEMPO_MINUTOS * 60);
-            $agora = time();
-            $tempo_restante = max(0, $expira - $agora);
+        $motivo = '';
+        $bloqueado = false;
+
+        if ($bloqueadoEmail && $bloqueadoIP) {
+            $bloqueado = true;
+            $tempoEmail = 0;
+            $tempoIP = 0;
+
+            if ($resultadoEmail['primeira_tentativa']) {
+                $primeiraEmail = strtotime($resultadoEmail['primeira_tentativa']);
+                $expiraEmail = $primeiraEmail + (JANELA_TEMPO_MINUTOS * 60);
+                $tempoEmail = max(0, $expiraEmail - time());
+            }
+
+            if ($resultadoIP['primeira_tentativa']) {
+                $primeiraIP = strtotime($resultadoIP['primeira_tentativa']);
+                $expiraIP = $primeiraIP + (JANELA_TEMPO_MINUTOS * 60);
+                $tempoIP = max(0, $expiraIP - time());
+            }
+
+            // Usar o maior tempo restante
+            $tempo_restante = max($tempoEmail, $tempoIP);
+            $motivo = 'email_e_ip';
+        } elseif ($bloqueadoEmail) {
+            $bloqueado = true;
+            if ($resultadoEmail['primeira_tentativa']) {
+                $primeira = strtotime($resultadoEmail['primeira_tentativa']);
+                $expira = $primeira + (JANELA_TEMPO_MINUTOS * 60);
+                $tempo_restante = max(0, $expira - time());
+            }
+            $motivo = 'email';
+        } elseif ($bloqueadoIP) {
+            $bloqueado = true;
+            if ($resultadoIP['primeira_tentativa']) {
+                $primeira = strtotime($resultadoIP['primeira_tentativa']);
+                $expira = $primeira + (JANELA_TEMPO_MINUTOS * 60);
+                $tempo_restante = max(0, $expira - time());
+            }
+            $motivo = 'ip';
         }
 
         return [
             'bloqueado' => $bloqueado,
-            'tentativas' => $tentativas,
-            'tempo_restante' => $tempo_restante
+            'tentativas' => max($tentativasEmail, $tentativasIP),
+            'tempo_restante' => $tempo_restante,
+            'motivo' => $motivo
         ];
 
     } catch (PDOException $e) {
@@ -93,7 +144,8 @@ function verificarBloqueio($email, $ip_origem) {
         return [
             'bloqueado' => false,
             'tentativas' => 0,
-            'tempo_restante' => 0
+            'tempo_restante' => 0,
+            'motivo' => ''
         ];
     }
 }
