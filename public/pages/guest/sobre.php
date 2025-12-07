@@ -10,7 +10,6 @@
     <title>SIV - Sistema Integrado de Votações</title>
 
     <link rel="stylesheet" href="../../assets/styles/guest.css">
-    <link rel="stylesheet" href="../../assets/styles/admin.css">
     <link rel="stylesheet" href="../../assets/styles/base.css">
     <link rel="stylesheet" href="../../assets/styles/fonts.css">
     <link rel="stylesheet" href="../../assets/styles/footer-site.css">
@@ -26,7 +25,7 @@
             </div>
 
             <ul class="links">
-                <li><a href="index.php">Home</a></li>
+                <li><a href="../../index.php">Home</a></li>
                 <li><a href="sobre.php" class="active">Sobre</a></li>
                 <li><a href="login.php">Votação</a></li>
                 <li><a href="login.php">Inscrição</a></li>
@@ -76,12 +75,17 @@
                     <h2>SOBRE NÓS</h2>
 
                     <p>
-                        Este sistema é um projeto acadêmico desenvolvido pelos alunos do 1º semestre do curso de
+                        Este sistema é um projeto acadêmico desenvolvido por alunos do curso de
                         Desenvolvimento de Software Multiplataforma da FATEC Itapira.
-                        O SIV foi idealizado com base nos conhecimentos adquiridos no semestre, representando
-                        um importante passo na nossa jornada como desenvolvedores.
+                        O SIV foi construído como uma aplicação web completa, integrando frontend dinâmico com
+                        backend robusto em PHP e banco de dados MySQL.
                         <br><br>
-                        Esperamos que o SIV torne o processo eleitoral mais eficiente e democrático para todos!
+                        O projeto implementa recursos avançados como sistema de auditoria imutável, automação de
+                        prazos eleitorais via eventos de banco de dados, confirmação de email, proteção contra
+                        tentativas de login e CSRF, além de funcionalidades completas para gestão de eleições,
+                        candidaturas e votações digitais.
+                        <br><br>
+                        Esperamos que o SIV torne o processo eleitoral mais eficiente, transparente e democrático para todos!
                     </p>
                 </section>
 

@@ -13,16 +13,32 @@ if (session_status() === PHP_SESSION_NONE) {
 if (isset($_SESSION['usuario_tipo']) && $_SESSION['usuario_tipo'] === 'admin') {
     try {
         require_once __DIR__ . '/../config/conexao.php';
+        require_once __DIR__ . '/../config/helpers.php';
 
-        $stmt = $conn->prepare("
-            INSERT INTO AUDITORIA (id_admin, tipo_acao, descricao, ip_origem, data_acao)
-            VALUES (?, 'logout', 'Logout realizado', ?, NOW())
-        ");
-        $stmt->execute([
-            $_SESSION['usuario_id'],
-            $_SERVER['REMOTE_ADDR']
-        ]);
-    } catch (PDOException $e) {
+        // Capturar dados antes de destruir a sessão
+        $id_admin = $_SESSION['usuario_id'];
+        $nome_admin = $_SESSION['usuario_nome'] ?? 'Desconhecido';
+        $email_admin = $_SESSION['usuario_email'] ?? 'desconhecido@email.com';
+
+        // Registrar logout com dados completos
+        registrarAuditoria(
+            $conn,
+            $id_admin,
+            'ADMINISTRADOR',
+            'LOGOUT',
+            "Logout realizado - $nome_admin ($email_admin)",
+            $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+            null,  // Não relacionado a eleição
+            null,  // Sem dados anteriores
+            json_encode([
+                'id_admin' => $id_admin,
+                'nome' => $nome_admin,
+                'email' => $email_admin,
+                'timestamp' => date('Y-m-d H:i:s'),
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown'
+            ])
+        );
+    } catch (Exception $e) {
         // Continua o logout mesmo se falhar auditoria
         error_log("Erro ao registrar logout na auditoria: " . $e->getMessage());
     }
@@ -54,6 +70,6 @@ session_regenerate_id(true);
 session_destroy();
 
 // Redireciona para página inicial
-header("Location: pages/guest/index.php");
+header("Location: /sistema-integrado-votacao/public/index.php");
 exit;
 ?>

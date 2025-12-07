@@ -1,6 +1,6 @@
 /* Importa recursos, reseta CSS, define variáveis e classes genéricas */
 
-@import url("/assets/styles/fonts.local.css");
+@import url("fonts.css");
 /* @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"); */
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css");
 
@@ -118,6 +118,7 @@ button {
     font-size: 2em;
 }
 
+/* Desabilitado - causa barra indesejada à esquerda
 .callout::before {
     content: "";
     position: absolute;
@@ -127,32 +128,37 @@ button {
     height: 100%;
 }
 
-.callout.info > div i {
-    color: var(--primary);
-}
 .callout.info::before {
     background: var(--primary);
+}
+
+.callout.success::before {
+    background: var(--bootstrap-success);
+}
+
+.callout.danger::before {
+    background: var(--bootstrap-danger);
+}
+
+.callout.warning::before {
+    background: var(--bootstrap-warning);
+}
+*/
+
+.callout.info > div i {
+    color: var(--primary);
 }
 
 .callout.success > div i {
     color: var(--bootstrap-success);
 }
-.callout.success::before {
-    background: var(--bootstrap-success);
-}
 
 .callout.danger > div i {
     color: var(--bootstrap-danger);
 }
-.callout.danger::before {
-    background: var(--bootstrap-danger);
-}
 
 .callout.warning > div i {
     color: var(--bootstrap-warning);
-}
-.callout.warning::before {
-    background: var(--bootstrap-warning);
 }
 
 .card-wrapper {
@@ -191,12 +197,10 @@ form[class^="form-"] .wrapper-select {
 form[class^="form-"] .wrapper-select::after {
     content: "";
     position: absolute;
-    top: 50%;
+    top: calc(50% - 4px);
     right: 10px;
-    transform: translateY(-50%);
     width: 0;
     height: 0;
-    border-left: 6px solid transparent;
     border-right: 6px solid transparent;
     border-top: 8px solid #999;
 }
@@ -293,16 +297,20 @@ form[class^="form-"] .form-buttons .button {
     pointer-events: auto;
 }
 
-#edit-user-modal:target {
-    opacity: 1;
-    pointer-events: auto;
+#edit-user-modal:target,
+[id^="edit-user-modal-"]:target {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    display: flex !important;
 }
 
 .modal .content {
     position: relative;
     padding: 30px;
     width: 90%;
-    max-width: 500px;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
     background: white;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     border-radius: 15px;
@@ -339,9 +347,11 @@ form[class^="form-"] .form-buttons .button {
     cursor: pointer;
 }
 
-#edit-user-modal:target {
-    opacity: 1;
-    pointer-events: auto;
+#edit-user-modal:target,
+[id^="edit-user-modal-"]:target {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    display: flex !important;
 }
 
 .modal .form-group {
@@ -358,7 +368,8 @@ form[class^="form-"] .form-buttons .button {
 }
 
 .modal .form-group input,
-.modal .form-group select {
+.modal .form-group select,
+.modal .form-group textarea {
     width: 100%;
     padding: 12px 15px;
     border: 1px solid #ddd;
@@ -366,10 +377,17 @@ form[class^="form-"] .form-buttons .button {
     font-size: 1rem;
     transition: border-color 0.3s;
     background: white;
+    font-family: inherit;
+}
+
+.modal .form-group textarea {
+    min-height: 120px;
+    resize: vertical;
 }
 
 .modal .form-group input:focus,
-.modal .form-group select:focus {
+.modal .form-group select:focus,
+.modal .form-group textarea:focus {
     border-color: #005c6d;
     outline: none;
     box-shadow: 0 0 0 2px rgba(0, 92, 109, 0.2);
@@ -378,5 +396,7 @@ form[class^="form-"] .form-buttons .button {
 .modal .modal-buttons {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 15px;
+    margin-top: 25px;
+    flex-wrap: wrap;
 }

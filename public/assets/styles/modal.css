@@ -1,0 +1,286 @@
+/* ========================================
+   MODAL STYLES - Sistema Integrado de Votação
+   ======================================== */
+
+/* Modal Base */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 99999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    overflow-y: auto;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+/* Garantir que modal.show sempre apareça */
+.modal.show {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* Suporte para :target também */
+.modal:target {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Modal Content */
+.modal .content,
+.modal-content {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 0;
+    max-width: 600px;
+    width: 90%;
+    max-height: 85vh;
+    overflow: hidden;
+    position: relative;
+    z-index: 100000;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    animation: modalSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Modal menor para feedback */
+.modal.feedback .content {
+    max-width: 450px;
+}
+
+/* Animação */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Modal Header */
+.modal .content .title,
+.modal-content .modal-header,
+.modal-header {
+    background: var(--primary);
+    color: #ffffff;
+    padding: 24px 28px;
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 16px 16px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* Botão Fechar */
+.modal .content .close,
+.modal-content .btn-close,
+.btn-close {
+    position: absolute !important;
+    right: 28px !important;
+    top: 24px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: none !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    font-size: 20px !important;
+    cursor: pointer !important;
+    color: #ffffff !important;
+    line-height: 32px !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.modal .content .close:hover,
+.btn-close:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Modal Body */
+.modal .content .text,
+.modal-body {
+    padding: 28px !important;
+    max-height: calc(85vh - 200px) !important;
+    overflow-y: auto !important;
+}
+
+/* Scrollbar customizada */
+.modal .content .text::-webkit-scrollbar,
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal .content .text::-webkit-scrollbar-track,
+.modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.modal .content .text::-webkit-scrollbar-thumb,
+.modal-body::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.modal .content .text::-webkit-scrollbar-thumb:hover,
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Input Groups */
+.input-group,
+.form-group {
+    margin-bottom: 20px;
+}
+
+.input-group label,
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.input-group input,
+.input-group select,
+.input-group textarea,
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.input-group input[readonly],
+.input-group textarea[readonly],
+.form-group input[readonly],
+.form-group textarea[readonly] {
+    background: #f8f9fa;
+    cursor: not-allowed;
+}
+
+.input-group input:not([readonly]):focus,
+.input-group select:focus,
+.input-group textarea:not([readonly]):focus,
+.form-group input:not([readonly]):focus,
+.form-group select:focus,
+.form-group textarea:not([readonly]):focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 95, 115, 0.1);
+    background: #ffffff;
+}
+
+.input-group textarea,
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.input-group small,
+.form-group small {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #666;
+}
+
+.info-text {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Modal Buttons */
+.modal-buttons,
+.form-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding: 20px 28px;
+    background: #f8f9fa;
+    margin: 20px 0 0 0;
+    border-radius: 0 0 16px 16px;
+}
+
+.modal-buttons .button,
+.form-buttons .button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.modal-buttons .button.primary,
+.form-buttons .button.primary {
+    background: var(--primary);
+    color: white;
+}
+
+.modal-buttons .button.primary:hover,
+.form-buttons .button.primary:hover {
+    background: #004654;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.modal-buttons .button.secondary,
+.form-buttons .button.secondary {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.modal-buttons .button.secondary:hover,
+.form-buttons .button.secondary:hover {
+    background: #dee2e6;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.empty-state i {
+    font-size: 64px;
+    color: #ddd;
+    margin-bottom: 20px;
+}

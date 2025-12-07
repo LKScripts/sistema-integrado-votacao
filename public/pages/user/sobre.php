@@ -1,3 +1,16 @@
+<?php
+require_once '../../../config/session.php';
+require_once '../../../config/conexao.php';
+require_once '../../../config/automacao_eleicoes.php';
+
+verificarAluno();
+
+// Verificar se há eleição em fase de candidatura (para mostrar/ocultar link Inscrição)
+$usuario = obterUsuarioLogado();
+$curso = $usuario['curso'];
+$semestre = $usuario['semestre'];
+$eleicaoCandidatura = buscarEleicaoAtivaComVerificacao($curso, $semestre, 'candidatura');
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -6,14 +19,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIV - Sistema Integrado de Votações</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="/assets/styles/guest.css">
-    <link rel="stylesheet" href="../../assets/styles/guest.css">
-    <link rel="stylesheet" href="../../assets/styles/admin.css">
     <link rel="stylesheet" href="../../assets/styles/base.css">
-    <link rel="stylesheet" href="../../assets/styles/user.css">
     <link rel="stylesheet" href="../../assets/styles/fonts.css">
-    <link rel="stylesheet" href="../../assets/styles/footer-site.css">
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
+    <link rel="stylesheet" href="../../assets/styles/footer-site.css">
+    <link rel="stylesheet" href="../../assets/styles/user.css">
 </head>
 
 <body>
@@ -26,19 +36,21 @@
 
             <ul class="links">
                 <li><a href="../../pages/user/index.php">Home</a></li>
-                <li><a href="../../pages/user/inscricao.php">Inscrição</a></li>
+                <?php if ($eleicaoCandidatura): ?>
+                    <li><a href="../../pages/user/inscricao.php">Inscrição</a></li>
+                <?php endif; ?>
                 <li><a href="../../pages/user/votacao.php">Votação</a></li>
                 <li><a href="../../pages/user/sobre.php" class="active">Sobre</a></li>
             </ul>
 
             <div class="actions">
-                <img src="../../assets/images/user-icon.png" alt="Avatar do usuário" class="user-icon">
+                <img src="<?= htmlspecialchars(obterFotoUsuario()) ?>" alt="Avatar do usuário" class="user-icon">
                 <a href="../../logout.php">Sair da Conta</a>
             </div>
         </nav>
     </header>
 
-    <main class="about">
+    <main class="user-about">
         <div class="card-wrapper">
             <div class="card">
                 <section class="voting">
@@ -74,12 +86,16 @@
                 <section class="security">
                     <h2>SOBRE NÓS</h2>
                     <p>
-                        Este sistema é um projeto acadêmico desenvolvido pelos alunos do 1º semestre do curso de
-                        Desenvolvimento de Software
-                        Multiplataforma da FATEC Itapira. O SIV foi idealizado com base nos conhecimentos adquiridos no
-                        semestre, representando
-                        um importante passo na nossa jornada como desenvolvedores.
-                        Esperamos que o SIV torne o processo eleitoral mais eficiente e democrático para todos!
+                        Este sistema é um projeto acadêmico desenvolvido por alunos do curso de Desenvolvimento de Software
+                        Multiplataforma da FATEC Itapira. O SIV foi construído como uma aplicação web completa, integrando
+                        frontend dinâmico com backend robusto em PHP e banco de dados MySQL.
+                        <br><br>
+                        O projeto implementa recursos avançados como sistema de auditoria imutável, automação de
+                        prazos eleitorais via eventos de banco de dados, confirmação de email, proteção contra
+                        tentativas de login e CSRF, além de funcionalidades completas para gestão de eleições,
+                        candidaturas e votações digitais.
+                        <br><br>
+                        Esperamos que o SIV torne o processo eleitoral mais eficiente, transparente e democrático para todos!
                     </p>
                 </section>
 

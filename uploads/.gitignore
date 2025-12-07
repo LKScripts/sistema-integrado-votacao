@@ -1,0 +1,5 @@
+# Ignorar todas as fotos de perfil
+fotos_perfil/*
+
+# Manter apenas este arquivo .gitignore
+!.gitignore

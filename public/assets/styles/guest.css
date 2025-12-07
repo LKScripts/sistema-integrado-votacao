@@ -1,6 +1,18 @@
-@import url("/assets/styles/base.css");
-@import url("/assets/styles/header-site.css");
-@import url("/assets/styles/footer-site.css");
+@import url("base.css");
+@import url("header-site.css");
+@import url("footer-site.css");
+
+/* Sobrescrever cores da navbar para seção guest (vermelho) */
+header.site .navbar {
+    background: var(--secondary) !important;
+    background-color: var(--secondary) !important;
+    background-image: none !important;
+}
+
+header.site .navbar .links li a.active,
+header.site .navbar .links li a:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
 
 /* Início estilização página inicial visitante (/pages/guest/index.html) */
 main.guest-home {
@@ -93,7 +105,7 @@ main.login {
     justify-content: center;
     align-items: center;
     padding: 20px;
-    background: linear-gradient(135deg, #0d1b48 0%, #1a2a6c 100%);
+    background: #1a2a6c;
 }
 
 main.login .container {
@@ -186,14 +198,43 @@ main.login .wrapper-form .input-field input:focus {
 main.login .wrapper-form .input-field i[class^="fa"] {
     position: absolute;
     left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 18px;
     color: #005c6d;
 }
 
 main.login .wrapper-form [class^="button"] {
     width: 100%;
     margin-bottom: 1em;
+    padding: 18px 35px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease;
+}
+
+main.login .wrapper-form [class^="button"]:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+main.login .wrapper-form .button.primary {
+    background: #006172;
+}
+
+main.login .wrapper-form .button.primary:hover {
+    background: #004955;
+}
+
+/* Garantir que botões secondary tenham texto branco (ícones e texto) */
+main.login .wrapper-form .button.secondary,
+main.login .wrapper-form .button.secondary i {
+    color: white;
+    background: #8b0000;
+}
+
+main.login .wrapper-form .button.secondary:hover {
+    background: #6a0101;
 }
 
 main.login .wrapper-visual {
@@ -203,7 +244,7 @@ main.login .wrapper-visual {
     align-items: center;
     justify-content: center;
     flex: 1 0 50%;
-    background: linear-gradient(135deg, #005c6d 0%, #0d1b48 100%);
+    background: #0d1b48;
     padding: 40px;
 }
 
@@ -258,7 +299,7 @@ main.login-support {
     flex-direction: column;
     flex: 1 1 auto;
     padding: 20px;
-    background: linear-gradient(135deg, #1a2a6c, #2a4b8d, #3a6bc7);
+    background: #2a4b8d;
 }
 
 main.login-support .container {
@@ -358,58 +399,61 @@ main.about {
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
+    align-items: center;
+    padding: 2em;
 }
 
 main.about .card-wrapper {
     width: 100%;
-    max-width: 900px;
+    max-width: 1000px;
     margin: 30px auto;
+    text-align: center;
 }
 
 main.about .card-wrapper .card {
-    padding: 40px;
+    padding: 50px;
     border-radius: 20px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    background-color: #fff;
 }
 
 main.about .card-wrapper h1 {
-    font-size: 32px;
-    margin-bottom: 15px;
+    font-size: 2.2em;
+    margin-bottom: 20px;
+    color: #8b0000;
 }
 
 main.about .card-wrapper h2 {
-    font-size: 26px;
+    font-size: 1.8em;
     margin-top: 40px;
-    margin-bottom: 15px;
-}
-
-main.about .card-wrapper .card {
-    background-color: #028c9f;
-    color: #fff;
+    margin-bottom: 20px;
+    color: #8b0000;
 }
 
 main.about .card-wrapper .voting {
     display: flex;
     align-items: flex-start;
-    gap: 40px;
+    gap: 50px;
 }
 
 main.about .card-wrapper .voting p {
-    font-size: 16px;
-    margin-bottom: 15px;
-    line-height: 1.6;
-    text-align: justify;
+    font-size: 1rem;
+    margin-bottom: 18px;
+    line-height: 1.8;
+    text-align: left;
+    color: #555;
 }
 
 main.about .card-wrapper .voting ul {
-    margin-left: 20px;
-    margin-bottom: 20px;
+    margin-left: 25px;
+    margin-bottom: 25px;
+    text-align: left;
 }
 
 main.about .card-wrapper .voting li {
-    margin-bottom: 10px;
-    line-height: 1.6;
-    text-align: justify;
+    margin-bottom: 12px;
+    line-height: 1.7;
+    color: #555;
 }
 
 main.about .card-wrapper .voting-text {
@@ -417,34 +461,83 @@ main.about .card-wrapper .voting-text {
 }
 
 main.about .card-wrapper .voting-illustration {
-    flex: 0 0 40%;
+    flex: 0 0 35%;
     display: flex;
     align-items: center;
-    margin-top: 40px;
+    justify-content: center;
     flex-direction: column;
+    gap: 20px;
 }
 
 main.about .card-wrapper .voting-illustration img {
     max-width: 100%;
     height: auto;
+    opacity: 0.85;
 }
 
-main.about .card-wrapper .alert {
-    background-color: #fceaea;
-    color: #a80000;
-    padding: 12px 18px;
-    border-radius: 15px;
-    font-weight: bold;
-    margin-top: 25px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+main.about .card-wrapper .security {
+    margin-top: 30px;
+    padding: 25px;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    text-align: left;
+}
+
+main.about .card-wrapper .security p {
+    color: #555;
+    line-height: 1.8;
 }
 
 main.about .card-wrapper .button-group {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     gap: 20px;
-    margin-top: 20px;
+    margin-top: 30px;
     width: 100%;
+}
+
+main.about .card-wrapper .button {
+    padding: 18px 35px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(139, 0, 0, 0.25);
+    transition: all 0.3s ease;
+}
+
+main.about .card-wrapper .button:hover {
+    box-shadow: 0 6px 16px rgba(139, 0, 0, 0.35);
+}
+
+main.about .card-wrapper .button.primary {
+    background: #8b0000;
+}
+
+main.about .card-wrapper .button.primary:hover {
+    background: #6a0101;
+}
+
+@media (max-width: 768px) {
+    main.about {
+        padding: 1em;
+    }
+
+    main.about .card-wrapper .card {
+        padding: 30px 20px;
+    }
+
+    main.about .card-wrapper .voting {
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    main.about .card-wrapper .voting-illustration {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
 }
 
 /* Fim estilização página sobre (/pages/guest/sobre.html) */
@@ -484,3 +577,67 @@ main.login .wrapper-form .input-field select:focus {
     }
 }
 /* Fim estilização página cadastro (/pages/guest/cadastro.php) */
+
+/* Início estilização de alertas */
+.alert {
+    position: relative;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
+}
+
+/* Alert Info (azul) */
+.alert.info {
+    color: #004085;
+    background-color: #cfe2ff;
+    border: 1px solid #b6d4fe;
+}
+
+/* Alert Success (verde) */
+.alert.success {
+    color: #0f5132;
+    background-color: #d1e7dd;
+    border: 1px solid #badbcc;
+}
+
+/* Alert Warning (amarelo/laranja) */
+.alert.warning {
+    color: #664d03;
+    background-color: #fff3cd;
+    border: 1px solid #ffecb5;
+}
+
+/* Alert Danger/Error (vermelho) */
+.alert.danger,
+.alert.error {
+    color: #842029;
+    background-color: #f8d7da;
+    border: 1px solid #f5c2c7;
+}
+
+/* Compatibilidade com classe antiga "callout" */
+.callout {
+    position: relative;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border-radius: 0.25rem;
+}
+
+.callout.info {
+    color: #004085;
+    background-color: #cfe2ff;
+    border: 1px solid #b6d4fe;
+}
+
+.callout.warning {
+    color: #664d03;
+    background-color: #fff3cd;
+    border: 1px solid #ffecb5;
+}
+
+.callout.success {
+    color: #0f5132;
+    background-color: #d1e7dd;
+    border: 1px solid #badbcc;
+}
+/* Fim estilização de alertas */

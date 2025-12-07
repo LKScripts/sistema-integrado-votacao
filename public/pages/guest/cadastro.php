@@ -1,11 +1,19 @@
 <?php
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
+require_once '../../../config/helpers.php';
+require_once '../../../config/csrf.php';
+require_once '../../../config/email.php';
+require_once '../../../config/dev_mode.php';
 
 $erro = "";
 $sucesso = false;
+$dev_mode_html = ""; // Para exibir mensagem de dev mode
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // VALIDAR CSRF PRIMEIRO
+    validarCSRFOuMorrer("Token de segurança inválido. Recarregue a página e tente cadastrar novamente.");
+
     $nome = trim($_POST["nome"] ?? "");
     $ra = trim($_POST["ra"] ?? "");
     $email = trim($_POST["email"] ?? "");
@@ -14,58 +22,114 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $curso = $_POST["curso"] ?? "";
     $semestre = intval($_POST['semestre'] ?? 0);
 
+    // Variáveis para upload de foto
+    $foto_perfil = null;
+    $foto_perfil_original = null;
+
     // Identificar tipo (admin ou aluno)
     $is_admin = (
         empty($ra) &&
         empty($curso) &&
         ($semestre === 0) &&
-        preg_match('/@cps\.sp\.gov\.br$/i', $email)
+        (isDevMode() || preg_match('/@cps\.sp\.gov\.br$/i', $email))
     );
 
     $is_aluno = (
         !empty($ra) &&
         !empty($curso) &&
         $semestre >= 1 &&
-        preg_match('/@fatec\.sp\.gov\.br$/i', $email)
+        (isDevMode() || preg_match('/@fatec\.sp\.gov\.br$/i', $email))
     );
 
     // Validações básicas comuns
     if (empty($nome) || empty($email) || empty($senha) || empty($confirma_senha)) {
         $erro = "Preencha os campos obrigatórios: nome, e-mail e senha.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $erro = "E-mail inválido! Verifique o formato do endereço de e-mail.";
     } elseif ($senha !== $confirma_senha) {
         $erro = "As senhas não coincidem!";
-    } elseif (strlen($senha) < 6) {
-        $erro = "A senha deve ter pelo menos 6 caracteres!";
-    } elseif (!$is_admin && !$is_aluno) {
-        $erro = "Dados incompatíveis: para ALUNO use @fatec.sp.gov.br com RA/curso/semestre preenchidos; para ADMIN deixe RA/curso/semestre vazios e use @cps.sp.gov.br.";
     } else {
+        $validacao_senha = validarSenha($senha);
+        if (!$validacao_senha['valido']) {
+            $erro = $validacao_senha['erro'];
+        }
+    }
+
+    if (empty($erro) && !($is_admin || $is_aluno)) {
+        $erro = "Dados incompatíveis: para ALUNO use @fatec.sp.gov.br com RA/curso/semestre preenchidos; para ADMIN deixe RA/curso/semestre vazios e use @cps.sp.gov.br.";
+    }
+
+    if (empty($erro)) {
         // --------------------------------------------------
         // CADASTRAR ADMINISTRADOR
         // --------------------------------------------------
         if ($is_admin) {
             try {
                 // Verificar email duplicado na tabela ADMINISTRADOR
-                $stmtEmail = $conn->prepare("SELECT id_admin FROM ADMINISTRADOR WHERE email_corporativo = ?");
-                $stmtEmail->execute([$email]);
-
-                if ($stmtEmail->fetch()) {
+                if (emailAdminExiste($conn, $email)) {
                     $erro = "Este e-mail já está cadastrado como administrador!";
                 } else {
-                    $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
+                    $senha_hash = hashearSenha($senha);
 
                     $stmtInsert = $conn->prepare("
                         INSERT INTO ADMINISTRADOR (nome_completo, email_corporativo, senha_hash, ativo)
-                        VALUES (?, ?, ?, 1)
+                        VALUES (?, ?, ?, 0)
                     ");
 
                     if ($stmtInsert->execute([$nome, $email, $senha_hash])) {
-                        $sucesso = true;
+                        $id_admin = $conn->lastInsertId();
+
+                        // Gerar token de confirmação
+                        $token = bin2hex(random_bytes(32));
+                        $dataExpiracao = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+                        $stmtToken = $conn->prepare("
+                            INSERT INTO email_confirmacao (token, tipo_usuario, id_usuario, email, data_expiracao)
+                            VALUES (?, 'admin', ?, ?, ?)
+                        ");
+
+                        if ($stmtToken->execute([$token, $id_admin, $email, $dataExpiracao])) {
+                            // Enviar email (produção ou hybrid mode)
+                            if (shouldSendRealEmail()) {
+                                try {
+                                    $emailService = new EmailService();
+                                    $emailEnviado = $emailService->enviarConfirmacaoCadastro($email, $nome, $token, 'admin');
+
+                                    if ($emailEnviado) {
+                                        $sucesso = true;
+                                        // Modo hybrid: mostra popup E envia email
+                                        if (isDevMode()) {
+                                            $dev_mode_html = exibirMensagemDevMode($token, $email);
+                                        }
+                                    } else {
+                                        $erro = "Cadastro realizado, mas houve erro ao enviar o e-mail de confirmação. Entre em contato com o suporte.";
+                                    }
+                                } catch (Exception $e) {
+                                    $erro = "Cadastro realizado, mas o serviço de e-mail não está configurado. Entre em contato com o suporte.";
+                                }
+                            } else {
+                                // Modo dev puro: só mostra popup
+                                $sucesso = true;
+                                $dev_mode_html = exibirMensagemDevMode($token, $email);
+                            }
+                        } else {
+                            $erro = "Erro ao gerar token de confirmação.";
+                        }
                     } else {
                         $erro = "Erro ao cadastrar administrador.";
                     }
                 }
             } catch (PDOException $e) {
-                $erro = "Erro no cadastro do administrador: " . $e->getMessage();
+                // Logar erro completo para debug (não mostrar ao usuário)
+                error_log("Erro ao cadastrar admin: " . $e->getMessage());
+                error_log("Stack trace: " . $e->getTraceAsString());
+
+                // Mensagem genérica para o usuário
+                if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                    $erro = "Este e-mail já está cadastrado no sistema.";
+                } else {
+                    $erro = "Erro ao processar cadastro. Tente novamente ou contate o suporte.";
+                }
             }
         }
 
@@ -73,40 +137,119 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // CADASTRAR ALUNO
         // --------------------------------------------------
         elseif ($is_aluno) {
+            // Processar upload de foto (opcional)
+            if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] === UPLOAD_ERR_OK) {
+                $arquivo = $_FILES['foto_perfil'];
+                $extensao = strtolower(pathinfo($arquivo['name'], PATHINFO_EXTENSION));
+                $extensoes_permitidas = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                $tamanho_maximo = 5 * 1024 * 1024; // 5MB
+
+                if (!in_array($extensao, $extensoes_permitidas)) {
+                    $erro = "Formato de imagem inválido. Use JPG, PNG, GIF ou WebP.";
+                } elseif ($arquivo['size'] > $tamanho_maximo) {
+                    $erro = "A imagem deve ter no máximo 5MB.";
+                } else {
+                    // Diretório de upload (mesmo padrão de mudar_foto.php)
+                    $diretorio_upload = __DIR__ . '/../../storage/uploads/perfil/';
+                    if (!is_dir($diretorio_upload)) {
+                        mkdir($diretorio_upload, 0755, true);
+                    }
+
+                    // Nome único para o arquivo
+                    $nome_arquivo = uniqid('perfil_', true) . '.' . $extensao;
+                    $caminho_completo = $diretorio_upload . $nome_arquivo;
+
+                    if (move_uploaded_file($arquivo['tmp_name'], $caminho_completo)) {
+                        // Caminho relativo (mesmo padrão de mudar_foto.php)
+                        // Funciona em qualquer página pois é relativo ao HTML renderizado
+                        $foto_perfil = '../../storage/uploads/perfil/' . $nome_arquivo;
+                        $foto_perfil_original = $arquivo['name'];
+                    } else {
+                        $erro = "Erro ao fazer upload da foto.";
+                    }
+                }
+            }
+
             // Validar RA numérico
-            if (!preg_match('/^\d+$/', $ra)) {
+            if (empty($erro) && !preg_match('/^\d+$/', $ra)) {
                 $erro = "O RA deve conter apenas números!";
-            } else {
+            }
+
+            if (empty($erro)) {
                 try {
                     // Verificar RA duplicado
-                    $stmtCheckRA = $conn->prepare("SELECT id_aluno FROM ALUNO WHERE ra = ?");
-                    $stmtCheckRA->execute([$ra]);
-                    if ($stmtCheckRA->fetch()) {
+                    if (raExiste($conn, $ra)) {
                         $erro = "Este RA já está cadastrado!";
+                    } elseif (emailAlunoExiste($conn, $email)) {
+                        $erro = "Este e-mail já está cadastrado!";
                     } else {
-                        // Verificar email duplicado na tabela ALUNO
-                        $stmtCheckEmail = $conn->prepare("SELECT id_aluno FROM ALUNO WHERE email_institucional = ?");
-                        $stmtCheckEmail->execute([$email]);
+                        $senha_hash = hashearSenha($senha);
 
-                        if ($stmtCheckEmail->fetch()) {
-                            $erro = "Este e-mail já está cadastrado!";
-                        } else {
-                            $senha_hash = password_hash($senha, PASSWORD_BCRYPT);
+                        $stmtInsert = $conn->prepare("
+                            INSERT INTO ALUNO (ra, nome_completo, email_institucional, foto_perfil, senha_hash, curso, semestre, ativo)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+                        ");
 
-                            $stmtInsert = $conn->prepare("
-                                INSERT INTO ALUNO (ra, nome_completo, email_institucional, senha_hash, curso, semestre)
-                                VALUES (?, ?, ?, ?, ?, ?)
+                        if ($stmtInsert->execute([$ra, $nome, $email, $foto_perfil, $senha_hash, $curso, $semestre])) {
+                            $id_aluno = $conn->lastInsertId();
+
+                            // Gerar token de confirmação
+                            $token = bin2hex(random_bytes(32));
+                            $dataExpiracao = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+                            $stmtToken = $conn->prepare("
+                                INSERT INTO email_confirmacao (token, tipo_usuario, id_usuario, email, data_expiracao)
+                                VALUES (?, 'aluno', ?, ?, ?)
                             ");
 
-                            if ($stmtInsert->execute([$ra, $nome, $email, $senha_hash, $curso, $semestre])) {
-                                $sucesso = true;
+                            if ($stmtToken->execute([$token, $id_aluno, $email, $dataExpiracao])) {
+                                // Enviar email (produção ou hybrid mode)
+                                if (shouldSendRealEmail()) {
+                                    try {
+                                        $emailService = new EmailService();
+                                        $emailEnviado = $emailService->enviarConfirmacaoCadastro($email, $nome, $token, 'aluno');
+
+                                        if ($emailEnviado) {
+                                            $sucesso = true;
+                                            // Modo hybrid: mostra popup E envia email
+                                            if (isDevMode()) {
+                                                $dev_mode_html = exibirMensagemDevMode($token, $email);
+                                            }
+                                        } else {
+                                            $erro = "Cadastro realizado, mas houve erro ao enviar o e-mail de confirmação. Entre em contato com o suporte.";
+                                        }
+                                    } catch (Exception $e) {
+                                        $erro = "Cadastro realizado, mas o serviço de e-mail não está configurado. Entre em contato com o suporte.";
+                                    }
+                                } else {
+                                    // Modo dev puro: só mostra popup
+                                    $sucesso = true;
+                                    $dev_mode_html = exibirMensagemDevMode($token, $email);
+                                }
                             } else {
-                                $erro = "Erro ao cadastrar aluno.";
+                                $erro = "Erro ao gerar token de confirmação.";
                             }
+                        } else {
+                            $erro = "Erro ao cadastrar aluno.";
                         }
                     }
                 } catch (PDOException $e) {
-                    $erro = "Erro no cadastro do aluno: " . $e->getMessage();
+                    // Logar erro completo para debug (não mostrar ao usuário)
+                    error_log("Erro ao cadastrar aluno: " . $e->getMessage());
+                    error_log("Stack trace: " . $e->getTraceAsString());
+
+                    // Mensagem genérica para o usuário
+                    if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+                        if (strpos($e->getMessage(), 'email') !== false) {
+                            $erro = "Este e-mail já está cadastrado no sistema.";
+                        } elseif (strpos($e->getMessage(), 'ra') !== false) {
+                            $erro = "Este RA já está cadastrado no sistema.";
+                        } else {
+                            $erro = "Estes dados já estão cadastrados no sistema.";
+                        }
+                    } else {
+                        $erro = "Erro ao processar cadastro. Tente novamente ou contate o suporte.";
+                    }
                 }
             }
         }
@@ -123,13 +266,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
     <link rel="stylesheet" href="../../assets/styles/guest.css">
-    <link rel="stylesheet" href="../../assets/styles/admin.css">
     <link rel="stylesheet" href="../../assets/styles/base.css">
     <link rel="stylesheet" href="../../assets/styles/fonts.css">
     <link rel="stylesheet" href="../../assets/styles/footer-site.css">
     <link rel="stylesheet" href="../../assets/styles/header-site.css">
 </head>
 <body>
+<?php if (!empty($dev_mode_html)) echo $dev_mode_html; ?>
+
 <main class="login">
     <div class="container">
         <div class="wrapper-form cadastro">
@@ -142,8 +286,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <div class="callout" style="background-color: #d4edda; border-color: #c3e6cb;">
                     <div class="content">
                         <span style="color: #155724;">
-                            <strong>✅ Cadastro realizado com sucesso!</strong><br>
-                            Você já pode fazer login com suas credenciais.
+                            <strong>Cadastro realizado com sucesso!</strong><br>
+                            Um e-mail de confirmação foi enviado para sua caixa de entrada. Verifique sua caixa de e-mail e clique no link para ativar sua conta.
                         </span>
                     </div>
                 </div>
@@ -156,9 +300,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <div class="callout info">
                     <div class="content">
                         <span>
-                            <strong>Cadastro de Aluno / Administrador</strong><br>
-                            Para cadastrar como <strong>ALUNO</strong> use seu e-mail @fatec.sp.gov.br e preencha RA, curso e semestre.<br>
-                            Para cadastrar como <strong>ADMINISTRADOR</strong> deixe RA/curso/semestre vazios e utilize o e-mail @cps.sp.gov.br.
+                            <strong>Cadastro no Sistema SIV</strong><br>
+                            <strong>Para ALUNOS:</strong> Use seu email institucional @fatec.sp.gov.br e preencha todos os campos (RA, curso e semestre).<br>
+                            <strong>Para ADMINISTRADORES:</strong> Use o email corporativo @cps.sp.gov.br e deixe os campos RA, curso e semestre vazios.<br>
+                            Após o cadastro, você receberá um email de confirmação. Clique no link para ativar sua conta antes de fazer login.
                         </span>
                     </div>
                 </div>
@@ -171,7 +316,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     </div>
                 <?php endif; ?>
 
-                <form method="POST" id="form-cadastro" novalidate>
+                <form method="POST" id="form-cadastro" enctype="multipart/form-data" novalidate>
+                    <?= campoCSRF() ?>
                     <div class="input-group">
                         <label for="nome">Nome Completo</label>
                         <div class="input-field">
@@ -241,6 +387,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         </div>
                     </div>
 
+                    <div class="input-group" id="foto-perfil-group">
+                        <label for="foto_perfil">Foto de Perfil (Opcional)</label>
+                        <div class="upload-foto-perfil" style="display: flex; flex-direction: column; align-items: center; gap: 15px; padding: 20px; border: 2px dashed #ddd; border-radius: 10px; background: #f9f9f9;">
+                            <div class="preview-foto" style="width: 120px; height: 120px; border-radius: 50%; overflow: hidden; background: #e0e0e0; display: flex; align-items: center; justify-content: center; border: 4px solid #005c6d;">
+                                <i class="fas fa-user" style="font-size: 3rem; color: #005c6d;" id="icon-placeholder"></i>
+                                <img id="preview-img" src="" alt="Preview" style="display: none; width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                            <input type="file" id="foto_perfil" name="foto_perfil" accept="image/jpeg,image/jpg,image/png,image/gif" style="display: none;">
+                            <label for="foto_perfil" class="button secondary" style="cursor: pointer; margin: 0;">
+                                <i class="fas fa-camera"></i>
+                                Escolher Foto
+                            </label>
+                            <p style="font-size: 0.85rem; color: #666; text-align: center; margin: 0;">JPG, PNG ou GIF (máx. 5MB)</p>
+                        </div>
+                    </div>
+
                     <div class="input-group">
                         <label for="senha">Senha</label>
                         <div class="input-field">
@@ -271,6 +433,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <a class="button secondary" href="login.php">
                         <i class="fas fa-arrow-left"></i>
                         Já tenho conta
+                    </a>
+
+                    <a class="button secondary" href="../../index.php">
+                        <i class="fas fa-home"></i>
+                        Voltar à Homepage
                     </a>
                 </form>
 
@@ -340,6 +507,55 @@ function ajustarRequiredPorEmail() {
 document.getElementById('email')?.addEventListener('input', ajustarRequiredPorEmail);
 // Ao carregar a página, aplicar a regra se já houver valor
 window.addEventListener('load', ajustarRequiredPorEmail);
+
+// Preview da foto de perfil
+document.getElementById('foto_perfil')?.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('preview-img');
+    const placeholder = document.getElementById('icon-placeholder');
+
+    if (file) {
+        // Validar tamanho
+        if (file.size > 5 * 1024 * 1024) {
+            alert('A imagem deve ter no máximo 5MB.');
+            this.value = '';
+            return;
+        }
+
+        // Validar tipo
+        const tiposPermitidos = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!tiposPermitidos.includes(file.type)) {
+            alert('Formato inválido. Use JPG, PNG ou GIF.');
+            this.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            preview.src = event.target.result;
+            preview.style.display = 'block';
+            placeholder.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Ocultar campo de foto para administradores
+function ajustarCampoFoto() {
+    const email = (document.getElementById('email')?.value || '').toLowerCase();
+    const fotoGroup = document.getElementById('foto-perfil-group');
+
+    if (fotoGroup) {
+        if (email.endsWith('@cps.sp.gov.br')) {
+            fotoGroup.style.display = 'none';
+        } else {
+            fotoGroup.style.display = 'block';
+        }
+    }
+}
+
+document.getElementById('email')?.addEventListener('input', ajustarCampoFoto);
+window.addEventListener('load', ajustarCampoFoto);
 </script>
 </body>
 </html>

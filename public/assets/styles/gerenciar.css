@@ -1,0 +1,336 @@
+/* ========================================
+   GERENCIAR - Estilos para páginas de gerenciamento
+   (gerenciar-admins.php e gerenciar-alunos.php)
+   ======================================== */
+
+/* Card Wrapper */
+.card-wrapper {
+    max-width: 100%;
+    padding: 20px;
+}
+
+.card {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Filters Bar */
+.filters-bar {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: end;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 180px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+    font-size: 13px;
+}
+
+.filter-group input,
+.filter-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.btn-filter {
+    padding: 10px 20px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+.btn-filter:hover {
+    background: #004654;
+}
+
+/* Add Button */
+.btn-add {
+    padding: 16px 20px;
+    background: var(--secondary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: auto;
+    max-width: fit-content;
+}
+
+.btn-add:hover {
+    background: #6d0000;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-add:active {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Table Container */
+.table-container {
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+th {
+    background: var(--primary);
+    color: white;
+    padding: 12px 10px;
+    text-align: left;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    white-space: nowrap;
+    font-size: 13px;
+}
+
+td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+}
+
+tr:hover {
+    background: #f8f9fa;
+}
+
+/* Status Badges */
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge.pendente {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge.ativo,
+.badge.active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge.removido,
+.badge.inactive {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.btn-approve,
+.btn-reject,
+.btn-edit,
+.btn-remove,
+.btn-reactivate {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.btn-approve {
+    background: #28a745;
+    color: white;
+}
+
+.btn-approve:hover {
+    background: #218838;
+}
+
+.btn-reject {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-reject:hover {
+    background: #c82333;
+}
+
+.btn-edit {
+    background: #ffc107;
+    color: #333;
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.btn-edit:hover {
+    background: #e0a800;
+}
+
+.btn-remove {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-remove:hover {
+    background: #5a6268;
+}
+
+.btn-reactivate {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-reactivate:hover {
+    background: #138496;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.empty-state i {
+    font-size: 64px;
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.pagination .results {
+    color: #666;
+    font-size: 14px;
+}
+
+.pagination ul {
+    list-style: none;
+    display: flex;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+}
+
+.pagination li {
+    display: inline-block;
+}
+
+.pagination a,
+.pagination span {
+    display: inline-block;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    background: white;
+    color: #333;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s;
+    min-width: 40px;
+    text-align: center;
+}
+
+.pagination a:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.pagination a.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    font-weight: bold;
+}
+
+.pagination span {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Warning Box (usado apenas em gerenciar-admins.php) */
+.warning-box {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 13px;
+    color: #856404;
+}
+
+.warning-box i {
+    margin-right: 8px;
+}
+
+/* Ajustes específicos para gerenciar-alunos.php */
+th:nth-child(1), td:nth-child(1) { width: 18%; } /* Nome */
+th:nth-child(2), td:nth-child(2) { width: 12%; } /* RA */
+th:nth-child(3), td:nth-child(3) { width: 22%; } /* Email */
+th:nth-child(4), td:nth-child(4) { width: 8%; } /* Curso */
+th:nth-child(5), td:nth-child(5) { width: 10%; } /* Semestre */
+th:nth-child(6), td:nth-child(6) { width: 8%; } /* Status */
+th:nth-child(7), td:nth-child(7) { width: 10%; } /* Cadastro */
+th:nth-child(8), td:nth-child(8) { width: 12%; } /* Ações */
+
+/* ========================================
+   MODAL FIX - Garantir que modais apareçam
+   ======================================== */
+#modalEditar.modal.show,
+#modalCriar.modal.show {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}

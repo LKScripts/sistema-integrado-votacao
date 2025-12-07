@@ -1,6 +1,19 @@
-@import url("/assets/styles/base.css");
-@import url("/assets/styles/header-site.css");
-@import url("/assets/styles/footer-site.css");
+@import url("base.css");
+@import url("header-site.css");
+@import url("footer-site.css");
+
+/* Sobrescrever cores da navbar para seção admin */
+header.site .navbar {
+    background: var(--dark) !important;
+    background-color: var(--dark) !important;
+    background-image: none !important;
+}
+
+header.site .navbar .links li a.active,
+header.site .navbar .links li a:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
 /* Início estilização página inicial (/pages/admin/index.html) */
 main.dashboard {
     display: flex;
@@ -228,13 +241,11 @@ main.manage-applicants .list-applicants tbody td a {
     border-radius: 8px;
     font-weight: bold;
     color: #fff;
-    transition: all 0.2s ease;
+    transition: background 0.3s;
 }
 
 main.manage-applicants .list-applicants tbody td a:hover {
     background-color: #004955;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 main.manage-applicants .list-applicants .pagination {
@@ -289,10 +300,17 @@ main.manage-deadlines {
     flex-direction: column;
     flex: 1 1 auto;
 }
+
+main.manage-deadlines .card-wrapper {
+    width: 100%;
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 16px;
+}
+
 main.manage-deadlines .card-wrapper .card {
     display: flex;
     flex-direction: column;
-    max-width: 800px;
     background-color: #fff;
 }
 
@@ -342,10 +360,16 @@ main.manage-reports {
     flex: 1 1 auto;
 }
 
+main.manage-reports .card-wrapper {
+    width: 100%;
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 16px;
+}
+
 main.manage-reports .card-wrapper .card {
     display: flex;
     flex-direction: column;
-    max-width: 800px;
     background-color: #fff;
 }
 
@@ -357,3 +381,57 @@ main.manage-reports .card-wrapper .card h1.title {
 }
 
 /* Fim estilização página de relatórios (/pages/admin/relatorios.html) */
+
+header.site .navbar .actions a:hover {
+    background-color: #004654 !important;
+}
+
+/* Início estilização página de cadastro de administrador (/pages/admin/cadastro-admin.php) */
+main.manage-admin-registration {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+main.manage-admin-registration .card-wrapper {
+    width: 100%;
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 16px;
+}
+
+main.manage-admin-registration .card-wrapper .card {
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+}
+
+main.manage-admin-registration .card-wrapper .card h1.title {
+    color: #005f73;
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+main.manage-admin-registration .form-buttons .button {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+main.manage-admin-registration .message-box {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+main.manage-admin-registration .message-box.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+main.manage-admin-registration .message-box.error {
+    background: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+}
+/* Fim estilização página de cadastro de administrador (/pages/admin/cadastro-admin.php) */
