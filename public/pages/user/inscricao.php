@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $id_eleicao) {
 
                     if (file_exists($caminho_origem)) {
                         $extensao = pathinfo($caminho_origem, PATHINFO_EXTENSION);
-                        $nome_arquivo = 'candidato_' . $id_aluno . '_' . time() . '.' . $extensao;
+                        $nome_arquivo = 'candidato_' . $id_aluno . '_' . uniqid() . '.' . $extensao;
                         $caminho_destino = __DIR__ . '/../../../storage/uploads/candidatos/' . $nome_arquivo;
 
                         // Criar diretório se não existir
@@ -105,26 +105,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $id_eleicao) {
                 elseif ($arquivo['size'] > $tamanho_maximo) {
                     $erro = "A imagem deve ter no máximo 5MB.";
                 }
-                // Validar se é realmente uma imagem
-                elseif (!getimagesize($arquivo['tmp_name'])) {
-                    $erro = "O arquivo enviado não é uma imagem válida.";
-                } else {
-                    // Gerar nome único para o arquivo
-                    $nome_arquivo = 'candidato_' . $id_aluno . '_' . time() . '.' . $extensao;
-                    $dir_destino = __DIR__ . '/../../../storage/uploads/candidatos/';
+                // VALIDAÇÃO MIME TYPE (Issue #8)
+                else {
+                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                    $mimeType = finfo_file($finfo, $arquivo['tmp_name']);
+                    finfo_close($finfo);
 
-                    // Criar diretório se não existir
-                    if (!is_dir($dir_destino)) {
-                        mkdir($dir_destino, 0755, true);
+                    $mimePermitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+                    if (!in_array($mimeType, $mimePermitidos)) {
+                        $erro = "Tipo de arquivo inválido. O arquivo não é uma imagem válida.";
                     }
-
-                    $caminho_destino = $dir_destino . $nome_arquivo;
-
-                    // Mover arquivo para pasta de uploads
-                    if (move_uploaded_file($arquivo['tmp_name'], $caminho_destino)) {
-                        $foto_candidato = $nome_arquivo;
+                    // Validar se é realmente uma imagem (backup validation)
+                    elseif (!getimagesize($arquivo['tmp_name'])) {
+                        $erro = "O arquivo enviado não é uma imagem válida.";
                     } else {
-                        $erro = "Erro ao fazer upload da imagem. Tente novamente.";
+                        // Gerar nome único para o arquivo (Issue #9: usar uniqid())
+                        $nome_arquivo = 'candidato_' . $id_aluno . '_' . uniqid() . '.' . $extensao;
+                        $dir_destino = __DIR__ . '/../../../storage/uploads/candidatos/';
+
+                        // Criar diretório se não existir
+                        if (!is_dir($dir_destino)) {
+                            mkdir($dir_destino, 0755, true);
+                        }
+
+                        $caminho_destino = $dir_destino . $nome_arquivo;
+
+                        // Mover arquivo para pasta de uploads
+                        if (move_uploaded_file($arquivo['tmp_name'], $caminho_destino)) {
+                            $foto_candidato = $nome_arquivo;
+                        } else {
+                            $erro = "Erro ao fazer upload da imagem. Tente novamente.";
+                        }
                     }
                 }
             }

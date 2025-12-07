@@ -27,19 +27,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto_perfil'])) {
         } elseif ($arquivo['size'] > 5 * 1024 * 1024) { // 5MB
             $erro = "Arquivo muito grande. Tamanho máximo: 5MB.";
         } else {
-            // Diretório de upload
-            $diretorioUpload = __DIR__ . '/../../storage/uploads/perfil/';
+            // VALIDAÇÃO MIME TYPE (Issue #8)
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_file($finfo, $arquivo['tmp_name']);
+            finfo_close($finfo);
 
-            if (!is_dir($diretorioUpload)) {
-                mkdir($diretorioUpload, 0755, true);
-            }
+            $mimePermitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
-            // Nome único para o arquivo
-            $nomeArquivo = 'perfil_' . $usuario['id'] . '_' . time() . '.' . $extensao;
-            $caminhoCompleto = $diretorioUpload . $nomeArquivo;
+            if (!in_array($mimeType, $mimePermitidos)) {
+                $erro = "Tipo de arquivo inválido. O arquivo não é uma imagem válida.";
+            } else {
+                // Diretório de upload
+                $diretorioUpload = __DIR__ . '/../../storage/uploads/perfil/';
 
-            // Mover arquivo
-            if (move_uploaded_file($arquivo['tmp_name'], $caminhoCompleto)) {
+                if (!is_dir($diretorioUpload)) {
+                    mkdir($diretorioUpload, 0755, true);
+                }
+
+                // Nome único para o arquivo (Issue #9: usar uniqid())
+                $nomeArquivo = 'perfil_' . $usuario['id'] . '_' . uniqid() . '.' . $extensao;
+                $caminhoCompleto = $diretorioUpload . $nomeArquivo;
+
+                // Mover arquivo
+                if (move_uploaded_file($arquivo['tmp_name'], $caminhoCompleto)) {
                 // Caminho relativo do ponto de vista do HTML renderizado em public/pages/user/
                 $caminhoRelativo = '../../storage/uploads/perfil/' . $nomeArquivo;
 
@@ -67,8 +77,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto_perfil'])) {
                 } else {
                     $erro = "Erro ao salvar foto no banco de dados.";
                 }
-            } else {
-                $erro = "Erro ao fazer upload do arquivo.";
+                } else {
+                    $erro = "Erro ao fazer upload do arquivo.";
+                }
             }
         }
     } else {

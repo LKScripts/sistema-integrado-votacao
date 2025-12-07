@@ -212,7 +212,13 @@ $pode_acompanhar = $tem_candidatura;
                                     </div>
 
                                     <?php if ($eleicao_encerrada['foto_representante']): ?>
-                                        <img src="../../storage/uploads/candidatos/<?= htmlspecialchars($eleicao_encerrada['foto_representante']) ?>"
+                                        <?php
+                                        // Detecta se é URL externa (http/https) ou caminho local
+                                        $foto_rep_src = (filter_var($eleicao_encerrada['foto_representante'], FILTER_VALIDATE_URL))
+                                            ? htmlspecialchars($eleicao_encerrada['foto_representante'])
+                                            : '../../storage/uploads/candidatos/' . htmlspecialchars($eleicao_encerrada['foto_representante']);
+                                        ?>
+                                        <img src="<?= $foto_rep_src ?>"
                                              alt="Foto do representante"
                                              style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid white; margin-bottom: 15px;">
                                     <?php else: ?>
@@ -255,7 +261,13 @@ $pode_acompanhar = $tem_candidatura;
                                     </div>
 
                                     <?php if ($eleicao_encerrada['foto_suplente']): ?>
-                                        <img src="../../storage/uploads/candidatos/<?= htmlspecialchars($eleicao_encerrada['foto_suplente']) ?>"
+                                        <?php
+                                        // Detecta se é URL externa (http/https) ou caminho local
+                                        $foto_sup_src = (filter_var($eleicao_encerrada['foto_suplente'], FILTER_VALIDATE_URL))
+                                            ? htmlspecialchars($eleicao_encerrada['foto_suplente'])
+                                            : '../../storage/uploads/candidatos/' . htmlspecialchars($eleicao_encerrada['foto_suplente']);
+                                        ?>
+                                        <img src="<?= $foto_sup_src ?>"
                                              alt="Foto do suplente"
                                              style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid white; margin-bottom: 15px;">
                                     <?php else: ?>

@@ -59,48 +59,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote']) && $eleicao &
         if (!$verificacao['valido']) {
             $erro = $verificacao['mensagem'];
         } else {
-            // Se for voto em branco, inserir direto sem validação de candidato
-            if ($id_candidatura === null) {
-                $stmtVoto = $conn->prepare("
-                    INSERT INTO VOTO (id_eleicao, id_aluno, id_candidatura, ip_votante, assinatura_digital)
-                    VALUES (?, ?, NULL, ?, TRUE)
+            // PROTEÇÃO CONTRA RACE CONDITION: Usar transação com lock pessimista
+            try {
+                $conn->beginTransaction();
+
+                // SELECT FOR UPDATE bloqueia linha e impede votação simultânea
+                $stmtLock = $conn->prepare("
+                    SELECT id_voto FROM VOTO
+                    WHERE id_eleicao = ? AND id_aluno = ?
+                    FOR UPDATE
                 ");
-                $ip = $_SERVER['REMOTE_ADDR'];
+                $stmtLock->execute([$eleicao['id_eleicao'], $id_aluno]);
 
-                if ($stmtVoto->execute([$eleicao['id_eleicao'], $id_aluno, $ip])) {
-                    $voto_confirmado = true;
-                    $ja_votou = true;
+                if ($stmtLock->fetch()) {
+                    // Já existe voto - rollback e erro
+                    $conn->rollBack();
+                    $erro = "Você já votou nesta eleição.";
                 } else {
-                    $erro = "Erro ao registrar voto em branco. Tente novamente.";
-                }
-            } else {
-                // VALIDAÇÃO CRÍTICA: Verificar se o candidato pertence a esta eleição e está deferido
-                $stmtValidaCandidato = $conn->prepare("
-                    SELECT id_candidatura
-                    FROM CANDIDATURA
-                    WHERE id_candidatura = ?
-                      AND id_eleicao = ?
-                      AND status_validacao = 'deferido'
-                ");
-                $stmtValidaCandidato->execute([$id_candidatura, $eleicao['id_eleicao']]);
+                    // Se for voto em branco, inserir direto sem validação de candidato
+                    if ($id_candidatura === null) {
+                        $stmtVoto = $conn->prepare("
+                            INSERT INTO VOTO (id_eleicao, id_aluno, id_candidatura, ip_votante)
+                            VALUES (?, ?, NULL, ?)
+                        ");
+                        $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 
-                if (!$stmtValidaCandidato->fetch()) {
-                    $erro = "Candidato inválido ou não aprovado para esta eleição.";
-                } else {
-                    // Inserir voto com assinatura digital (confirmado com senha)
-                    $stmtVoto = $conn->prepare("
-                        INSERT INTO VOTO (id_eleicao, id_aluno, id_candidatura, ip_votante, assinatura_digital)
-                        VALUES (?, ?, ?, ?, TRUE)
-                    ");
-                    $ip = $_SERVER['REMOTE_ADDR'];
-
-                    if ($stmtVoto->execute([$eleicao['id_eleicao'], $id_aluno, $id_candidatura, $ip])) {
-                        $voto_confirmado = true;
-                        $ja_votou = true;
+                        if ($stmtVoto->execute([$eleicao['id_eleicao'], $id_aluno, $ip])) {
+                            $conn->commit();
+                            $voto_confirmado = true;
+                            $ja_votou = true;
+                        } else {
+                            $conn->rollBack();
+                            $erro = "Erro ao registrar voto em branco. Tente novamente.";
+                        }
                     } else {
-                        $erro = "Erro ao registrar voto. Tente novamente.";
+                        // VALIDAÇÃO CRÍTICA: Verificar se o candidato pertence a esta eleição e está deferido
+                        $stmtValidaCandidato = $conn->prepare("
+                            SELECT id_candidatura
+                            FROM CANDIDATURA
+                            WHERE id_candidatura = ?
+                              AND id_eleicao = ?
+                              AND status_validacao = 'deferido'
+                        ");
+                        $stmtValidaCandidato->execute([$id_candidatura, $eleicao['id_eleicao']]);
+
+                        if (!$stmtValidaCandidato->fetch()) {
+                            $conn->rollBack();
+                            $erro = "Candidato inválido ou não aprovado para esta eleição.";
+                        } else {
+                            // Inserir voto
+                            $stmtVoto = $conn->prepare("
+                                INSERT INTO VOTO (id_eleicao, id_aluno, id_candidatura, ip_votante)
+                                VALUES (?, ?, ?, ?)
+                            ");
+                            $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+
+                            if ($stmtVoto->execute([$eleicao['id_eleicao'], $id_aluno, $id_candidatura, $ip])) {
+                                $conn->commit();
+                                $voto_confirmado = true;
+                                $ja_votou = true;
+                            } else {
+                                $conn->rollBack();
+                                $erro = "Erro ao registrar voto. Tente novamente.";
+                            }
+                        }
                     }
                 }
+            } catch (PDOException $e) {
+                if ($conn->inTransaction()) {
+                    $conn->rollBack();
+                }
+                error_log("Erro ao processar voto: " . $e->getMessage());
+                $erro = "Erro ao processar voto. Por favor, tente novamente.";
             }
         }
     }
