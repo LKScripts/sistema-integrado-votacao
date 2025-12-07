@@ -88,6 +88,7 @@ header.site .navbar .links {
     justify-content: center;
     list-style: none;
     gap: 25px;
+    flex-wrap: wrap;
 }
 
 header.site .navbar .links li a {
@@ -152,15 +153,161 @@ header.site .navbar .actions .admin-name {
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-@media (max-width: 1024px) {
+/* Responsividade para telas menores */
+@media (max-width: 1400px) {
+    header.site .navbar .links {
+        gap: 12px;
+    }
+
+    header.site .navbar .links li a {
+        padding: 10px 8px;
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 1300px) {
     header.site .navbar {
         flex-direction: column;
-        gap: 10px;
+        gap: 15px;
         padding: 20px;
+    }
+
+    header.site .navbar .logo {
+        width: 100%;
+        justify-content: center;
     }
 
     header.site .navbar .links {
         position: relative;
-        padding: 16px 0;
+        width: 100%;
+        gap: 10px;
+    }
+
+    header.site .navbar .links li a {
+        padding: 10px 12px;
+        font-size: 0.9em;
+    }
+
+    header.site .navbar .actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    header.site .navbar .actions .admin-name {
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 1200px) {
+    header.site .navbar .links {
+        gap: 8px;
+    }
+
+    header.site .navbar .links li a {
+        padding: 8px 10px;
+        font-size: 0.85em;
+    }
+
+    header.site .navbar .actions .admin-name {
+        font-size: 0.85em;
+        padding: 6px 10px;
+    }
+}
+
+@media (max-width: 1024px) {
+    header.site .navbar {
+        flex-direction: column;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    header.site .navbar .logo {
+        width: 100%;
+        justify-content: center;
+    }
+
+    header.site .navbar .links {
+        position: relative;
+        width: 100%;
+        flex-wrap: wrap;
+        padding: 0;
+        gap: 8px;
+    }
+
+    header.site .navbar .links li a {
+        padding: 10px 12px;
+        font-size: 0.9em;
+    }
+
+    header.site .navbar .actions {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 768px) {
+    header.site .navbar {
+        padding: 15px;
+    }
+
+    header.site .navbar .logo > img {
+        height: 45px;
+    }
+
+    header.site .navbar .links {
+        gap: 5px;
+    }
+
+    header.site .navbar .links li a {
+        padding: 8px 10px;
+        font-size: 0.85em;
+    }
+
+    header.site .navbar .actions {
+        gap: 10px;
+    }
+
+    header.site .navbar .actions a,
+    header.site .navbar .actions .admin-name {
+        padding: 6px 12px;
+        font-size: 0.85em;
+    }
+}
+
+@media (max-width: 480px) {
+    header.site .navbar .logo {
+        gap: 10px;
+    }
+
+    header.site .navbar .logo > img {
+        height: 35px;
+    }
+
+    header.site .navbar .links {
+        flex-direction: column;
+        width: 100%;
+        gap: 5px;
+    }
+
+    header.site .navbar .links li {
+        width: 100%;
+    }
+
+    header.site .navbar .links li a {
+        display: block;
+        text-align: center;
+        padding: 10px;
+    }
+
+    header.site .navbar .actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    header.site .navbar .actions a,
+    header.site .navbar .actions .admin-name {
+        width: 100%;
+        text-align: center;
     }
 }

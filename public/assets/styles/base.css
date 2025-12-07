@@ -201,7 +201,6 @@ form[class^="form-"] .wrapper-select::after {
     right: 10px;
     width: 0;
     height: 0;
-    border-left: 6px solid transparent;
     border-right: 6px solid transparent;
     border-top: 8px solid #999;
 }
