@@ -85,16 +85,38 @@ if (!empty($candidatura['foto_candidato'])) {
     <link rel="stylesheet" href="../../assets/styles/user.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-
     <style>
-        div #image-perfil img{
+        /* Padronização da foto na card de preview */
+        .candidate-card .media {
             display: flex;
-            justify-content: center; /* horizontal */
-            align-items: center;     /* vertical */
-            height: 300px;           /* ou o tamanho do container */
-            border: 3px solid #000;  /* só para visualizar */
-            border-radius: 50px;
-            margin-bottom: 20px;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 200px;
+            background: #005c6d;
+            color: #fff;
+        }
+
+        .candidate-card .media img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid white;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .candidate-card .media .placeholder {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 150px;
+            height: 150px;
+            border: 4px solid white;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            font-size: 4rem;
+            color: white;
         }
     </style>
 
@@ -185,8 +207,8 @@ if (!empty($candidatura['foto_candidato'])) {
                     <i class="fas fa-eye"></i> Preview - Como aparecerá na votação:
                 </h2>
 
-                <div class="candidate-card" style="max-width: 400px; margin: 0 auto 30px;" id="candidate-card">
-                    <div class="media" id="image-perfil">
+                <div class="candidate-card" style="max-width: 400px; margin: 0 auto 30px;">
+                    <div class="media">
                         <?php if ($foto_preview): ?>
                             <img src="<?= htmlspecialchars($foto_preview) ?>" alt="Sua foto" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                             <div class="placeholder" style="display:none;">
