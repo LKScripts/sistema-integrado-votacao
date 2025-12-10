@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `eleicao` (
   CONSTRAINT `chk_semestre_eleicao` CHECK (`semestre` BETWEEN 1 AND 6),
   CONSTRAINT `chk_datas_candidatura` CHECK (`data_fim_candidatura` > `data_inicio_candidatura`),
   CONSTRAINT `chk_datas_votacao` CHECK (`data_fim_votacao` > `data_inicio_votacao`),
-  CONSTRAINT `chk_ordem_fases` CHECK (`data_inicio_votacao` >= `data_fim_candidatura`)
+  CONSTRAINT `chk_ordem_fases` CHECK (`data_inicio_votacao` > `data_fim_candidatura`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabela: CANDIDATURA
@@ -445,9 +445,9 @@ BEGIN
         SET MESSAGE_TEXT = 'ERRO: data_inicio_candidatura deve ser anterior a data_fim_candidatura';
     END IF;
 
-    IF NEW.data_fim_candidatura >= NEW.data_fim_votacao THEN
+    IF NEW.data_inicio_votacao <= NEW.data_fim_candidatura THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'ERRO: data_fim_candidatura deve ser anterior a data_fim_votacao';
+        SET MESSAGE_TEXT = 'ERRO: data_inicio_votacao deve ser posterior a data_fim_candidatura';
     END IF;
 
     -- Validação 2: Verificar sobreposição com outras eleições do mesmo curso/semestre
@@ -484,9 +484,9 @@ BEGIN
         SET MESSAGE_TEXT = 'ERRO: data_inicio_candidatura deve ser anterior a data_fim_candidatura';
     END IF;
 
-    IF NEW.data_fim_candidatura >= NEW.data_fim_votacao THEN
+    IF NEW.data_inicio_votacao <= NEW.data_fim_candidatura THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'ERRO: data_fim_candidatura deve ser anterior a data_fim_votacao';
+        SET MESSAGE_TEXT = 'ERRO: data_inicio_votacao deve ser posterior a data_fim_candidatura';
     END IF;
 
     -- Validação 2: Verificar sobreposição com outras eleições do mesmo curso/semestre
