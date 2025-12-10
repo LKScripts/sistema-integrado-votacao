@@ -5,7 +5,7 @@ require_once __DIR__ . '/conexao.php';
 // =====================================================
 // CONFIGURAÇÕES DE CACHE
 // =====================================================
-const CACHE_DURACAO = 300; // 5 minutos (em segundos)
+const CACHE_DURACAO = 30; // 30 segundos
 const CACHE_FILE_PREFIX = __DIR__ . '/../storage/cache/eleicao_status_';
 
 /**
@@ -59,6 +59,19 @@ function salvarCache($chave, $valor) {
     ];
 
     file_put_contents($arquivo, json_encode($dados));
+}
+
+/**
+ * Limpar cache específico por chave
+ *
+ * @param string $chave Chave do cache a ser removido
+ */
+function limparCache($chave) {
+    garantirDiretorioCache();
+    $arquivo = CACHE_FILE_PREFIX . md5($chave) . '.json';
+    if (file_exists($arquivo)) {
+        @unlink($arquivo);
+    }
 }
 
 /**
@@ -218,24 +231,33 @@ function finalizarEleicoesAutomaticamente() {
  * @param string $curso Nome do curso
  * @param int $semestre Número do semestre
  * @param string $tipo 'votacao' ou 'candidatura'
+ * @param bool $forcar_atualizacao Força atualização mesmo com cache válido
  * @return array|null Dados da eleição ou null se não encontrada
  */
-function buscarEleicaoAtivaComVerificacao($curso, $semestre, $tipo = 'votacao') {
+function buscarEleicaoAtivaComVerificacao($curso, $semestre, $tipo = 'votacao', $forcar_atualizacao = false) {
     global $conn;
 
-    // Tentar obter do cache primeiro
-    $chave_cache = "eleicao_ativa_{$curso}_{$semestre}_{$tipo}";
-    $cache = obterCache($chave_cache);
-
-    if ($cache !== null) {
-        return $cache;
-    }
-
-    // Apenas verificar se há eleições que PODEM estar desatualizadas
-    $pode_estar_desatualizado = verificarSeNecessitaAtualizacao();
-
-    if ($pode_estar_desatualizado) {
+    // Se forçar atualização, limpar cache e atualizar status
+    if ($forcar_atualizacao) {
         atualizarStatusEleicoes();
+        // Limpar cache específico
+        $chave_cache = "eleicao_ativa_{$curso}_{$semestre}_{$tipo}";
+        limparCache($chave_cache);
+    } else {
+        // Tentar obter do cache primeiro
+        $chave_cache = "eleicao_ativa_{$curso}_{$semestre}_{$tipo}";
+        $cache = obterCache($chave_cache);
+
+        if ($cache !== null) {
+            return $cache;
+        }
+
+        // Apenas verificar se há eleições que PODEM estar desatualizadas
+        $pode_estar_desatualizado = verificarSeNecessitaAtualizacao();
+
+        if ($pode_estar_desatualizado) {
+            atualizarStatusEleicoes();
+        }
     }
 
     $status = ($tipo === 'votacao') ? 'votacao_aberta' : 'candidatura_aberta';
