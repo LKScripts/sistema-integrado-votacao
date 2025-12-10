@@ -15,11 +15,11 @@ $semestre = $usuario['semestre'];
 $erro = "";
 $voto_confirmado = false;
 
-// Buscar eleição ativa para votação (COM VERIFICAÇÃO AUTOMÁTICA)
-$eleicao = buscarEleicaoAtivaComVerificacao($curso, $semestre, 'votacao');
+// Buscar eleição ativa para votação (FORÇANDO ATUALIZAÇÃO para garantir sincronização)
+$eleicao = buscarEleicaoAtivaComVerificacao($curso, $semestre, 'votacao', true);
 
 // Verificar se há eleição em fase de candidatura (para mostrar/ocultar link Inscrição)
-$eleicaoCandidatura = buscarEleicaoAtivaComVerificacao($curso, $semestre, 'candidatura');
+$eleicaoCandidatura = buscarEleicaoAtivaComVerificacao($curso, $semestre, 'candidatura', true);
 
 // Verificar se já votou
 $ja_votou = false;

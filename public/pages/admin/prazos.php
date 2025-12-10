@@ -98,18 +98,40 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $status = "candidatura_aberta";
 
+        // Verificar se a coluna lote_criacao existe no banco
+        $coluna_lote_existe = false;
+        try {
+            $check_col = $conn->query("SHOW COLUMNS FROM ELEICAO LIKE 'lote_criacao'");
+            $coluna_lote_existe = $check_col->rowCount() > 0;
+        } catch (Exception $e) {
+            // Se houver erro ao verificar, assume que não existe
+            $coluna_lote_existe = false;
+        }
+
         // Gerar identificador único de lote se for criação múltipla
         $lote_criacao = null;
-        if (count($lista_cursos) > 1 || count($lista_semestres) > 1) {
+        if ($coluna_lote_existe && (count($lista_cursos) > 1 || count($lista_semestres) > 1)) {
             $lote_criacao = md5(uniqid($id_admin . time(), true));
         }
 
-        $stmt = $conn->prepare("
-            INSERT INTO ELEICAO
-            (curso, semestre, data_inicio_candidatura, data_fim_candidatura,
-             data_inicio_votacao, data_fim_votacao, status, criado_por, lote_criacao)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
+        // Montar SQL dinamicamente baseado na existência da coluna
+        if ($coluna_lote_existe) {
+            $sql_insert = "
+                INSERT INTO ELEICAO
+                (curso, semestre, data_inicio_candidatura, data_fim_candidatura,
+                 data_inicio_votacao, data_fim_votacao, status, criado_por, lote_criacao)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ";
+        } else {
+            $sql_insert = "
+                INSERT INTO ELEICAO
+                (curso, semestre, data_inicio_candidatura, data_fim_candidatura,
+                 data_inicio_votacao, data_fim_votacao, status, criado_por)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ";
+        }
+
+        $stmt = $conn->prepare($sql_insert);
 
         try {
             $eleicoes_criadas = [];
@@ -117,17 +139,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // Loop duplo: cursos x semestres
             foreach ($lista_cursos as $c) {
                 foreach ($lista_semestres as $s) {
-                    $stmt->execute([
-                        $c,
-                        $s,
-                        $inscricao_inicio,
-                        $inscricao_fim,
-                        $votacao_inicio,
-                        $votacao_fim,
-                        $status,
-                        $id_admin,
-                        $lote_criacao
-                    ]);
+                    // Preparar parâmetros baseado na existência da coluna
+                    if ($coluna_lote_existe) {
+                        $params = [
+                            $c,
+                            $s,
+                            $inscricao_inicio,
+                            $inscricao_fim,
+                            $votacao_inicio,
+                            $votacao_fim,
+                            $status,
+                            $id_admin,
+                            $lote_criacao
+                        ];
+                    } else {
+                        $params = [
+                            $c,
+                            $s,
+                            $inscricao_inicio,
+                            $inscricao_fim,
+                            $votacao_inicio,
+                            $votacao_fim,
+                            $status,
+                            $id_admin
+                        ];
+                    }
+
+                    $stmt->execute($params);
 
                     $id_eleicao_criada = $conn->lastInsertId();
                     $eleicoes_criadas[] = [
@@ -173,11 +211,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             error_log("Erro ao cadastrar eleição/prazo: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
 
-            // Mensagem genérica para o usuário
-            if (strpos($e->getMessage(), 'Duplicate entry') !== false) {
+            // Mensagens específicas baseadas no tipo de erro
+            $erro_msg = $e->getMessage();
+
+            if (strpos($erro_msg, 'Duplicate entry') !== false) {
                 $mensagem = "Já existe uma eleição cadastrada para este curso e semestre.";
+            } elseif (strpos($erro_msg, 'data_inicio_votacao deve ser posterior a data_fim_candidatura') !== false) {
+                $mensagem = "A data de <b>início da votação</b> deve ser posterior ao término das inscrições/candidatura.";
+            } elseif (strpos($erro_msg, 'data_inicio_candidatura deve ser anterior a data_fim_candidatura') !== false) {
+                $mensagem = "A data de <b>início das inscrições</b> deve ser anterior ao término.";
+            } elseif (strpos($erro_msg, 'Unknown column') !== false && strpos($erro_msg, 'lote_criacao') !== false) {
+                $mensagem = "Erro de estrutura do banco de dados. Execute o script de atualização do schema (ALTER TABLE ELEICAO).";
+            } elseif (strpos($erro_msg, 'Já existe eleição') !== false) {
+                $mensagem = $erro_msg; // Mensagem do trigger já é amigável
+            } elseif (strpos($erro_msg, 'chk_ordem_fases') !== false) {
+                $mensagem = "A data de <b>início da votação</b> deve ser posterior ao fim das inscrições.";
             } else {
-                $mensagem = "Erro ao processar cadastro da eleição. Verifique os dados e tente novamente.";
+                $mensagem = "Erro ao processar cadastro da eleição. Verifique os dados e tente novamente.<br><small>Detalhe técnico: " . htmlspecialchars($e->getMessage()) . "</small>";
             }
             $tipo_mensagem = "error";
         }

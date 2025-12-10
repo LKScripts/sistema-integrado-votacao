@@ -17,8 +17,8 @@ $semestre = $usuario['semestre'];
 $erro = "";
 $inscricao_sucesso = isset($_GET['sucesso']) && $_GET['sucesso'] == '1';
 
-// Buscar eleição ativa para candidatura (COM VERIFICAÇÃO AUTOMÁTICA)
-$eleicao = buscarEleicaoAtivaComVerificacao($curso, $semestre, 'candidatura');
+// Buscar eleição ativa para candidatura (FORÇANDO ATUALIZAÇÃO para garantir sincronização)
+$eleicao = buscarEleicaoAtivaComVerificacao($curso, $semestre, 'candidatura', true);
 $eleicaoCandidatura = $eleicao; // Para uso no header
 
 if (!$eleicao) {
