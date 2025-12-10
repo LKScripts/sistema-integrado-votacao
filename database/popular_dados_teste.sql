@@ -4,7 +4,6 @@ USE siv_db;
 -- SCRIPT DE DADOS DE TESTE - SIV
 -- =====================================================
 -- IMPORTANTE: Este script é apenas para TESTE/DESENVOLVIMENTO
--- NÃO execute em ambiente de produção
 --
 -- FOTOS DOS CANDIDATOS:
 -- Todas as imagens são de paisagens/lugares/comidas do Unsplash (sem pessoas)
@@ -24,7 +23,7 @@ DELETE FROM RESULTADO;
 DELETE FROM CANDIDATURA;
 DELETE FROM ELEICAO;
 DELETE FROM ALUNO;
-DELETE FROM AUDITORIA;
+
 
 -- Resetar auto_increment
 ALTER TABLE VOTO AUTO_INCREMENT = 1;
@@ -32,7 +31,6 @@ ALTER TABLE RESULTADO AUTO_INCREMENT = 1;
 ALTER TABLE CANDIDATURA AUTO_INCREMENT = 1;
 ALTER TABLE ELEICAO AUTO_INCREMENT = 1;
 ALTER TABLE ALUNO AUTO_INCREMENT = 1;
-ALTER TABLE AUDITORIA AUTO_INCREMENT = 1;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
