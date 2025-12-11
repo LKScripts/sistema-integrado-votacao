@@ -4,7 +4,7 @@ require_once '../../../config/conexao.php';
 require_once '../../../config/helpers.php';
 require_once '../../../config/csrf.php';
 require_once '../../../config/email.php';
-require_once '../../../config/dev_mode.php';
+require_once '../../../config/dev-mode.php';
 
 $erro = "";
 $sucesso = false;
@@ -149,7 +149,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 } elseif ($arquivo['size'] > $tamanho_maximo) {
                     $erro = "A imagem deve ter no máximo 5MB.";
                 } else {
-                    // Diretório de upload (mesmo padrão de mudar_foto.php)
+                    // Diretório de upload (mesmo padrão de mudar-foto.php)
                     $diretorio_upload = __DIR__ . '/../../storage/uploads/perfil/';
                     if (!is_dir($diretorio_upload)) {
                         mkdir($diretorio_upload, 0755, true);
@@ -160,7 +160,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $caminho_completo = $diretorio_upload . $nome_arquivo;
 
                     if (move_uploaded_file($arquivo['tmp_name'], $caminho_completo)) {
-                        // Caminho relativo (mesmo padrão de mudar_foto.php)
+                        // Caminho relativo (mesmo padrão de mudar-foto.php)
                         // Funciona em qualquer página pois é relativo ao HTML renderizado
                         $foto_perfil = '../../storage/uploads/perfil/' . $nome_arquivo;
                         $foto_perfil_original = $arquivo['name'];

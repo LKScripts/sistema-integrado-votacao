@@ -2,7 +2,7 @@
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
 require_once '../../../config/csrf.php';
-require_once '../../../config/rate_limit.php';
+require_once '../../../config/rate-limit.php';
 require_once '../../../config/helpers.php';
 
 $erro = "";
