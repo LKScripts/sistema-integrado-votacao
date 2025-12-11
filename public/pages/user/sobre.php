@@ -1,7 +1,7 @@
 <?php
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
-require_once '../../../config/automacao_eleicoes.php';
+require_once '../../../config/automacao-eleicoes.php';
 
 verificarAluno();
 

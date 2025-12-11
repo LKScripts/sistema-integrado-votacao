@@ -3,7 +3,7 @@ require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
 require_once '../../../config/helpers.php';
 require_once '../../../config/csrf.php';
-require_once '../../../config/automacao_eleicoes.php';
+require_once '../../../config/automacao-eleicoes.php';
 
 // Verifica se é aluno logado
 verificarAluno();
@@ -21,7 +21,7 @@ $edicao_sucesso = isset($_GET['sucesso']) && $_GET['sucesso'] == '1';
 $id_candidatura = $_GET['id'] ?? null;
 
 if (!$id_candidatura) {
-    header('Location: acompanhar_inscricao.php');
+    header('Location: acompanhar-inscricao.php');
     exit;
 }
 
@@ -37,14 +37,14 @@ $candidatura = $stmt->fetch();
 
 if (!$candidatura) {
     $_SESSION['erro'] = 'Candidatura não encontrada ou você não tem permissão para editá-la.';
-    header('Location: acompanhar_inscricao.php');
+    header('Location: acompanhar-inscricao.php');
     exit;
 }
 
 // Verificar se ainda está no período de candidatura
 if (strtotime($candidatura['data_fim_candidatura']) < time()) {
     $_SESSION['erro'] = 'O período de candidaturas já foi encerrado. Não é mais possível editar.';
-    header('Location: acompanhar_inscricao.php');
+    header('Location: acompanhar-inscricao.php');
     exit;
 }
 
@@ -185,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
 
             // Redirecionar para página de acompanhamento com mensagem de sucesso
-            header("Location: acompanhar_inscricao.php?edicao_sucesso=1");
+            header("Location: acompanhar-inscricao.php?edicao_sucesso=1");
             exit;
         } else {
             $erro = "Erro ao atualizar candidatura. Tente novamente.";
@@ -308,7 +308,7 @@ if (!empty($candidatura['foto_candidato'])) {
                     </div>
 
                     <div class="form-buttons">
-                        <a href="acompanhar_inscricao.php" type="button" class="button secondary">Cancelar</a>
+                        <a href="acompanhar-inscricao.php" type="button" class="button secondary">Cancelar</a>
                         <button type="submit" class="button primary">Salvar Alterações</button>
                     </div>
                 </form>

@@ -52,11 +52,11 @@ if (!isset($tem_candidatura)) {
             <div class="user-menu">
                 <img src="<?= htmlspecialchars(obterFotoUsuario()) ?>" alt="Avatar do usuário" class="user-icon" onclick="toggleUserDropdown()">
                 <div class="user-dropdown" id="userDropdown">
-                    <a href="../../pages/user/mudar_foto.php">
+                    <a href="../../pages/user/mudar-foto.php">
                         <i class="fas fa-camera"></i>
                         <span>Mudar Foto de Perfil</span>
                     </a>
-                    <a href="../../pages/user/editar_perfil.php">
+                    <a href="../../pages/user/editar-perfil.php">
                         <i class="fas fa-user-edit"></i>
                         <span>Editar Perfil</span>
                     </a>

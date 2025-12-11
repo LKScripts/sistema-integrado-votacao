@@ -1,7 +1,7 @@
 <?php
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
-require_once '../../../config/automacao_eleicoes.php';
+require_once '../../../config/automacao-eleicoes.php';
 require_once '../../../config/csrf.php';
 
 // Verifica se é aluno logado

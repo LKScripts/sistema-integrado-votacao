@@ -2,7 +2,7 @@
 // pages/user/index.php
 require_once '../../../config/session.php';
 require_once '../../../config/conexao.php';
-require_once '../../../config/automacao_eleicoes.php';
+require_once '../../../config/automacao-eleicoes.php';
 
 verificarAluno();
 
@@ -167,7 +167,7 @@ $pode_acompanhar = $tem_candidatura;
 
                     <!-- Botão Acompanhar -->
                     <?php if ($pode_acompanhar): ?>
-                        <a href="../../pages/user/acompanhar_inscricao.php" class="button primary">
+                        <a href="../../pages/user/acompanhar-inscricao.php" class="button primary">
                             <i class="fas fa-clipboard-check"></i> ACOMPANHAR INSCRIÇÃO
                         </a>
                     <?php else: ?>
@@ -371,7 +371,7 @@ $pode_acompanhar = $tem_candidatura;
                 <button class="btn-close" type="button" onclick="document.getElementById('modalSolicitarMudanca').classList.remove('show')">&times;</button>
             </div>
 
-            <form id="formSolicitarMudanca" method="POST" action="processar_solicitacao_mudanca.php">
+            <form id="formSolicitarMudanca" method="POST" action="processar-solicitacao-mudanca.php">
                 <div class="modal-body">
                 <div class="info-atual" style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                     <h3 style="font-size: 14px; color: #333; margin-bottom: 10px;">📋 Dados Atuais:</h3>
