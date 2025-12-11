@@ -38,32 +38,32 @@ function verificarAluno() {
 }
 
 // Função para fazer login de aluno
-function loginAluno($id_aluno, $nome, $email, $ra, $curso, $semestre, $foto_perfil = null) {
+function loginAluno($idAluno, $nome, $email, $ra, $curso, $semestre, $fotoPerfil = null) {
     // Regenerar session ID para prevenir session fixation attack
     session_regenerate_id(true);
 
-    $_SESSION['usuario_id'] = $id_aluno;
+    $_SESSION['usuario_id'] = $idAluno;
     $_SESSION['usuario_tipo'] = 'aluno';
     $_SESSION['usuario_nome'] = $nome;
     $_SESSION['usuario_email'] = $email;
     $_SESSION['usuario_ra'] = $ra;
     $_SESSION['usuario_curso'] = $curso;
     $_SESSION['usuario_semestre'] = $semestre;
-    $_SESSION['usuario_foto'] = $foto_perfil;
+    $_SESSION['usuario_foto'] = $fotoPerfil;
 
     // Atualizar último acesso
     require_once __DIR__ . '/conexao.php';
     global $conn;
     $stmt = $conn->prepare("UPDATE ALUNO SET ultimo_acesso = NOW() WHERE id_aluno = ?");
-    $stmt->execute([$id_aluno]);
+    $stmt->execute([$idAluno]);
 }
 
 // Função para fazer login de administrador
-function loginAdmin($id_admin, $nome, $email) {
+function loginAdmin($idAdmin, $nome, $email) {
     // Regenerar session ID para prevenir session fixation attack
     session_regenerate_id(true);
 
-    $_SESSION['usuario_id'] = $id_admin;
+    $_SESSION['usuario_id'] = $idAdmin;
     $_SESSION['usuario_tipo'] = 'admin';
     $_SESSION['usuario_nome'] = $nome;
     $_SESSION['usuario_email'] = $email;
@@ -72,7 +72,7 @@ function loginAdmin($id_admin, $nome, $email) {
     require_once __DIR__ . '/conexao.php';
     global $conn;
     $stmt = $conn->prepare("UPDATE ADMINISTRADOR SET ultimo_acesso = NOW() WHERE id_admin = ?");
-    $stmt->execute([$id_admin]);
+    $stmt->execute([$idAdmin]);
 }
 
 // Função para fazer logout

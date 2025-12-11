@@ -12,16 +12,16 @@ if (!isset($conn)) {
 /**
  * Valida se uma senha atende os requisitos mínimos
  * @param string $senha Senha a validar
- * @param int $min_length Tamanho mínimo (padrão: 6)
+ * @param int $minLength Tamanho mínimo (padrão: 6)
  * @return array ['valido' => bool, 'erro' => string|null]
  */
-function validarSenha($senha, $min_length = 6) {
+function validarSenha($senha, $minLength = 6) {
     if (empty($senha)) {
         return ['valido' => false, 'erro' => 'A senha é obrigatória.'];
     }
 
-    if (strlen($senha) < $min_length) {
-        return ['valido' => false, 'erro' => "A senha deve ter pelo menos {$min_length} caracteres."];
+    if (strlen($senha) < $minLength) {
+        return ['valido' => false, 'erro' => "A senha deve ter pelo menos {$minLength} caracteres."];
     }
 
     return ['valido' => true, 'erro' => null];
@@ -50,10 +50,10 @@ function hashearSenha($senha) {
  *
  * @param string $email Email a validar
  * @param string $tipo 'aluno' ou 'admin' (em dev mode, usado apenas como sugestão)
- * @param bool $dev_mode Se true, aceita qualquer email válido (bypassa regra de domínio)
+ * @param bool $devMode Se true, aceita qualquer email válido (bypassa regra de domínio)
  * @return array ['valido' => bool, 'erro' => string|null, 'tipo_detectado' => string|null]
  */
-function validarEmailInstitucional($email, $tipo = null, $dev_mode = false) {
+function validarEmailInstitucional($email, $tipo = null, $devMode = false) {
     if (empty($email)) {
         return ['valido' => false, 'erro' => 'O e-mail é obrigatório.', 'tipo_detectado' => null];
     }
@@ -65,7 +65,7 @@ function validarEmailInstitucional($email, $tipo = null, $dev_mode = false) {
     // DEV MODE: Aceitar qualquer email válido (para demos e testes)
     // Útil para apresentações onde precisa demonstrar envio de email
     // sem ter acesso a emails institucionais reais
-    if ($dev_mode) {
+    if ($devMode) {
         // Se domínio institucional for detectado, definir tipo automaticamente
         if (preg_match('/@cps\.sp\.gov\.br$/i', $email)) {
             $tipo_detectado = 'admin';
@@ -115,13 +115,13 @@ function validarEmailInstitucional($email, $tipo = null, $dev_mode = false) {
  * Verifica se email de aluno já existe no banco
  * @param PDO $conn Conexão PDO
  * @param string $email Email a verificar
- * @param int|null $excluir_id ID do aluno a excluir da verificação (para edições)
+ * @param int|null $excluirId ID do aluno a excluir da verificação (para edições)
  * @return bool True se email já existe
  */
-function emailAlunoExiste($conn, $email, $excluir_id = null) {
-    if ($excluir_id) {
+function emailAlunoExiste($conn, $email, $excluirId = null) {
+    if ($excluirId) {
         $stmt = $conn->prepare("SELECT id_aluno FROM ALUNO WHERE email_institucional = ? AND id_aluno != ?");
-        $stmt->execute([$email, $excluir_id]);
+        $stmt->execute([$email, $excluirId]);
     } else {
         $stmt = $conn->prepare("SELECT id_aluno FROM ALUNO WHERE email_institucional = ?");
         $stmt->execute([$email]);
@@ -134,13 +134,13 @@ function emailAlunoExiste($conn, $email, $excluir_id = null) {
  * Verifica se email de admin já existe no banco
  * @param PDO $conn Conexão PDO
  * @param string $email Email a verificar
- * @param int|null $excluir_id ID do admin a excluir da verificação (para edições)
+ * @param int|null $excluirId ID do admin a excluir da verificação (para edições)
  * @return bool True se email já existe
  */
-function emailAdminExiste($conn, $email, $excluir_id = null) {
-    if ($excluir_id) {
+function emailAdminExiste($conn, $email, $excluirId = null) {
+    if ($excluirId) {
         $stmt = $conn->prepare("SELECT id_admin FROM ADMINISTRADOR WHERE email_corporativo = ? AND id_admin != ?");
-        $stmt->execute([$email, $excluir_id]);
+        $stmt->execute([$email, $excluirId]);
     } else {
         $stmt = $conn->prepare("SELECT id_admin FROM ADMINISTRADOR WHERE email_corporativo = ?");
         $stmt->execute([$email]);
@@ -153,13 +153,13 @@ function emailAdminExiste($conn, $email, $excluir_id = null) {
  * Verifica se RA já existe no banco
  * @param PDO $conn Conexão PDO
  * @param string $ra RA a verificar
- * @param int|null $excluir_id ID do aluno a excluir da verificação (para edições)
+ * @param int|null $excluirId ID do aluno a excluir da verificação (para edições)
  * @return bool True se RA já existe
  */
-function raExiste($conn, $ra, $excluir_id = null) {
-    if ($excluir_id) {
+function raExiste($conn, $ra, $excluirId = null) {
+    if ($excluirId) {
         $stmt = $conn->prepare("SELECT id_aluno FROM ALUNO WHERE ra = ? AND id_aluno != ?");
-        $stmt->execute([$ra, $excluir_id]);
+        $stmt->execute([$ra, $excluirId]);
     } else {
         $stmt = $conn->prepare("SELECT id_aluno FROM ALUNO WHERE ra = ?");
         $stmt->execute([$ra]);
@@ -175,30 +175,30 @@ function raExiste($conn, $ra, $excluir_id = null) {
 /**
  * Verifica se aluno já se candidatou em uma eleição
  * @param PDO $conn Conexão PDO
- * @param int $id_eleicao ID da eleição
- * @param int $id_aluno ID do aluno
+ * @param int $idEleicao ID da eleição
+ * @param int $idAluno ID do aluno
  * @return array|false Dados da candidatura ou false se não existe
  */
-function alunoCandidatouNaEleicao($conn, $id_eleicao, $id_aluno) {
+function alunoCandidatouNaEleicao($conn, $idEleicao, $idAluno) {
     $stmt = $conn->prepare("
         SELECT id_candidatura, status_validacao, data_inscricao
         FROM CANDIDATURA
         WHERE id_eleicao = ? AND id_aluno = ?
     ");
-    $stmt->execute([$id_eleicao, $id_aluno]);
+    $stmt->execute([$idEleicao, $idAluno]);
     return $stmt->fetch();
 }
 
 /**
  * Verifica se aluno já votou em uma eleição
  * @param PDO $conn Conexão PDO
- * @param int $id_eleicao ID da eleição
- * @param int $id_aluno ID do aluno
+ * @param int $idEleicao ID da eleição
+ * @param int $idAluno ID do aluno
  * @return bool True se já votou
  */
-function alunoVotouNaEleicao($conn, $id_eleicao, $id_aluno) {
+function alunoVotouNaEleicao($conn, $idEleicao, $idAluno) {
     $stmt = $conn->prepare("SELECT id_voto FROM VOTO WHERE id_eleicao = ? AND id_aluno = ?");
-    $stmt->execute([$id_eleicao, $id_aluno]);
+    $stmt->execute([$idEleicao, $idAluno]);
     return $stmt->fetch() !== false;
 }
 
@@ -219,18 +219,18 @@ function alunoVotouNaEleicao($conn, $id_eleicao, $id_aluno) {
  * - Garante integridade e rastreabilidade completa de todas as operações
  *
  * @param PDO $conn Conexão PDO
- * @param int $id_admin ID do administrador que executou a operação
+ * @param int $idAdmin ID do administrador que executou a operação
  * @param string $tabela Nome da tabela afetada (ALUNO, ELEICAO, CANDIDATURA, etc)
  * @param string $operacao Tipo de operação (INSERT, UPDATE, DELETE, LOGIN, LOGOUT)
  * @param string $descricao Descrição textual da operação (ex: "Aprovou candidatura #123")
- * @param string|null $ip_origem IP de origem (padrão: $_SERVER['REMOTE_ADDR'])
- * @param int|null $id_eleicao ID da eleição relacionada (opcional, para operações em eleições)
- * @param string|null $dados_anteriores JSON com estado anterior (opcional, ex: json_encode(['status' => 'pendente']))
- * @param string|null $dados_novos JSON com estado novo (opcional, ex: json_encode(['status' => 'aprovado']))
+ * @param string|null $ipOrigem IP de origem (padrão: $_SERVER['REMOTE_ADDR'])
+ * @param int|null $idEleicao ID da eleição relacionada (opcional, para operações em eleições)
+ * @param string|null $dadosAnteriores JSON com estado anterior (opcional, ex: json_encode(['status' => 'pendente']))
+ * @param string|null $dadosNovos JSON com estado novo (opcional, ex: json_encode(['status' => 'aprovado']))
  * @return bool True se registrou com sucesso, False em caso de erro
  *
  * @example Uso básico (compatível com código existente):
- * registrarAuditoria($conn, $id_admin, 'ALUNO', 'DELETE', 'Deletou aluno João Silva');
+ * registrarAuditoria($conn, $idAdmin, 'ALUNO', 'DELETE', 'Deletou aluno João Silva');
  *
  * @example Uso completo com JSON (recomendado para operações críticas):
  * registrarAuditoria(
@@ -240,37 +240,37 @@ function alunoVotouNaEleicao($conn, $id_eleicao, $id_aluno) {
  *     'UPDATE',
  *     'Aprovou candidatura #123',
  *     null, // IP será detectado automaticamente
- *     $id_eleicao,
+ *     $idEleicao,
  *     json_encode(['status' => 'pendente', 'validado_por' => null]),
- *     json_encode(['status' => 'aprovado', 'validado_por' => $id_admin])
+ *     json_encode(['status' => 'aprovado', 'validado_por' => $idAdmin])
  * );
  */
 function registrarAuditoria(
     $conn,
-    $id_admin,
+    $idAdmin,
     $tabela,
     $operacao,
     $descricao,
-    $ip_origem = null,
-    $id_eleicao = null,
-    $dados_anteriores = null,
-    $dados_novos = null
+    $ipOrigem = null,
+    $idEleicao = null,
+    $dadosAnteriores = null,
+    $dadosNovos = null
 ) {
     try {
         // Auto-detecção de IP se não fornecido
-        if ($ip_origem === null) {
-            $ip_origem = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        if ($ipOrigem === null) {
+            $ipOrigem = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         }
 
         // Validação básica de JSON (se fornecidos)
-        if ($dados_anteriores !== null && !is_string($dados_anteriores)) {
+        if ($dadosAnteriores !== null && !is_string($dadosAnteriores)) {
             error_log("AVISO: dados_anteriores deve ser string JSON válida");
-            $dados_anteriores = json_encode($dados_anteriores);
+            $dadosAnteriores = json_encode($dadosAnteriores);
         }
 
-        if ($dados_novos !== null && !is_string($dados_novos)) {
+        if ($dadosNovos !== null && !is_string($dadosNovos)) {
             error_log("AVISO: dados_novos deve ser string JSON válida");
-            $dados_novos = json_encode($dados_novos);
+            $dadosNovos = json_encode($dadosNovos);
         }
 
         $stmt = $conn->prepare("
@@ -281,14 +281,14 @@ function registrarAuditoria(
         ");
 
         return $stmt->execute([
-            $id_admin,
+            $idAdmin,
             $tabela,
             $operacao,
             $descricao,
-            $ip_origem,
-            $id_eleicao,
-            $dados_anteriores,
-            $dados_novos
+            $ipOrigem,
+            $idEleicao,
+            $dadosAnteriores,
+            $dadosNovos
         ]);
     } catch (PDOException $e) {
         error_log("Erro ao registrar auditoria: " . $e->getMessage());
@@ -325,11 +325,11 @@ function sanitizarInputs($inputs) {
  */
 function extrairDadosPost($campos) {
     $dados = [];
-    foreach ($campos as $campo => $valor_padrao) {
-        $valor = $_POST[$campo] ?? $valor_padrao;
+    foreach ($campos as $campo => $valorPadrao) {
+        $valor = $_POST[$campo] ?? $valorPadrao;
 
         // Aplicar trim se for string
-        if (is_string($valor) && $valor !== $valor_padrao) {
+        if (is_string($valor) && $valor !== $valorPadrao) {
             $valor = trim($valor);
         }
 
@@ -401,41 +401,41 @@ function formatarCamposErro($campos) {
 
 /**
  * Transforma IDs em nomes, adiciona contexto e formata para exibição
- * 
+ *
  * @param PDO $conn Conexão PDO
- * @param string|null $json_dados JSON string com dados
+ * @param string|null $jsonDados JSON string com dados
  * @param string $tabela Nome da tabela para contexto
  * @return string HTML formatado ou string vazia
  */
-function enriquecerDadosAuditoria($conn, $json_dados, $tabela) {
-    if (empty($json_dados)) {
+function enriquecerDadosAuditoria($conn, $jsonDados, $tabela) {
+    if (empty($jsonDados)) {
         return '<em style="color: #999;">Nenhum dado</em>';
     }
-    
+
     try {
-        $dados = json_decode($json_dados, true);
-        
+        $dados = json_decode($jsonDados, true);
+
         if (!is_array($dados)) {
             return '<em style="color: #999;">Dados inválidos</em>';
         }
-        
+
         // Enriquecer dados baseado na tabela
         $dados_enriquecidos = [];
-        
+
         foreach ($dados as $chave => $valor) {
             $rotulo = traduzirCampoAuditoria($chave);
             $valor_legivel = formatarValorAuditoria($conn, $chave, $valor, $tabela);
-            
+
             $dados_enriquecidos[] = [
                 'rotulo' => $rotulo,
                 'valor' => $valor_legivel,
                 'chave_original' => $chave
             ];
         }
-        
+
         // Gerar HTML formatado
         return gerarHTMLDadosAuditoria($dados_enriquecidos);
-        
+
     } catch (Exception $e) {
         error_log("Erro ao enriquecer dados de auditoria: " . $e->getMessage());
         return '<em style="color: #999;">Erro ao processar dados</em>';
@@ -715,51 +715,51 @@ function obterNomeCursoCompleto($sigla) {
 
 /**
  * Gera HTML formatado para dados de auditoria
- * 
- * @param array $dados_enriquecidos Array com dados enriquecidos
+ *
+ * @param array $dadosEnriquecidos Array com dados enriquecidos
  * @return string HTML formatado
  */
-function gerarHTMLDadosAuditoria($dados_enriquecidos) {
-    if (empty($dados_enriquecidos)) {
+function gerarHTMLDadosAuditoria($dadosEnriquecidos) {
+    if (empty($dadosEnriquecidos)) {
         return '<em style="color: #999;">Sem dados</em>';
     }
-    
+
     $html = "<div style='background: #f8f9fa; padding: 10px; border-radius: 6px; font-size: 13px;'>";
-    
-    foreach ($dados_enriquecidos as $item) {
+
+    foreach ($dadosEnriquecidos as $item) {
         $html .= "<div style='margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e9ecef;'>";
         $html .= "<strong style='color: #495057; display: block; margin-bottom: 3px;'>{$item['rotulo']}:</strong>";
         $html .= "<div style='color: #212529; padding-left: 10px;'>{$item['valor']}</div>";
         $html .= "</div>";
     }
-    
+
     // Remover última borda
     $html = preg_replace('/; border-bottom: 1px solid #e9ecef;\'>[^<]*<\/div>$/', '\'>', $html);
-    
+
     $html .= "</div>";
-    
+
     return $html;
 }
 
 /**
  * Gera comparação visual entre dados anteriores e novos
  * Mostra diff lado a lado com destaque de mudanças
- * 
+ *
  * @param PDO $conn Conexão PDO
- * @param string|null $json_anterior JSON com dados anteriores
- * @param string|null $json_novo JSON com dados novos
+ * @param string|null $jsonAnterior JSON com dados anteriores
+ * @param string|null $jsonNovo JSON com dados novos
  * @param string $tabela Nome da tabela para contexto
  * @return string HTML com comparação visual
  */
-function gerarComparacaoAuditoria($conn, $json_anterior, $json_novo, $tabela) {
-    if (empty($json_anterior) && empty($json_novo)) {
+function gerarComparacaoAuditoria($conn, $jsonAnterior, $jsonNovo, $tabela) {
+    if (empty($jsonAnterior) && empty($jsonNovo)) {
         return '<em style="color: #999;">Sem dados para comparar</em>';
     }
-    
+
     try {
-        $dados_anteriores = $json_anterior ? json_decode($json_anterior, true) : [];
-        $dados_novos = $json_novo ? json_decode($json_novo, true) : [];
-        
+        $dados_anteriores = $jsonAnterior ? json_decode($jsonAnterior, true) : [];
+        $dados_novos = $jsonNovo ? json_decode($jsonNovo, true) : [];
+
         if (!is_array($dados_anteriores)) $dados_anteriores = [];
         if (!is_array($dados_novos)) $dados_novos = [];
         
