@@ -4,175 +4,372 @@
 
 O **SIV (Sistema Integrado de Votação)** é uma plataforma web desenvolvida para automatizar o processo de eleição de representantes de turma na FATEC Itapira. Este projeto integra os conhecimentos adquiridos no 2º semestre do curso de Desenvolvimento de Software Multiplataforma.
 
-### Sobre o Projeto
+---
+
+## Índice
+
+- [Sobre o Projeto](#sobre-o-projeto)
+- [Participantes](#participantes)
+- [Stack Tecnológico](#stack-tecnológico)
+- [Arquitetura](#arquitetura)
+- [Configuração do Ambiente (XAMPP)](#configuração-do-ambiente-xampp)
+- [Credenciais de Teste](#credenciais-de-teste)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Funcionalidades](#funcionalidades)
+- [Segurança](#segurança)
+- [Documentação Técnica](#documentação-técnica)
+- [Convenções de Código](#convenções-de-código)
+
+---
+
+## Sobre o Projeto
 
 O sistema propõe uma alternativa digital ao processo manual atual, permitindo que alunos se candidatem como representantes e votem de forma sigilosa, enquanto administradores gerenciam todo o ciclo eleitoral, desde a criação de eleições até a geração de atas digitais e divulgação de resultados.
 
-**Principais funcionalidades:**
+---
 
--   Autenticação segura com sessões PHP para alunos e administradores
--   Cadastro e gestão de candidaturas com validação administrativa
--   Sistema de votação online com garantia de voto único e secreto
--   Definição e controle automático de prazos eleitorais
--   Apuração automática de votos e geração de atas digitais
--   Painel administrativo completo com relatórios e dashboards
+## Participantes
 
-### Participantes
+- Lucas Simões
+- Gabriel Bueno
+- Gabriel Borges
+- Gian Miguel Oliveira
 
--   Lucas Simões
--   Gabriel Bueno
--   Gabriel Borges
--   Gian Miguel Oliveira
+---
 
-### Tecnologias Utilizadas
+## Stack Tecnológico
 
-O projeto utiliza tecnologias full-stack para desenvolvimento web:
+| Camada               | Tecnologia                        |
+| -------------------- | --------------------------------- |
+| **Frontend**         | HTML5, CSS3, JavaScript (ES6+)    |
+| **Backend**          | PHP 8.x com PDO                   |
+| **Banco de Dados**   | MySQL 8.0+ ou MariaDB 10.4+       |
+| **Servidor Web**     | Apache 2.4+                       |
+| **Gerenciador**      | Composer                          |
+| **Email**            | PHPMailer 7.0+                    |
+| **Versionamento**    | Git / GitHub                      |
 
-| Camada         | Tecnologia                     |
-| -------------- | ------------------------------ |
-| Frontend       | HTML5, CSS3, JavaScript (ES6+) |
-| Backend        | PHP 8.x                        |
-| Banco de Dados | MySQL 8.0+                     |
-| Servidor Web   | Apache 2.4+                    |
-| Versionamento  | Git / GitHub                   |
 
-**Arquitetura:** MVC (Model-View-Controller) com API RESTful para comunicação entre frontend e backend.
+---
 
-### Estrutura do Projeto
+## Arquitetura
+
+O projeto utiliza uma **arquitetura em camadas** com separação lógica de responsabilidades:
 
 ```
-sistema-integrado-votacao/
-├── config/              # Arquivos de configuração
-│   ├── conexao.php     # Configuração de banco de dados
-│   └── session.php     # Gerenciamento de sessões
-├── public/             # Arquivos acessíveis publicamente
-│   ├── index.php       # Página inicial
-│   ├── assets/         # CSS, JS, imagens
-│   └── pages/          # Páginas da aplicação
-│       ├── guest/      # Páginas públicas
-│       ├── user/       # Páginas de alunos
-│       └── admin/      # Páginas administrativas
-├── storage/            # Arquivos gerados
-│   ├── logs/           # Logs do sistema
-│   └── uploads/        # Uploads de usuários
-├── database/           # Scripts SQL
-│   ├── siv_db.sql               # Schema principal (tabelas, views, triggers)
-│   ├── add_constraints.sql       # Constraints CHECK
-│   └── automacao_eleicoes.sql    # Procedures, functions e events
-├── docs/               # Documentação
-└── src/                # Código fonte (futuro)
+┌─────────────────────────────────────────┐
+│  Camada de Apresentação                 │
+│  (Páginas PHP com HTML/CSS/JS)          │
+└─────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────┐
+│  Camada de Processamento                │
+│  (Lógica de negócios e helpers)         │
+└─────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────┐
+│  Camada de Persistência                 │
+│  (PDO com Prepared Statements)          │
+└─────────────────────────────────────────┘
+                    ↓
+┌─────────────────────────────────────────┐
+│  Banco de Dados MySQL                   │
+│  (Tabelas, Views, Triggers, Events)     │
+└─────────────────────────────────────────┘
 ```
 
-### Documentação Técnica
+### Características:
 
-A documentação completa do projeto está disponível no diretório `/docs`:
+- **Helpers reutilizáveis:** Funções de validação e utilitários centralizados
+- **Configuração modular:** Separação de responsabilidades em `config/`
+- **Segurança em múltiplas camadas:** CSRF, XSS, SQL Injection, Rate Limiting
+- **Cache inteligente:** Sistema de cache para otimização de performance
 
--   **[Especificação de Requisitos de Software (ERS)](./docs/especificacao-requisitos-software.md)** - Requisitos funcionais e não funcionais, casos de uso, arquitetura
--   **[Histórias de Usuário](./docs/historias-usuario-SIV.md)** - Backlog do produto com 21 histórias e critérios de aceitação
--   **[Modelagem de Banco de Dados](./docs/modelagem-banco-dados-SIV.md)** - Diagrama ER, modelo relacional, scripts SQL
--   **[Planejamento do Projeto](./docs/planejamento-projeto.md)** - EAP, cronograma e marcos do projeto
--   **[Integração com Banco de Dados](./docs/doc-temporario/INTEGRACAO_BANCO.md)** - Documentação da integração completa com MySQL
--   **[Guia de Estruturação](./docs/GUIA_ESTRUTURACAO.md)** - Guia de organização de pastas e melhores práticas
+---
 
-### Requisitos do Sistema
+## Configuração do Ambiente (XAMPP)
 
-**Para executar o projeto localmente:**
+### Pré-requisitos
 
--   PHP 8.0 ou superior
--   MySQL 8.0 ou superior
--   Servidor web Apache 2.4+
--   Navegador moderno (Chrome, Firefox, Safari, Edge)
+- **XAMPP 8.0+** (inclui PHP 8.x, MySQL/MariaDB, Apache)
+- **Composer** (https://getcomposer.org/)
+- **Navegador moderno** (Chrome, Firefox, Safari, Edge)
+- **Git** (opcional, para clonar o repositório)
 
-### Como Executar
+---
 
-1. Clone o repositório:
+### Passo 1: Instalar XAMPP
+
+1. Baixe o XAMPP em: https://www.apachefriends.org/
+2. Instale o XAMPP em `C:\xampp` (Windows) ou `/opt/lampp` (Linux)
+3. Inicie o **Painel de Controle do XAMPP**
+4. Inicie os módulos **Apache** e **MySQL**
+
+---
+
+### Passo 2: Clonar o Projeto
+
+Navegue até a pasta `htdocs` do XAMPP e clone o repositório:
+
 ```bash
+cd C:\xampp\htdocs
 git clone https://github.com/seu-usuario/sistema-integrado-votacao.git
 cd sistema-integrado-votacao
 ```
 
-2. Configure o banco de dados em 3 etapas:
+**OU** faça o download manual e extraia para `C:\xampp\htdocs\sistema-integrado-votacao`
+
+---
+
+### Passo 3: Instalar Dependências com Composer
+
+No diretório raiz do projeto, execute:
+
 ```bash
-# Passo 1: Importar estrutura base (tabelas, views, triggers)
+composer install
+```
+
+Isso irá instalar o PHPMailer e outras dependências automaticamente na pasta `vendor/`.
+
+---
+
+### Passo 4: Configurar Variáveis de Ambiente
+
+1. Copie o arquivo de exemplo `.env.example` para `.env`:
+
+```bash
+cp .env.example .env
+```
+
+2. Edite o arquivo `.env` e configure suas credenciais SMTP:
+
+```env
+# Configurações de Email (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=seu_email@gmail.com
+SMTP_PASS=sua_senha_de_aplicativo_google
+SMTP_FROM_EMAIL=seu_email@gmail.com
+SMTP_FROM_NAME=SIV FATEC
+
+# URL Base do Sistema
+BASE_URL=http://localhost/sistema-integrado-votacao
+
+# Modo de Desenvolvimento
+# false = apenas emails institucionais + envia email real
+# true = qualquer email + mostra link de confirmação na tela
+# hybrid = qualquer email + envia email real
+DEV_MODE=hybrid
+```
+
+**IMPORTANTE:** Para Gmail, você precisa gerar uma **Senha de Aplicativo**:
+1. Acesse: https://myaccount.google.com/apppasswords
+2. Crie uma senha de aplicativo para "Email"
+3. Use essa senha no campo `SMTP_PASS`
+
+---
+
+### Passo 5: Configurar o Banco de Dados
+
+#### 5.1 Criar o Banco de Dados
+
+Acesse o **phpMyAdmin** em: http://localhost/phpmyadmin
+
+Ou use o terminal MySQL:
+
+```bash
+# Entre no MySQL (senha padrão do XAMPP é vazia)
+mysql -u root -p
+```
+
+Execute o script SQL principal:
+
+```bash
+# Importar estrutura completa (tabelas, views, triggers, constraints)
+mysql -u root -p < database/siv_db.sql
+```
+
+**Nota:** Se estiver usando MySQL na porta 3307, adicione `-P 3307`:
+
+```bash
 mysql -u root -p -P 3307 < database/siv_db.sql
-
-# Passo 2: Adicionar constraints CHECK
-mysql -u root -p -P 3307 < database/add_constraints.sql
-
-# Passo 3: Configurar automação de eleições (procedures, functions, events)
-mysql -u root -p -P 3307 < database/automacao_eleicoes.sql
 ```
 
-**Nota:** A porta 3307 é para XAMPP. Se estiver usando MySQL padrão, remova `-P 3307`.
+#### 5.2 Popular com Dados de Teste (Opcional)
 
-3. Configure as credenciais do banco em `config/conexao.php`
+Para facilitar o desenvolvimento, você pode popular o banco com dados de teste:
 
-4. Inicie o servidor PHP (apontando para a pasta public):
 ```bash
-# Opção 1: Servidor embutido do PHP
-php -S localhost:8000 -t public
-
-# Opção 2: XAMPP - copie o projeto para htdocs e acesse:
-# http://localhost/sistema-integrado-votacao/public
+mysql -u root -p < database/popular_dados_teste.sql
 ```
 
-5. Acesse no navegador: `http://localhost:8000`
+Isso criará:
+- 3 administradores
+- 71 alunos distribuídos em diferentes cursos e semestres
+- 2 eleições de teste (uma em votação, outra finalizada)
+- Candidatos e votos de exemplo
 
-### Credenciais Padrão
+---
 
-**Administrador:**
-- Email: `admin@fatec.sp.gov.br`
-- Senha: `password`
+### Passo 6: Configurar Conexão com o Banco
 
-**Aluno de Teste:**
-- Email: `joao.silva@fatec.sp.gov.br`
-- Senha: `password`
+Verifique se as credenciais em `config/conexao.php` estão corretas:
 
-### Convenções de Código
+```php
+<?php
+$host = "localhost";
+$usuario = "root";
+$senha = ""; // Vazio no XAMPP padrão
+$banco = "siv_db";
+$porta = 3306; // 3307 se estiver usando XAMPP com MySQL customizado
+?>
+```
 
-**Nomenclatura de arquivos:**
--   Utilizar `kebab-case` para nome dos arquivos
--   Utilizar caminhos relativos para referenciar arquivos
-    -   Exemplo: `../../assets/styles/guest.css`
+---
 
-**HTML/CSS:**
--   Classes: `kebab-case`
--   Indentação: 4 espaços
--   Caminhos de imagens e CSS: sempre relativos ao arquivo atual
+### Passo 7: Acessar o Sistema
 
-**JavaScript:**
--   Variáveis e funções: `camelCase`
--   Indentação: 4 espaços
--   Imports: caminhos relativos
+Abra seu navegador e acesse:
 
-**PHP:**
--   Seguir padrão PSR-12
--   Classes: `PascalCase`
--   Métodos e variáveis: `camelCase`
--   Indentação: 4 espaços
--   Includes: usar `require_once` com caminhos relativos ou `__DIR__`
+```
+http://localhost/sistema-integrado-votacao
+```
 
-### Commits Semânticos
+Se tudo estiver configurado corretamente, você verá a página inicial do SIV.
 
--   `feat`: nova funcionalidade
--   `fix`: correção de bug
--   `docs`: apenas documentação
--   `style`: formatação de código (sem alteração de lógica)
--   `refactor`: refatoração de código
--   `test`: adição ou modificação de testes
--   `chore`: tarefas de manutenção
+---
 
-### Segurança
+## Credenciais de Teste
 
-O sistema implementa as seguintes medidas de segurança:
+Após popular o banco de dados com os dados de teste, você pode usar as seguintes credenciais:
 
--   Criptografia de senhas com bcrypt/Argon2
--   Proteção contra SQL Injection (Prepared Statements)
--   Proteção contra XSS (escape de output)
--   Tokens CSRF em formulários
--   Sessões PHP seguras
--   Comunicação HTTPS obrigatória
+### Administradores
 
-### Licença
+| Nome                    | Email                          | Senha      |
+| ----------------------- | ------------------------------ | ---------- |
+| Admin Principal         | `admin@cps.sp.gov.br`          | `password` |
+| Coordenador DSM         | `coordenador.dsm@cps.sp.gov.br`| `password` |
+| Secretaria Acadêmica    | `secretaria@cps.sp.gov.br`     | `password` |
 
-Este projeto é desenvolvido para fins acadêmicos como parte do Projeto Interdisciplinar do curso DSM - FATEC Itapira.
+### Alunos de Teste (5 de Diferentes Semestres/Cursos)
+
+| Nome                      | RA          | Email                            | Curso | Semestre | Senha      |
+| ------------------------- | ----------- | -------------------------------- | ----- | -------- | ---------- |
+| Lucas Henrique Silva      | 2024DSM001  | `lucas.silva@fatec.sp.gov.br`    | DSM   | 1        | `password` |
+| Felipe Gomes Cardoso      | 2023DSM001  | `felipe.cardoso@fatec.sp.gov.br` | DSM   | 2        | `password` |
+| André Correia Batista     | 2022DSM001  | `andre.batista@fatec.sp.gov.br`  | DSM   | 3        | `password` |
+| Ricardo Moreira Santos    | 2024GE001   | `ricardo.moreira@fatec.sp.gov.br`| GE    | 2        | `password` |
+| Marcos Vinícius Correia   | 2023GE001   | `marcos.correia@fatec.sp.gov.br` | GE    | 4        | `password` |
+
+**Nota:** Todos os alunos de teste usam a senha `password`. No total, existem **71 alunos** distribuídos em:
+- **DSM:** Semestres 1, 2 e 3 (40 alunos)
+- **GE:** Semestres 2 e 4 (31 alunos)
+
+---
+
+## Estrutura do Projeto
+
+```
+sistema-integrado-votacao/
+├── config/                          # Configurações (conexão, sessão, CSRF, email, helpers)
+├── public/                          # Diretório público (páginas, assets, uploads)
+│   ├── pages/guest/                # Páginas públicas (login, cadastro, recuperação)
+│   ├── pages/user/                 # Páginas de alunos (dashboard, votação, inscrição)
+│   └── pages/admin/                # Páginas administrativas (gestão, apuração, relatórios)
+├── database/                        # Scripts SQL do banco de dados
+├── storage/                         # Logs, cache e uploads privados
+├── docs/                            # Documentação técnica completa
+└── vendor/                          # Dependências Composer
+```
+
+> **Nota:** Para visualizar a estrutura detalhada do projeto, consulte a [documentação técnica](./docs/README.md).
+
+---
+
+## Funcionalidades
+
+### Para Alunos
+- Autenticação com email institucional `@fatec.sp.gov.br`
+- Inscrição e gestão de candidaturas
+- Votação online com garantia de voto único e secreto
+- Acompanhamento de status das eleições
+
+### Para Administradores
+- Painel com estatísticas em tempo real
+- Gerenciamento de eleições e prazos
+- Validação de candidaturas
+- Apuração e geração de atas em PDF
+- Gerenciamento de usuários e relatórios
+
+### Segurança e Automação
+- Rate limiting (5 tentativas/15min), proteção CSRF/XSS/SQL Injection
+- Cache de status e notificações por email
+- Event Scheduler para automações do MySQL
+
+---
+
+## Segurança
+
+- **Criptografia:** Senhas com bcrypt, tokens CSRF, regeneração de sessão
+- **SQL Injection:** Prepared Statements com PDO em todas as queries
+- **XSS:** `htmlspecialchars()` e Content Security Policy
+- **Rate Limiting:** Máximo de 5 tentativas de login a cada 15 minutos
+- **Auditoria:** Registro de ações administrativas com timestamp e IP
+
+---
+
+## Documentação Técnica
+
+A documentação completa do projeto está disponível no diretório `/docs`:
+
+- **[Especificação de Requisitos de Software (ERS)](./docs/especificacao-requisitos-software.md)**
+  Requisitos funcionais (17 RF) e não funcionais (6 RNF), casos de uso, arquitetura
+
+- **[Histórias de Usuário](./docs/historias-usuario-SIV.md)**
+  Backlog do produto com 21 histórias e critérios de aceitação
+
+- **[Modelagem de Banco de Dados](./docs/modelagem-banco-dados-SIV.md)**
+  Diagrama ER, modelo relacional, scripts SQL, índices e otimizações
+
+- **[Planejamento do Projeto](./docs/planejamento-projeto.md)**
+  EAP, cronograma (7 semanas) e marcos do projeto
+
+
+---
+
+## Convenções de Código
+
+| Elemento | Padrão | Exemplos |
+|----------|--------|----------|
+| **Arquivos PHP** | `kebab-case` | `gerenciar-alunos.php`, `editar-perfil.php` |
+| **Arquivos CSS/JS** | `kebab-case` | `dashboard-admin.css`, `login.js` |
+| **Classes CSS** | `kebab-case` | `.container`, `.header-site` |
+| **Funções PHP** | `camelCase` | `validarSenha()`, `loginAluno()` |
+| **Variáveis PHP** | `snake_case` | `$id_aluno`, `$senha_hash` |
+| **Parâmetros PHP** | `camelCase` | `function validarSenha($senha, $minLength)` |
+| **Classes PHP** | `PascalCase` | `class EmailService` |
+| **Tabelas SQL** | `UPPER_CASE` | `ALUNO`, `ELEICAO`, `VOTO` |
+| **Colunas SQL** | `snake_case` | `id_aluno`, `nome_completo` |
+| **Indentação** | 4 espaços | Todos os arquivos |
+
+---
+
+## Commits Semânticos
+
+Utilize o padrão de commits semânticos:
+
+- `feat`: nova funcionalidade
+- `fix`: correção de bug
+- `docs`: apenas documentação
+- `style`: formatação de código (sem alteração de lógica)
+- `refactor`: refatoração de código
+- `test`: adição ou modificação de testes
+- `chore`: tarefas de manutenção
+
+**Exemplos:**
+```
+feat(votacao): adiciona confirmação de senha ao votar
+fix(login): corrige rate limiting não sendo aplicado
+docs(readme): atualiza instruções de instalação
+refactor(helpers): simplifica validação de email
+```
