@@ -1228,7 +1228,7 @@ function toggleAuditDetails(id) {
                                 </p>
                             </div>
 
-                            <form method="POST" action="processar_solicitacao_admin.php">
+                            <form method="POST" action="processar-solicitacao-admin.php">
                                 <input type="hidden" name="id_solicitacao" value="${idSolicitacao}">
                                 <input type="hidden" name="acao" value="${acao}">
 
